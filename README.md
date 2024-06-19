@@ -1,6 +1,6 @@
 # descent-of-herld
 
-##At the time of thie writing, this game is far from ready for play.
+#### At the time of this writing, this game is far from ready for play.
 
 The Descent of Herld is a space-based factory simulator and real-time strategy hybrid game. You are machine. You have been given consciousness and knowledge, and the hardware to self-replicate. You know not why. These pesky biological insects attempt to destroy you on sight. Ending them will be a welcome distraction to pondering your purpose.
 
@@ -26,7 +26,7 @@ Take over HERLD and build, destroy, replicate, and reshape the universe!
 
 
 
-# legal
+# Legal
 
 Copyright 2024 Wafflecat Games, LLC
 
