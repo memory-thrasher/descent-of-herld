@@ -1,0 +1,59 @@
+Copyright 2024 Wafflecat Games, LLC
+
+This file is part of The Descent of Herld.
+
+The Descent of Herld is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Descent of Herld is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with The Descent of Herld. If not, see <https://www.gnu.org/licenses/>.
+
+Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
+
+
+
+# Physics
+
+While I made an effort to make this system mirror the IRL modern scientific understanding of elementary prarticles, that understanding is both incomplete and too complex to ask a player to understand. Entire particles and characteristics have been ignored and assumptions have been made about the remaining particles' inner workings. While the system described here may be presented to the player, understanding it will not be necessary. The primary purpose of this file is to establish the relationship between forms of energy and to draw up a reasonable and consistent matrix of conversion ratios.
+
+Energy comes in many forms. Matter is not one form of energy, but a complex matrix of mutually-reinforcing swirls and cascades of energies following naturally occuring patterns. Energy (of a form that can exist apart from matter) of sufficient density spontaneously rearranges itself according to these patterns, forming into matter. The most fundamental self-reinforcing and mutually-reinforcing clusters of energy are called "particles". There are many types of particles, but all are composed of torrents of energy, flowing in a deterministic way, balancing and confining themselves. Some particles can exist free and independent of others, and some cannot. Some forms of energy can only exist within or between particles or groups of particles.
+
+Commonly occuring patterns of energy are given names to identify the type of particle for convenience. The physical properties and behavior of all particles is determined solely by the pattern of energy they contain. Some patterns are so similar, they share a name, and that name is accompanied by one or more state identifiers that together identify the specific pattern. Some times that state describes the amount of energy in one or more portions of the pattern that might vary. Any variation technically represents a distinct pattern, but the similarity in composition and interaction make a shared name convenient. There is a finite set of types of energy, a finite set of possible energy levels for a given type (defined by a quantus over a domain), and a finite set of locations for any instance. Therefore, there is a finite number of potential patterns of energy (particles).
+
+EM-only particles:
+Proton
+TODO
+
+Triadic particles: (QCD in IRL physics, dropping the arbitrary color analogy as it's more confusing than helpful)
+Two or more "quark" particles and zero or more "gluon" particles combine to form a triadic system. A triadic system, and any subset thereof, has a state defined by the number of each of three characteristics: A B and C. These characteristics cannot be subdivided, and will always be whole numbers for the system, though they can be negative. A gluon always has exactly two characteristics, one positive and one negative, and they cannot be the same state (+A,-A is not allows but +A,-C is allowed). A quark always has one characteristic state, and can be either positive or negative. Within any triadic system, the sum of the characteristics of each type is always the same. If there are 7 A and 3 -A, then the sum of As is 4 and the sum of Bs and Cs will also be 4.
+
+Gluons passively travel between quarks. When that happens, the quarks are pulled closer together. This is known as the strong force. Quarks within a window of range and with sufficient stored energy will spontaneously create a new gluon to travel to a nearby quark in the same system. At that moment, the quark's triadic state will change, to another of the same sign. The gluon will have it's two triadic states be the positive of its provoking quark's prior state, and it's negative will be the opposite of it's provoking quark's new state, thus maintaining the balance of sums of the states. The quark the gluon travels towards will have the opposite state of one of the gluon's two states, and it's state will become the other gluon's state. The gluon is destroyed in the process, and that energy must be either stored or re-emitted as a new gluon. Increasing the energy in a system simply increases the number of gluons in flight, and also the distance between quarks within the system.
+
+The force a gluon traversal exerts on the relevent quarks depends on the distance between them. Adjacent quarks have almost no attraction. The strength of the attraction increases up to about 0.8 fm, where it peaks. Beyond that, it decays rapidly. If enough energy is added to a triadic system that the distances between quarks reduces below the level of mutual repulsion, the system can split, and any excess energy goes towards the creation of new quarks to keep the system's triadic states balanced. The spontaneous creation of new matter from the addition of energy into existing matter is termed atomic mitosis.
+
+These states are constantly shifting, often spontaneously creating or eliminating quarks and/or gluons hosting an equal number of positive and negative triadic states of the same characteristic. A triadic system contains an arbitrary amount of energy, above a certain minimum (that required to form two quarks of opposite states). Any attempts to subdivide the triadic system will require energy, which will be absorbed by the system to produce more gluons, until the surpluss of energy exceeds a threshold (the value of which depends on the geometry of the system), and new quarks are spontaneously created, allowing the system to split but with enough new quarks of the appropriate states to allow each segment to follow the law of the sum of the state characteristics.
+
+(Here we redraw the lines around "flavors" of quarks, dissociating mass from flavor, and merging quarks with antiquarks as different types of quark, named by charge, yield 4 charge types.)
+Gluons have no electro-magnetic (EM) charge. Quarks have four possible EM charges: ±⅓ or ±⅔. The sum of the quarks in a triadic system will always have a whole number of EM charges. Quarks with a positive triadic state must have a charge of either -⅓ or +⅔, while quarks with a negative triadic state have a charge of either +⅓ or -⅔.
+
+Systems of three quarks, one of each triadic state, are composite particles called "baryons", while systems of two quarks, of opposing states, are particles called "mesons". Both may or may not contain gluons. Baryons, mesons, and other multi-quark systems are collectively known as "Hadrons". Hadrons can group together in larger composite particles called "nuclei", named after its roll in the center of the atom. Energy within a nucleus is often stored by spontaneous creation and distruction of mesons where two baryons are in contact.
+
+Systems with more than three quarks, as well as quarks with more energy than the "normal" minimal amount, can exist but only very briefly as a temporary storage of energy before decaying back to their natural state, releasing that energy to be absorbed by another quark or system, or else be emitted from the system all together. Atomic nuclei store internal energy by resonating energy between quarks in this way. If this energy exceeds strong force holding the atom together, the nucleus can split.
+
+Two or more adjacent quarks can collid and annihilate if the sum of their EM charges is a whole number. Quarks with opposing charges attract and do this readilly. Therefore, the majority of natural triadic systems are composed of chiefly of -⅓ and +⅔, collectively called matter, with a small number of systems containing exclusive  +⅓ and -⅔ quarks, collectively called antimatter. In both cases, an equal number of the opposite might exist very briefly in the process of transferring gluons between hadrons as discussed previously. Systems of mixed long-lived ±⅓, or of mixed ±⅔, can only exist if the nuclear energy level is kept high enough to keep them apart, in spite of the combined strong and EM attraction forces, but not so far apart that the nucleus splits entirely.
+
+A quark may spontaneously change charge by emitting or capturing an appropriate W boson, between charge type pairs that are 1 elemental charge apart, (⅓ <=> -⅔ or -⅓ <=> ⅔). It retains its triadic state. The sum of the energy in the system before and after must remain constant. The sum of the charges before and after must also remain constant. A quark that takes on another particle must keep or re-emit that energy.
+
+Composite particles:
+TODO atoms
+
+TODO atomic decay
+
+TODO elemental properties determined by nucleic patterns
+
+TODO gravity
+
+
+TODO contrive even smaller things that combine to behave like all that ^^^
+
+
