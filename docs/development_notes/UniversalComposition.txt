@@ -16,13 +16,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 While I made an effort to make this system mirror the IRL modern scientific understanding of elementary prarticles, that understanding is both incomplete and too complex to ask a player to understand. Entire particles and characteristics have been ignored and assumptions have been made about the remaining particles' inner workings. While the system described here may be presented to the player, understanding it will not be necessary. The primary purpose of this file is to establish the relationship between forms of energy and to draw up a reasonable and consistent matrix of conversion ratios.
 
-Energy comes in many forms. Matter is not one form of energy, but a complex matrix of mutually-reinforcing swirls and cascades of energies following naturally occuring patterns. Energy (of a form that can exist apart from matter) of sufficient density spontaneously rearranges itself according to these patterns, forming into matter. The most fundamental self-reinforcing and mutually-reinforcing clusters of energy are called "particles". There are many types of particles, but all are composed of torrents of energy, flowing in a deterministic way, balancing and confining themselves. Some particles can exist free and independent of others, and some cannot. Some forms of energy can only exist within or between particles or groups of particles.
-
-Commonly occuring patterns of energy are given names to identify the type of particle for convenience. The physical properties and behavior of all particles is determined solely by the pattern of energy they contain. Some patterns are so similar, they share a name, and that name is accompanied by one or more state identifiers that together identify the specific pattern. Some times that state describes the amount of energy in one or more portions of the pattern that might vary. Any variation technically represents a distinct pattern, but the similarity in composition and interaction make a shared name convenient. There is a finite set of types of energy, a finite set of possible energy levels for a given type (defined by a quantus over a domain), and a finite set of locations for any instance. Therefore, there is a finite number of potential patterns of energy (particles).
-
-EM-only particles:
-Proton
-TODO
+## restatement of simplified particle physics
 
 Triadic particles: (QCD in IRL physics, dropping the arbitrary color analogy as it's more confusing than helpful)
 Two or more "quark" particles and zero or more "gluon" particles combine to form a triadic system. A triadic system, and any subset thereof, has a state defined by the number of each of three characteristics: A B and C. These characteristics cannot be subdivided, and will always be whole numbers for the system, though they can be negative. A gluon always has exactly two characteristics, one positive and one negative, and they cannot be the same state (+A,-A is not allows but +A,-C is allowed). A quark always has one characteristic state, and can be either positive or negative. Within any triadic system, the sum of the characteristics of each type is always the same. If there are 7 A and 3 -A, then the sum of As is 4 and the sum of Bs and Cs will also be 4.
@@ -33,7 +27,7 @@ The force a gluon traversal exerts on the relevent quarks depends on the distanc
 
 These states are constantly shifting, often spontaneously creating or eliminating quarks and/or gluons hosting an equal number of positive and negative triadic states of the same characteristic. A triadic system contains an arbitrary amount of energy, above a certain minimum (that required to form two quarks of opposite states). Any attempts to subdivide the triadic system will require energy, which will be absorbed by the system to produce more gluons, until the surpluss of energy exceeds a threshold (the value of which depends on the geometry of the system), and new quarks are spontaneously created, allowing the system to split but with enough new quarks of the appropriate states to allow each segment to follow the law of the sum of the state characteristics.
 
-(Here we redraw the lines around "flavors" of quarks, dissociating mass from flavor, and merging quarks with antiquarks as different types of quark, named by charge, yield 4 charge types.)
+(Here we redraw the lines around "flavors" of quarks, dissociating mass from flavor, and merging quarks with antiquarks as different types of quark, named by charge, yielding 4 charge types.)
 Gluons have no electro-magnetic (EM) charge. Quarks have four possible EM charges: ±⅓ or ±⅔. The sum of the quarks in a triadic system will always have a whole number of EM charges. Quarks with a positive triadic state must have a charge of either -⅓ or +⅔, while quarks with a negative triadic state have a charge of either +⅓ or -⅔.
 
 Systems of three quarks, one of each triadic state, are composite particles called "baryons", while systems of two quarks, of opposing states, are particles called "mesons". Both may or may not contain gluons. Baryons, mesons, and other multi-quark systems are collectively known as "Hadrons". Hadrons can group together in larger composite particles called "nuclei", named after its roll in the center of the atom. Energy within a nucleus is often stored by spontaneous creation and distruction of mesons where two baryons are in contact.
@@ -44,16 +38,53 @@ Two or more adjacent quarks can collid and annihilate if the sum of their EM cha
 
 A quark may spontaneously change charge by emitting or capturing an appropriate W boson, between charge type pairs that are 1 elemental charge apart, (⅓ <=> -⅔ or -⅓ <=> ⅔). It retains its triadic state. The sum of the energy in the system before and after must remain constant. The sum of the charges before and after must also remain constant. A quark that takes on another particle must keep or re-emit that energy.
 
-Composite particles:
-TODO atoms
+## complete bs
 
-TODO atomic decay
+New particle:
+Energy comes in many forms, but all are composed of energetic quanta known as mateons. Mateons' influence of one another causes them to group up into clusters following any of a finite set of possible patterns. Matter is a subset of potential patterns of mateons, those that include many mateons stuck in a looping flow with comparatively limited average velocity. Any sufficient density of mateons spontaneously rearranges itself according to these patterns, forming into matter. The most fundamental self-reinforcing and mutually-reinforcing clusters of mateons represent composite particles, many of which were identified and described before mateons were discovered. Mateons flow in a deterministic way, balancing and confining themselves. Some composite particles can exist free and independent of others, and some cannot. Some forms of energy can only exist within or between particles or groups of particles.
 
-TODO elemental properties determined by nucleic patterns
+All forms of matter-energy (including massless particles) are composed of a great number of mateons. Quarks, leptons, and bosons are simply different arrangements of mateons. A mateons is a symetrical but non-point-like configuration of energy. Every mateon is identical, save for position and orientation. Each mateon exhibits 48 charge states simultaneously, each having an opposite, yielding 24 independent charge characteristics. Every point on the surface of the mateon projects a single charge state radially from the mateon's center point. Which state it is depends entirely on that point's locaation on the surface of the mateon relative to the mateon's orientation. All states penetrate other mateons, though may be overshadowed by a competing charge in the same direction. Interaction between pairs of mateons manifests exclusively in one, both, or neither of the mateons changing orientation. A change in position or orientation is immediately observable by all other mateons at any distance. One mateon contains a fixed amount of mass-energy: approximately 2.688×10^-43 eV.
 
-TODO gravity
+The mateon has an innate vector of travel, and will "leap forward" according to that vector on every temporal "frame". Interaction with other mateons can cause the mateon to change orientation, possibly also causing that vector to change direction. The magnitude of the vector is constant, as is the frequency of its leaps, thus it's total distance covered in any given time frame is constant (significantly faster than the forward speed of light). The distance of each jump is several orders of magnitude larger than the diameter of a mateon. Mateons in transit do not collide or otherwise interact while in flight. At the moment they "reappear" on completion of a jump, their orientations have been altered as dictated by the sum of all other mateon fields acting on it at the time its jump began. This often includes a change in the "forward" diraction.
 
+All other forces ever observed are the result of the mateons' influence on one anothers' locations. Even simple-seaming forces like the electroweak force are in fact rapidly shifting fields of the 24 mateon charge states. No incomplete subset of mateon states is responsible for any force, but rather, the intricate and rapidly flowing pattern of movement of large numbers of mateons determine how mateons influence one another. If a pair of mateon particles causes some of each others' mateons to shift their velocities more towards each other, they attract. Only a subset of the particles' mateons are altered on the first frame of interaction, and that alteration causes a riple effect through the particle. The patterns that represent triadic charge interact with other mateon clusters of similar pattern in ways summarized in the laws of the strong atomic force.
 
-TODO contrive even smaller things that combine to behave like all that ^^^
+Commonly occuring patterns of energy are given names to identify the type of particle for convenience. The physical properties and behavior of all particles is determined solely by the pattern of energy they contain. Some patterns are so similar, they share a name, and that name is accompanied by one or more state identifiers that together identify the specific pattern. Sometimes that state describes the amount of energy in one or more portions of the pattern that might vary. Any variation technically represents a distinct pattern, but the similarity in composition and interaction make a shared name convenient. There is a finite set of types of energy, a finite set of possible energy levels for a given type (defined by a quantus over a domain), and a finite set of locations for any instance. Therefore, there is a finite number of potential patterns of energy (particles).
 
+For example: The photon is the fastest naturally occurring composite mateon particle. The quantity of mateons in a photon of a given wavelength can be computed using the energy composing a mateon: (1239.84198 eV⋅nm/λ / (2.688×10^-43 eV⋅M) = 3.3328×10^46 M⋅nm/λ. This large number of mateons dance and swirl in an intricate pattern. This pattern is triadic-charge-balanced in all directions at all times, thus providing a net zero triadic charge, but produces a pair of orthagonal sinwave patterns of electronic and magnetic charges as it crosses time and space with a constant speed. The quantity of mateons influences the rate of the swirl, and therefore the oscillation of the E and M waves it traces, but not the mean facing direction that gives the photon its trajectory and speed. As the pattern churns and swirls, many frames are required for the particle as a whole to advance a single mateon's jump length. While other patterns of mateons could conceivably move faster than light, none of those patterns could also output EM waves in the same way a photon does. Therefore, the speed of light is not the speed limit for all particles, but only the subset that involve an EW force, which includes the photon and the atom.
+
+# metalurgy
+
+Need an algorithm to determine physical properties of arbitrary alloys.
+inputs:
+- percentage (by atom count) of each element
+- cooling rate
+
+outputs:
+- melting point (liquidus)
+- freezing point (solidus)
+- recrystalization threshold
+- latent energy when melting (lerped)
+- state (homogenus solid, heterogenus solid, homogenus liquid, liquid-solid solution, heterogenus liquid, gas)
+- solidifcation type (plastic crystalization, invariant crystalization, amorphous (non-crystal))
+- electrical conductivity
+- density when solid
+- liquid viscosity
+- corrossion resistance
+- magnetic susceptibility
+- corcivity
+- yield point - elastic modulus (young's, E)
+- yield point - shear modulus (G)
+- radiation reaction matrix for each type of radiation (derived in an unrealistically simple way from constituents, e.g. density determining transparency)
+  - % turned to heat
+  - % transmuted the alloy (into what?)
+  - % triggers nuclear reaction (into what?)
+  - % stored for future decay (C14 et al)
+  - % reflected (for each type of radiation)
+  - % permeates.
+
+per-element database:
+- all alloy outputs above
+- latent energy when evaporating
+- atomic radius
 
