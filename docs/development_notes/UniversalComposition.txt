@@ -56,16 +56,16 @@ For example: The photon is the fastest naturally occurring composite mateon part
 # metalurgy
 
 Need an algorithm to determine physical properties of arbitrary alloys.
-inputs:
+## inputs:
 - percentage (by atom count) of each element
 - cooling rate
 
-outputs:
+## possible intermediates ?:
 - melting point (liquidus)
 - freezing point (solidus)
 - recrystalization threshold
 - latent energy when melting (lerped)
-- state (homogenus solid, heterogenus solid, homogenus liquid, liquid-solid solution, heterogenus liquid, gas)
+- state vs temperature matrix (homogenus solid, heterogenus solid, homogenus liquid, liquid-solid solution, heterogenus liquid, gas)
 - solidifcation type (plastic crystalization, invariant crystalization, amorphous (non-crystal))
 - electrical conductivity
 - density when solid
@@ -83,8 +83,219 @@ outputs:
   - % reflected (for each type of radiation)
   - % permeates.
 
-per-element database:
+## per-element database?:
 - all alloy outputs above
 - latent energy when evaporating
 - atomic radius
+
+## outputs:
+a subset of outputs exist for each use case:
+
+### structural: Armor and beams. The component must continue to be a single, solid mass. These parameters are necessary to model a component's resistance to displacement. A component can potentially be defeated by sheering it from the larger structure, causing it to float away, melting it, or can be pierced with a highly focused attack, in which case the component itself is considered mostly undamaged despite the attack affecting whatever is on the other side.
+- Melt vector thermal load (multiply by volume)
+- Sheer vector kinetic load (multiply by surface area connecting to other comkponents)
+- Light to thermal conversion
+- Massive radiation to thermal conversion
+- Piercing melt thermal concentration threshold (when new heat outpaces the component's ability to diffuse it)
+- Piercing kinetic displacement concentration threshold (when a point is small but forceful enough to punch a hole without breaking the whole component)
+
+### functional components:
+- electrical conductivity (used for conductors and insulators)
+- magnetic susceptibility
+- density (proportional to radiation opacity)
+- thermal conductivity
+- thermoelectric sensitivity (V/K note:nonlinear in alloying, see constantan)
+- radiancy frequency
+- radiancy by temperature (polynomial as matrix?)
+- radiation reaction matrix for each type of radiation (derived in an unrealistically simple way from constituents, e.g. density determining transparency)
+  - % turned to heat
+  - % transmutes the material (delta determined by radiation type)
+  - % transformed to other form of radiation (per type)
+  - % stored for future decay (C14 et al)
+  - % reflected
+  - % permeates
+
+# me conversion
+The end-game tech "mateon recombiner" unlocks total conversion on a pair-by-pair basis and can be used to convert between any pair of forms of energy. Only listed (as MR) for those pairs with no other conversion method.
+
+## from: kinetic  to:
+- kinetic
+ -- lever
+ -- pully
+ -- gear
+ -- bar
+ -- bowden cable
+ -- spinning shaft
+ -- flexible spinning shaft
+- light
+ -- light breaks (electric intermediate?)
+- electric
+ -- crank generator
+ -- em sail break
+- heat
+ -- kinetic diffuser (used to affix deep space stations)
+- massive radiation
+ -- rapid counter-accelerator (forcing matter to shed it's velocity quickly enough can cause it to spontaneously create new atoms. This phenomenon can be encouraged with tuned multi-spectrum fields)
+- matter (atomic model)
+ -- MR only
+- antimatter
+ -- MR only
+- chemical
+ -- compression-activated polymer
+
+## from: light  to:
+- kinetic
+ -- laser pump drive
+ -- photon pressure resonant chamber
+ -- solar sail
+- light
+ -- substances that turn a photon into more smaller photons (calcium, GFP etc)
+ -- mirrors and prisms
+ -- lenses
+- electric
+ -- solar panels
+- heat
+ -- light-absorbing pigments
+- massive radiation
+ -- high energy beam convergence
+- matter (atomic model)
+ -- tuned high energy beam convergence
+- antimatter
+ -- tuned high energy beam convergence
+- chemical
+ -- chlorophyll
+ -- photopolymers
+
+## from: electric  to:
+- kinetic
+ -- ion thruster
+ -- CRT (via equal and oposite of emitted electron's velocity)
+ -- solenoid/motor
+- light
+ -- LED
+ -- discharge tube
+- electric
+ -- transformer
+- heat
+ -- resistor wire
+ -- secondary/waste product of pretty much any device that uses electricity
+ -- open electric arc (in gas medium)
+- massive radiation
+ -- discharge tube
+ -- matter fabricator (lvl 1)
+- matter (atomic model)
+ -- matter fabricator (lvl 2)
+ -- electron plasma collapse (doped with mater so any antimatter produced is annihilated and re-emitted)
+- antimatter
+ -- electron plasma collapse (doped with antimater so any matter produced is annihilated and re-emitted)
+- chemical
+ -- electrolytic reaction (recharge)
+ -- magnetopolymers
+ -- electrolysis of compounds, esp of oxides, into constituents of greater potential
+
+## from: heat (differential)  to:
+- kinetic
+ -- gas pressure cycle heat engine (sterling engine and similar)
+- electric
+ -- thermocoupler
+
+## from: heat (direct)  to:
+- kinetic
+ -- kinetic order inducer
+- light
+ -- passive radiancy (IR, black-body et al)
+- electric
+ -- MR
+- heat
+ -- heat conductors
+- massive radiation
+ -- ionization resulting from spontaneous proton->neutron promotion (extreme heat only)
+- matter (atomic model)
+ -- plasma collapse
+- antimatter
+ -- plasma collapse
+- chemical
+ -- thermopolymers
+
+## from: massive radiation  to:
+- kinetic
+ -- radiation pressure resonant chamber
+- light
+ -- phosphorous and similar compounds
+- electric
+ -- electron capture ion dynamo
+- heat
+ -- radiation absorption
+- massive radiation
+ -- particle converting film
+ -- mirrors and prisms
+- matter (atomic model)
+ -- matter combiner
+- antimatter
+ -- particle inversion
+- chemical
+ -- ionization
+ -- radio-hydrolysis
+
+## from: matter (atomic model)  to:
+- kinetic
+ -- MR only
+- light
+ -- fission laser
+- electric
+ -- MR only
+- heat
+ -- fission/fusion reactor
+- massive radiation
+ -- fission/fusion reactor
+- matter (atomic model)
+ -- fission/fusion/see matter refinment
+- antimatter
+ -- inversion
+- chemical
+ -- electron descent
+
+## from: antimatter  to:
+- kinetic
+ -- annihilation pressure drive
+- light
+ -- unconstrained annhilation
+- electric
+ -- lepton annihilation ionizer
+- heat
+ -- any annihilation
+- massive radiation
+ -- hadron annihilation
+- matter (atomic model)
+ -- inversion
+- antimatter
+ -- fission/fusion/see matter refinment
+- chemical
+ -- positron ascent
+
+## from: chemical  to:
+- kinetic
+ -- chemical reaction thruster
+- light
+ -- fire
+- electric
+ -- electrolytic conversion
+ -- ionization
+- heat
+ -- fire
+- massive radiation
+ -- negative ion electron release
+- matter (atomic model)
+ -- electron ascent
+- antimatter
+ -- positron release
+- chemical
+ -- chemistry
+
+
+
+
+
+
+
 
