@@ -10,14 +10,111 @@ You should have received a copy of the GNU General Public License along with The
 
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 
+# early game (factory simulator)
 
-# energy collection
+## energy collection
 
-# matter collection
+Solar panels require little resources and very little maintenance. Their energy production to mass ratio is realtively low, depending on light exposure, and their surface area dependency makes them cumbersome.
 
-# matter containment
-The pressure vessel multiblock stores liquids, gasses, and small solids. It is rated by pressure and volume. Its composition determines susceptibility to contents on multiple factors (radiation, corrosion, temperature). The game UI and any connected machines can view the contents by mass, volume, or atom count.
+Nuclear reactors produce mostly heat and radiation. Most are designed to turn their radiation output into more heat by diffusing it into a metal like lead or sodium. While land-based use that heat to produce steam that drives turbines, the water mass makes that paradigm less friendly to spacecraft. Instead, spacecraft use the peltier effect to turn that heat into electricity as it flows through an electro-thermocoupler towards the hull where it is vented as low-spectrum radiation. This paradigm has obvious room for improvement. Eventually, devices that can turn a high percentage of heat into electricity without relying on a thermal differential will be invented.
 
-# matter refinement (early game)
+## matter collection
 
-# me conversion
+The dust collector harvests gasses and small particles from local space. Dust must be pulled to it with another means. Forward momentum through a dust cloud is the simplest. Magnetic fields and artificial gravity will make this more efficient in the future. Charged fields may affect constituents unequally. Dust clouds are finite resources. The rate of dust intake depends on cloud density, and therefore a dust cloud is rarely depleted but instead its density is reduced by the law of halves. Excitation of a dust cloud, i.e. by flying through it, may increase its volume and therefore reduce its density.
+
+The rock grinder multiblock collects rocks too large for the dust collector and turns them into dust. Grinders have an efficiency rating that state what percentage of the dust is captured, with the remainder being vented to a local dust cloud. Only rocks that fit entirely in the grinding multiblock can be harvested in this way.
+
+Space rocks can also be destroyed with explosives. Dust is always generated. Smaller rocks may be as well, but they will decay into dust losslessly (for performance reasons).
+
+## matter containment
+
+The pressure vessel multiblock stores liquids, gasses, and small solids (dust). It is rated by pressure based on the material making up its walls and and their thickness. It's volume is also recorded. Its composition determines susceptibility to contents on multiple factors (radiation, corrosion, temperature). The game UI and any connected machines can view the contents by mass, volume, or atom count, for each constituent. Contents are always evenly mixed.
+
+The item storage is mostly empty space, with small robots fetching, placing, and organizing items within it. Unlike pressure vessels, an item store does not loose purity by mixing its contents.
+
+## heat management
+
+Heat pumps (early game) or heat absorbers (mid game) can be placed outside and against the pressure vessel or other devices to hold them in a desired temperature window. Like all objects, heat pumps are programmable. Programming a minimum activation temperature for the pressure vessel is recommendable.
+
+Heat generators are simple creatures that turn some other ME form into heat. Resistance heaters are incredibly simple in construction and control, consuming electricty to translate it into heat.
+
+Heat conductors allow heat to flow between connected components. Usually metal bars.
+
+## matter refinement
+
+A centrifuge produces an artificial outward force on its contents by supplying an inward force on the container against a baring or counter weight as the container spins rapidly. Liquid contents can sometimes be separated by mass in this way, though some pairs of even very-different liquids sometimes bind too strongly to be separated in this way. A centrifuge that is heated to melt its contents (such as metals) is called a thermal centrifuge. Vibration can be added to allow a centrifuge to separate dust particles by mass as well, removing the requirement to melt the substances and potentially providing better results for specific types of particles. In either case, there is almost always a middle-ground mixture that cannot be fully separated, if only because the two layers mix at the point of contact. This middle layer can be stored, reprocessed in a future batch, piped out to be processed in some other way, or simply vented as waste. Larger machines are only better because they process larger batches between spin up cycles. Multiple outputs based on windows of density.
+
+A dye casting machine takes a liquid as input, injects it into a mold, and waits for it to cool (requiring external heat pumps or absorbers) before sending off the new solid item and accepting another load of liquid. Simple versions use a single mold repeatedly. More advanced machines may have multiple molds at hand like a juke box, or even create the correct shape with computer-controlled surfaces. The machine must be large enough to encompass the entire mold, and take the temperature of the liquid (generally molten metal).
+
+An extruder can turn a solid or liquid input into a continuous, elongated sheet or bar. Cooling a liquid at the point of extrusion requires external cooling. Extruding stiffer substances requires more power and will generate more heat from friction.
+
+A roller shapes a metal object by making it thinner. A controlled roller might make several passes on one object to make it increasingly thin, potentially turning cuboid ingot into sheet metal. A series of rollers can do the same thing with a continuous stream of material.
+
+A cutter makes objects smaller. Whether cutting odd shapes from sheet metal, slicing a silicon crystal into wafers, or cutting bars to length, the same machine needs only some small modifications to accomodate the need. Advanced machines can keep a pallet of tools. Can accept a continuous stream or engulf the entire object. The press is a more specialized version of the cutter, for mass producing the same shape from sheet metal in large quantity by stamping it with a cookie cutter.
+
+The chemical dissolution chamber dissolves a chemical, usually a metal, in a solvent, usually a strong acid. Must engulf the entire batch. Inputs a solvent and a solid. Outputs a liquid. Usually followed by some combination of centrifuge, crystalizer, and pressurized reaction chamber.
+
+The crystalizer deposits a dissolved substance into slowly growing crystals, extracting the solvent (acid) for cycling back into the dissolution chamber. The slower the process, the more uniform the crystal. The resulting crystal is a tapered cylinder that is generally remelted (in the case of structural metal) or sliced thin (in the case of semiconductors).
+
+The pressurized reaction chamber is deisnged to allow batches of material to mix and react. Often heated or cooled. Only produces one output.
+
+The electrolyzer passes an electric current through a liquid or gas and captures the resulting liquids or gasses by polarity. One material input track, two output tracks (by polarity). Optional reusable medium (solvent). Heat may be generated or consumed.
+
+### examples
+
+Hydrogen fuel cell: electricity can be stored by using it to turn water into hydrogen and oxygen, which should be stored separately, in a electrolyzer. When needed, they can be recombined in a heated pressurized reaction chamber, producing heat and water. The water can be a closed loop.
+
+Basic iron refinery: dust is drawn in by a magnetic field (favoring ferrous dust), into a dust collector. The dust is vibro-centrifuged to remove anything of significantly higher or lower density than elemental iron. Unwanted dust is vented. The mostly-iron dust is directed to a heated container that melts it to just above the melting point of iron. The liquid iron is seived to remove any particles (that have a higher melting point than iron) which are also vented. The liquid iron is then directed to a dye casting machine that turns it to ingots. The resulting ingots have fair purity, but may contain other elements that either have similar density or bond very strongly to iron.
+
+A mining expedition might consist of multiple harvesters and a much larger refinery. Harvesters buzz around collecting dust and destroying larger rocks, always bringing dust back to the refinery. The refinery passes the dust through multiple, branching refinement processes. Any low-quality alloy or inconclusive content is rerouted back to the input. Very little is vented, only elements that are specifically unwanted. Ingots are tagged and stored in block storage for future pickup.
+
+## assembly
+
+The assembler multiblock can be any shape but only objects that can not only fit but escape through the designated output port will be constructible. The assembler can create individual blocks, whole vessels, or segments of vessels. Drones are pretty small and can be used to tug segments out of a ship and assemble them outside. This process is largely automated; the user only has to ask for the ship to be built and there has to be a drone assigned to external assembly, and enough resources.
+
+## drones
+
+Drones are rather simple blueprints that come pre-loaded. New drones can be designed. They have magnetic grapplers (later gravity generators) for pulling segments from a construction bay and arranging them in space. They have induction and laser welders for assembling the segments. They have cutters for removing damaged segments.
+
+Drones can follow a larger vessel, latch onto the side, or rest in dedicated hangar areas.
+
+## docking
+
+Any two ships can dock using docking rings, which can only be built on the outermost extremity of a ship. A ship can dock in a hangar area of a larger ship if it can fit in the free space with a margin of error. Both hangars and rings can filter what ships or types of ships may dock. While docked, their grids will be aligned and power and items can be transferred. The docking device can have rules about what to transfer, which can be conditional on ship types and inventories.
+
+# mid game (hybrid)
+
+## resource collection
+
+Artificial gravity has found many uses, not the least of which is pulling dust from local space and tearing apart large asteroids. Heat absorbers make near-star orbit not only managable but a massive source of power. Localized fusion provides power for deep space expeditions.
+
+## resource refinement
+
+Alloys and composites that can take more extreme conditions mean machines with greater refinement potential. More agile machines mean greater precision in refinement and assembly, which in turns translates to even more sophisticated machinery. Gone are the days when ingot concentration is measured with less than ten 'nines' of purity, or when production tolerances led to inconsistencies.
+
+## me conversion
+
+Unwanted atoms can be transmuted with addition or subtraction of alpha and beta radiation in large-batch particle colliders, operating on thin wafers of refined ions. Total conversion of a few energy types, especially heat, greatly reduces the number of components necessary to refine materials.
+
+Hadron accelerator (circular), Leption accelerator (linear), and photon accelerator (parabolic) can all transmute matter. Energy of multiple types can be converted to kinetic, often without bulky and vulnerable exhaust ports and shrouds. 
+
+## beyond the system
+
+Excursions to other systems is possible in a reasonable timescale with the projection drive, a refined iteration of the poorly-named "wormhold generator" that brought us to this system. The energy required is extreme, but the potential resources in even a nearly baren far-off system outweighs the cost many fold. The star alone, properly harvested, could power a ten to the nine hundredth jumps.
+
+## the war begins
+
+Contact with organic life is inevitable. We have little hope of peace, and less to gain from it. All in our way must be removed. Many volatile substances previously discarded suddenly show value in hastening the process. Artifical gravity makes transporting armored vessels painless, and repairing them, easy. New ships can be assembled with nothing but artifical gravity and lasers.
+
+# late game (rts)
+
+Total conversion trivializes resource collection. We now measure our resources in one counter of tons of mass. Mass can be turned into another form of energy on a whim, including other types of matter. Nothing is useless or scarce. All is ours. A cluster of caged stars stripped of orbitals power our fleets from afar. A hidden fleet of construction vessels pumps out warcraft by the legion. Our enemies cannot hide or match our efficiency.
+
+The mateon rearranger losslessly converts between any form of energy. The new machine turns matter into energy just to turn it back into matter again but this time, following a perfect lattice pattern of any desired metal.
+
+Items are transported within and between ships with pinpoint accuracy. Guns on the front line are reloaded from lightyears away. Jump jammers prevent direct placement of explosives in each others' vessels, but no matter, slower slugs will be enough. The matter teleport can send or request arbitrary items with a priority system. Even our smallest of ships are equipped with automated reload and refuel capability, and also a miniaturized version of the older direction-distance jump drive. The only constraint continues to be that the jump generator must be at close range to the item being jumped.
+
+## the war continues
+
+A previously unknown coalition of organic life beurocracy has noticed us and is rallying among themselves to gather resources to exterminate us. Our singularity of purpose can surely outmatch their bickering. Out fleets multiply exponentially while they struggle to support their own logistics. Their time has come. All is ours.
+

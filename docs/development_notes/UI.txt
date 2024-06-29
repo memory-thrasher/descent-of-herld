@@ -12,5 +12,37 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 
 
-#
+# general
+
+Changes in what is selected is a viable undo event.
+
+The UI state, including any partially complete changes, is saved to the database.
+
+Each view window can be whole, split into halves (vertical or horizontal), or quartered. A set of buttons across the top of the screen at all times allows the viewing modes to be changed. First there are three tab-like buttons that control how the window is split, mapped to F1-F4. Then there are buttons to control what each pane displays, mapped to F1-Fn. After pressing one of them, the menu bar is replaced with a message saying to click the window to apply the change to.
+
+# designer
+
+The designer has multiple view modes. Any subset of them can be displayed as if they were independent.
+
+## module details
+
+Shows the selected module's information. Total construction cost is always displayed. If exactly one module is selected, its settings and upgrades are displayed and can be adjusted here.
+
+## schematic
+
+Each module is shown as a symbol or series of symbols with defined inputs and outputs. Symbols are a subset of IRL EE and PID symbols, with new ones made up as needed. Most things have i/o connectors for at least heat and some form of matter.
+
+## module and blueprint list
+
+A searchable list of all modules and blueprints. A blueprint can be a configured module, a segment of a ship, or a complete one. In any case, it is placable in the grid as a complete unit. Left click deselects anything that might be selected in the layout views, and spwans and selects a new copy of the module for placement. Right clicking the module/blueprint in the list transitions the view to a list of materials needed to build it, defined by ideal properties and tolerances.
+
+## layout 2d
+
+A tab-like mechanism lets you pick which axis you want to be mapped to screen depth. A scroll bar defines which layer you're looking at. The rest is a grid of module slots.
+
+Scroll bar zooms. Holding middle click while scrolling changes layer. Middle click without scrolling flips the selection. Right click rotates the selection 90 degrees. Left click selects something; and with shift it adds/removes from the selection. Left click and drag on nothing makes a selection box. Left click and drag on something moves the whole selection.
+
+## layout 3d
+
+The complete ship/segment can be viewed as if from the outside. A toggle controls whether the whole ship is displayed or just the selected layer. The selected layer is controlled with a slider / nud combo.
 

@@ -12,5 +12,13 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 
 
-#
+Vessels are made of grid elements. The grid pitch is relatively small.
+
+Internal substructures must be surrounded by at least one level of solid blocks on all sides in three dimensions. These structures can contain support beams enforce the container's strength from internal and external pressure. The volume of the beam subtracts from any container that calculates it, and limit the usablility of other containers. Containers like pressure vessels that can contain potentially hazardous materials must be made of a single material on the innermost layer on all sides, and all internal beams.
+
+Only high-power devices need power routed to them. Smaller devices just automatically get power from the ship's grid. Wires made of selecting any conductor and optionally any insulator can be placed much like structural beams to connect them.
+
+Some modules can have a limited number of upgrade slots. Things like build speed and energy efficiency. All upgrades have unlimited tiers with increasingly extreme manufacturing requirements (mostly in terms of precision).
+
+
 
