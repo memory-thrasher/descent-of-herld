@@ -16,3 +16,43 @@
 
 
 # this script will scan all source files and generate a header that contains define snippets that help to create the onion with less touching of so many files every time an object gets modified or added
+
+#note: working directory is project root (executed from ../build.sh)
+allvars=
+while IFS= read -d $'\0' file; do
+    # echo "//note: begin $file"
+    while read line; do
+	# echo "processing: $line"
+	if [[ "$line" =~ \!\!onion\ (.*?) ]]; then
+	    onion="${BASH_REMATCH[1]}"
+	    #note: this doesn't do anything (yet) as I have only one onion
+	elif [[ "$line" =~ \!\!append\ (.*?)\ (.*?) ]]; then
+	    listName="${BASH_REMATCH[1]}"
+	    listNewVar="${BASH_REMATCH[2]}"
+	    # echo "//$listName += $listNewVar"
+	    if ! echo "$allvars" | grep -Fwq "$listName"; then
+		if [ -z "$allvars" ]; then
+		    allvars="$listName"
+		else
+		    allvars="$allvars $listName"
+		fi
+		eval "$listName='$listNewVar'"
+	    else
+		eval "$listName=\"\$$listName, $listNewVar\""
+	    fi
+	    # echo -n "//$listName="
+	    # eval echo \$$listName
+	elif [[ "$line" =~ \!\!include\ me ]]; then
+	    echo "#include \"../src/$file\""
+	fi
+    done < <(grep -ho '!!.*' "$file")
+done < <(find src -type f -not -iname '*~' -print0) >generated/onionHelper.hpp
+
+while read -d' ' var; do
+    echo -n "#define expand_$var(T) constexpr auto $var = WITE::concat<T, "
+    eval echo -n \$$var
+    echo '>();'
+done <<<$allvars >>generated/onionHelper.hpp
+
+
+

@@ -17,31 +17,47 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 //!!include me
 //!!onion all
 
+#define FLID (FILE_ID + __LINE__)
+
+//give each file a unique id, and the above macro will generate a unique id per-line (assuming the file ids are diverse enough)
+#define FILE_ID 0
+
 constexpr uint64_t gpuId = 0;
 
-constexpr bufferRequirements BR_singleTransform = WITE::singleTransform<gpuId, 1>::value,
-	    BR_S_singleTransform = WITE::withId(WITE::stagingRequirementsFor(BR_singleTransform, 2), 2);
-//!!register BR BR_singleTransform
-//!!register BR BR_S_singleTransform
+constexpr WITE::bufferRequirements BR_singleTransform = WITE::singleTransform<gpuId, FLID>::value,
+	    BR_S_singleTransform = WITE::withId(WITE::stagingRequirementsFor(BR_singleTransform, 2), FLID);
+//!!append BR_all BR_singleTransform
+//!!append BR_all BR_S_singleTransform
 
 struct cameraData_t {
   glm::vec4 geometry;//xy pixels
 };
 
-constexpr bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, 3, sizeof(cameraData_t)>::value,
-	    BR_S_cameraData = WITE::withId(WITE::stagingRequirementsFor(BR_cameraData, 4), 2);
-//!!register BR BR_cameraData
-//!!register BR BR_S_cameraData
+constexpr WITE::bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, 3, sizeof(cameraData_t)>::value,
+	    BR_S_cameraData = WITE::withId(WITE::stagingRequirementsFor(BR_cameraData, 2), FLID);
+//!!append BR_all BR_cameraData
+//!!append BR_all BR_S_cameraData
 
-constexpr copyStep CP_transform = WITE::simpleCopy<100>::value;
-//!!register CP CP_transform
+constexpr WITE::copyStep CP_transform = WITE::simpleCopy<FLID>::value,
+	    CP_data = WITE::simpleCopy<FLID>::value;
+//!!append CP_all CP_transform
+//!!append CP_all CP_data
 
-constexpr uint64_t RC_ID_RP_1_color = 200,
-	    RC_ID_RP_2_color = 201,
-	    RC_ID_RP_3_color = 202,
-	    RC_ID_RP_4_color = 203,
-	    RC_ID_RP_5_color = 204,
-	    RC_ID_reusable_depth = 205;
+constexpr uint64_t RC_ID_RP_1_color = FLID,
+	    RC_ID_RP_1_depth = FLID,
+	    RC_ID_RP_2_color = FLID,
+	    RC_ID_RP_2_depth = FLID,
+	    RC_ID_RP_3_color = FLID,
+	    RC_ID_RP_3_depth = FLID,
+	    RC_ID_RP_4_color = FLID,
+	    RC_ID_RP_4_depth = FLID,
+	    RC_ID_RP_5_color = FLID,
+	    RC_ID_RP_5_depth = FLID;
 
+//this IR is the final target of reflection cube maps, getting resambled by future renders, and also the pre-bloom attachment for the screen target, which is resambled by the bloom shader.
+constexpr WITE::imageRequirements IR_intermediateColor = WITE::intermediateColor<gpuId, FLID, WITE::Format::RGBA32float>::value;
+//!!append IR_all IR_intermediateColor
 
+constexpr WITE::imageReuqirements IR_depth = WITE::simpleDepth<gpuId, FLID>::value;//depth are pretty much all the same
+//!!append IR_all IR_depth
 

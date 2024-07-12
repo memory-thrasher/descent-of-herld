@@ -15,10 +15,59 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "gpuShared.hpp"
 #include "../generated/onionHelper.hpp"
 
+#define FILE_ID 1000000000
 
+expand_RR_L_primaryCamera(WITE::resourceReference);
 
-constexpr onionDescriptor onionFull_data = {
-  .IRS = NULL,
+constexpr targetLayout TL_primaryCamera = {
+  .id = FLID,
+  .objectLayoutId = OL_primaryCamera.id,
+  .resources RR_L_primaryCamera,
+};
+
+expand_S_RP_gui(WITE::graphicsShaderRequirements);
+
+constexpr WITE::renderPassRequirements RP_gui = {
+  .id = FLID,
+  .depth = RC_ID_RP_gui_depth,
+  .color = RC_ID_RP_gui_color,
+  .clearDepth = true,
+  .clearColor = true,
+  .shaders = S_RP_gui,
+};
+
+expand_IDL_CP_L1(uint64_t);
+
+constexpr WITE::layerRequirements L_gui = {
+  .copies = IDL_CP_L1,
+  .reanders = RP_gui,
+};
+//!!append LR_all L_gui
+
+expand_IR_all(WITE::imageRequirements);
+expand_BR_all(WITE::bufferRequirements);
+expand_RS_all(WITE::resourceSlot);
+//expand_CSR_all(WITE::computeShaderRequirements);
+expand_RPR_all(WITE::renderPassRequirements);
+//expand_CL_all(WITE::clearStep);
+expand_CS_all(WITE::copyStep);
+expand_LR_all(WITE::layerRequirements);
+expand_OL_all(WITE::objectLayout);
+expand_TL_all(WITE::targetLayout);
+expand_SL_all(WITE::sourceLayout);
+
+constexpr WITE::onionDescriptor onionFull_data = {
+  .IRS = IR_all,
+  .BRS = BR_all,
+  .RSS = RS_all,
+  .CSRS = CSR_all,
+  .RPRS = RPR_all,
+  .CLS = CL_all,
+  .CSS = CS_all,
+  .LRS = LR_all,
+  .OLS = OL_all,
+  .TLS = TL_all,
+  .SLS = SL_all,
   .GPUID = gpuId,
 };
 
