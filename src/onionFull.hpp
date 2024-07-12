@@ -19,11 +19,12 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 expand_RR_L_primaryCamera(WITE::resourceReference);
 
-constexpr targetLayout TL_primaryCamera = {
+constexpr WITE::targetLayout TL_primaryCamera = {
   .id = FLID,
   .objectLayoutId = OL_primaryCamera.id,
-  .resources RR_L_primaryCamera,
+  .resources = RR_L_primaryCamera,
 };
+//!!append TL_all TL_primaryCamera
 
 expand_S_RP_gui(WITE::graphicsShaderRequirements);
 
@@ -35,12 +36,13 @@ constexpr WITE::renderPassRequirements RP_gui = {
   .clearColor = true,
   .shaders = S_RP_gui,
 };
+//!!append RPR_all RP_gui
 
-expand_IDL_CP_L1(uint64_t);
+expand_IDL_CP_L_gui(uint64_t);
 
 constexpr WITE::layerRequirements L_gui = {
-  .copies = IDL_CP_L1,
-  .reanders = RP_gui,
+  .copies = IDL_CP_L_gui,
+  .renders = RP_gui.id,
 };
 //!!append LR_all L_gui
 
@@ -60,9 +62,9 @@ constexpr WITE::onionDescriptor onionFull_data = {
   .IRS = IR_all,
   .BRS = BR_all,
   .RSS = RS_all,
-  .CSRS = CSR_all,
+  // .CSRS = CSR_all,
   .RPRS = RPR_all,
-  .CLS = CL_all,
+  // .CLS = CL_all,
   .CSS = CS_all,
   .LRS = LR_all,
   .OLS = OL_all,
@@ -72,3 +74,5 @@ constexpr WITE::onionDescriptor onionFull_data = {
 };
 
 typedef WITE::onion<onionFull_data> onionFull;
+
+#undef FILE_ID

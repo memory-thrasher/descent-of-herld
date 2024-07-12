@@ -31,11 +31,7 @@ while IFS= read -d $'\0' file; do
 	    listNewVar="${BASH_REMATCH[2]}"
 	    # echo "//$listName += $listNewVar"
 	    if ! echo "$allvars" | grep -Fwq "$listName"; then
-		if [ -z "$allvars" ]; then
-		    allvars="$listName"
-		else
-		    allvars="$allvars $listName"
-		fi
+		allvars="$listName $allvars"
 		eval "$listName='$listNewVar'"
 	    else
 		eval "$listName=\"\$$listName, $listNewVar\""
@@ -43,16 +39,26 @@ while IFS= read -d $'\0' file; do
 	    # echo -n "//$listName="
 	    # eval echo \$$listName
 	elif [[ "$line" =~ \!\!include\ me ]]; then
-	    echo "#include \"../src/$file\""
+	    echo "#include \"../$file\""
+	else
+	    echo "Unrecognized directive: $line"
+	    exit 1;
 	fi
     done < <(grep -ho '!!.*' "$file")
-done < <(find src -type f -not -iname '*~' -print0) >generated/onionHelper.hpp
+done < <(find src -type f -not -iname '*~' -print0) >generated/onionHelper.hpp_new
 
 while read -d' ' var; do
     echo -n "#define expand_$var(T) constexpr auto $var = WITE::concat<T, "
     eval echo -n \$$var
     echo '>();'
-done <<<$allvars >>generated/onionHelper.hpp
+done <<<$allvars >>generated/onionHelper.hpp_new
+
+#avoid updating the file if nothing changed to save build time
+if diff -q generated/onionHelper.hpp_new generated/onionHelper.hpp | grep -q .; then
+    mv generated/onionHelper.hpp_new generated/onionHelper.hpp
+else
+    rm generated/onionHelper.hpp_new
+fi
 
 
 

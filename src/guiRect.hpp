@@ -12,12 +12,15 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#pragma once
 //!!include me
 //!!onion all
 
+#include "targetPrimary.hpp"
+
 #define FILE_ID 10000000
 
-constexpr objectLayout OL_guiRect = { .id = FLID };
+constexpr WITE::objectLayout OL_guiRect = { .id = FLID };
 //!!append OL_all OL_guiRect
 
 struct guiRect_t {
@@ -32,7 +35,7 @@ constexpr WITE::bufferRequirements BR_guiRect = WITE::simpleUB<gpuId, FLID, size
 //!!append BR_all BR_guiRect
 //!!append BR_all BR_S_guiRect
 
-constexpr resourceSlot RS_guiRect = {
+constexpr WITE::resourceSlot RS_guiRect = {
   .id = FLID,
   .requirementId = BR_guiRect.id,
   .objectLayoutId = OL_guiRect.id,
@@ -50,6 +53,9 @@ constexpr WITE::resourceConsumer RC_S_guiRect_source = WITE::simpleUBConsumer<FL
 
 constexpr WITE::resourceConsumer RC_S_guiRect_target = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment>::value;
 
+#include "guiRect.frag.spv.h"
+#include "rectangle.vert.spv.h"
+
 constexpr WITE::shaderModule SM_L_guiRect[] = {
   { rectangle_vert, sizeof(rectangle_vert), vk::ShaderStageFlagBits::eVertex },
   { guiRect_frag, sizeof(guiRect_frag), vk::ShaderStageFlagBits::eFragment }
@@ -58,8 +64,8 @@ constexpr WITE::shaderModule SM_L_guiRect[] = {
 constexpr WITE::graphicsShaderRequirements S_guiRect {
   .id = FLID,
   .modules = SM_L_guiRect,
-  .targetProvidedResources = &RC_S_guiRect_target,
-  .sourceProvidedResources = &RC_S_guiRect_source,
+  .targetProvidedResources = RC_S_guiRect_target,
+  .sourceProvidedResources = RC_S_guiRect_source,
   .cullMode = vk::CullModeFlagBits::eNone,
   .vertexCountOverride = 6
 };
@@ -68,18 +74,20 @@ constexpr WITE::graphicsShaderRequirements S_guiRect {
 constexpr WITE::resourceReference RR_L_guiRect[] = {
   { CP_data.src, RS_S_guiRect.id },
   { CP_data.dst, RS_guiRect.id },
-  { RC_S_guiRect_source, RS_guiRect.id },
+  { RC_S_guiRect_source.id, RS_guiRect.id },
 };
 
 constexpr WITE::sourceLayout SL_guiRect = {
   .id = FLID,
-  .objectLayoutId = OL_guiRect,
+  .objectLayoutId = OL_guiRect.id,
   .resources = RR_L_guiRect,
 };
 //!!append SL_all SL_guiRect
 
 constexpr WITE::resourceReference RR_L_primaryCamera_guiRect[] = {
-  { RC_S_guiRect_target, RS_primaryCamera_cameraData.id },
+  { RC_S_guiRect_target.id, RS_primaryCamera_cameraData.id },
 };
 //!!append RR_L_primaryCamera RR_L_primaryCamera_guiRect
+
+#undef FILE_ID
 
