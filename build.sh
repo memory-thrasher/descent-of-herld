@@ -95,11 +95,11 @@ while IFS= read -d '' SRCFILE; do
 	    $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" -E -o /dev/null -w -ferror-limit=1 -H "${SRCFILE}" 2>&1 | grep '^\.' | grep -o '[^[:space:]]*$' | sort -u >"${DEPENDENCIES}" &
 	fi
 	#use dd as a buffer so the output from parallel jobs collides less
-	(if ! $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" --std=c++20 -fPIC -DDEBUG -g $BOTHOPTS -Werror -Wall "${SRCFILE}" -c -o "${DBGDSTFILE}" 2>&1 | dd ibs=4096 status=none; then
+	(if ! $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" --std=c++20 -fPIC -fdata-sections -ffunction-sections -fdata-sections -DDEBUG -g $BOTHOPTS -Werror -Wall "${SRCFILE}" -c -o "${DBGDSTFILE}" 2>&1 | dd ibs=4096 status=none; then
 	     rm "${DBGDSTFILE}" 2>/dev/null
 	     echo "Failed Build: ${SRCFILE}"
 	 fi)&
-	(if ! $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" --std=c++20 -fPIC -O3 $BOTHOPTS -Werror -Wall "${SRCFILE}" -c -o "${RELDSTFILE}" 2>&1 | dd ibs=4096 status=none; then
+	(if ! $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" --std=c++20 -fPIC -ffunction-sections -fdata-sections -O3 $BOTHOPTS -Werror -Wall "${SRCFILE}" -c -o "${RELDSTFILE}" 2>&1 | dd ibs=4096 status=none; then
 	     rm "${RELDSTFILE}" 2>/dev/null
 	     echo "[release build] Failed Build: ${SRCFILE}"
 	 fi)&
@@ -118,14 +118,14 @@ while read -d ' ' DSTFILE; do
 	echo "File does not exist. Build failed? $DSTFILE"
 	exit 1;
     fi
-done <<< $ALLDSTFILES
+done <<< "$ALLDSTFILES"
 ALLDSTFILES=
 
 $WORKNICE $WIN_LINKER /opt:icf=4 /subsystem:windows /entry:mainCRTStartup build/windows/*.o $WITEBUILD/windows/WITE/*.o /defaultlib:SDL2 "/out:build/windows/descentOfHerld.exe" &
 
-$WORKNICE $COMPILER build/release/*.o $WITEBUILD/release/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -lvulkan -lSDL2 $BOTHOPTS -o "build/release/descentOfHerld" &
+$WORKNICE $COMPILER -Wl,--icf=all build/release/*.o $WITEBUILD/release/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/release/descentOfHerld" &
 
-$WORKNICE $COMPILER -DDEBUG build/debug/*.o $WITEBUILD/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -lvulkan -lSDL2 $BOTHOPTS -o "build/debug/descentOfHerld" || exit 1
+$WORKNICE $COMPILER -DDEBUG -Wl,--icf=all build/debug/*.o $WITEBUILD/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/debug/descentOfHerld" || exit 1
 
 ./build/debug/descentOfHerld
 
