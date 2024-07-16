@@ -13,8 +13,24 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #include "onionWrapper.hpp"
+#include "dbWrapper.hpp"
 
 int main(int argc, char** argv) {
-  //
+  WITE::configuration::setOptions(argc, argv);
+  WITE::gpu::init("Descent of Herld");
+  WITE::winput::initInput();
+  WITE::sound::initSound();
+  LOG("Note: using save dir: ", getSaveDir());
+  createOnionFull();
+  createMainMenu();
+  dbCycle();
+  while(!WITE::shutdownRequested()) {
+    WITE::winput::pollInput();
+    dbUpdate();
+    render();
+    dbEndFrame();
+    dbCycle();
+  }
+  dbDestroy();
 }
 

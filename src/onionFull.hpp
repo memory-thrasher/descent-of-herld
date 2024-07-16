@@ -73,6 +73,6 @@ constexpr WITE::onionDescriptor onionFull_data = {
   .GPUID = gpuId,
 };
 
-typedef WITE::onion<onionFull_data> onionFull;
+typedef WITE::onion<onionFull_data> onionFull_t;
 
 #undef FILE_ID

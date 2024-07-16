@@ -22,7 +22,7 @@
 #define FILE_ID 1000000
 
 constexpr WITE::objectLayout OL_primaryCamera = { .id = FLID };
-//!!append OL_all OL_guiRect
+//!!append OL_all OL_primaryCamera
 
 constexpr uint64_t RC_ID_RP_gui_color = FLID,
 	    RC_ID_RP_gui_depth = FLID;
