@@ -12,19 +12,19 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
-#include <memory>
+#pragma once
+//!!include me
 
-#include "onionWrapper.hpp"
-#include "onionFull.hpp"
+#include <WITE/WITE.hpp>
 
-std::unique_ptr<onionFull_t> onionFull;
-
-void createOnionFull() {
-  onionFull = std::make_unique<onionFull_t>();
-}
-
-void render() {
-  if(onionFull)
-    onionFull->render();
-}
+struct mainMenu {
+  static constexpr uint64_t typeId = 10001000;
+  static constexpr std::string dbFileId = "mainMenu";
+  static void update(uint64_t oid);
+  static void allocated(uint64_t oid);
+  static void freed(uint64_t oid);
+  static void spunUp(uint64_t oid);
+  static void spunDown(uint64_t oid);
+};
+//!!append DB_types mainMenu
 

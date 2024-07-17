@@ -12,6 +12,8 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#include <WITE/WITE.hpp>
+
 #include "onionWrapper.hpp"
 #include "dbWrapper.hpp"
 
@@ -19,7 +21,7 @@ int main(int argc, char** argv) {
   WITE::configuration::setOptions(argc, argv);
   WITE::gpu::init("Descent of Herld");
   WITE::winput::initInput();
-  WITE::sound::initSound();
+  WITE::wsound::initSound();
   LOG("Note: using save dir: ", getSaveDir());
   createOnionFull();
   createMainMenu();

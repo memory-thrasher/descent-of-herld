@@ -51,6 +51,8 @@ while read -d' ' var; do
     echo -n "#define expand_$var(T) constexpr auto $var = WITE::concat<T, "
     eval echo -n \$$var
     echo '>();'
+    echo -n "#define expand_raw_$var "
+    eval echo \$$var
 done <<<$allvars >>generated/onionHelper.hpp_new
 
 #avoid updating the file if nothing changed to save build time

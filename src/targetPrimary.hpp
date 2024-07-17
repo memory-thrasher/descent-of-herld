@@ -69,10 +69,10 @@ constexpr WITE::resourceSlot RS_primaryCamera_cameraData = {
 //!!append IDL_CP_L_gui CP_data.id
 
 constexpr WITE::resourceReference RR_L_primaryCamera_invariant[] = {
-	    { CP_transform.src, RS_S_primaryCamera_transform.id },
-	    { CP_transform.dst, RS_primaryCamera_transform.id },
-	    { CP_data.src, RS_S_primaryCamera_cameraData.id },
-	    { CP_data.dst, RS_primaryCamera_cameraData.id },
+	    // { CP_transform.src, RS_S_primaryCamera_transform.id },
+	    // { CP_transform.dst, RS_primaryCamera_transform.id },
+	    // { CP_data.src, RS_S_primaryCamera_cameraData.id },
+	    // { CP_data.dst, RS_primaryCamera_cameraData.id },
 	    { RC_ID_RP_gui_color, RS_primaryCamera_color_raw.id },
 	    { RC_ID_RP_gui_depth, RS_primaryCamera_depth.id },
 	  };

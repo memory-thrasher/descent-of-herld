@@ -14,6 +14,8 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
+#include <filesystem>
+
 void createMainMenu();
 void createNewGame(int slot);
 void dbUpdate();
