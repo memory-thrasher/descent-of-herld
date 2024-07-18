@@ -13,5 +13,44 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #include "mainMenu.hpp"
+#include "onionFull.hpp"
+#include "dbFull.hpp"
 
-//TODO
+struct transients_t {
+  onionFull_t::object_t<OL_primaryCamera.id>* camera;
+  onionFull_t::object_t<OL_guiRect.id>* rect_test;
+};
+
+transients_t* getTransients(uint64_t oid, void* dbv) {
+  auto db = reinterpret_cast<db_t*>(dbv);
+  mainMenu mm;
+  db->readCommitted<mainMenu>(oid, &mm);
+  return reinterpret_cast<transients_t*>(mm.transients);
+};
+
+void mainMenu::allocated(uint64_t oid, void* dbv) {
+  new(getTransients(oid, dbv))transients_t();
+};
+
+void mainMenu::freed(uint64_t oid, void* dbv) {
+  delete getTransients(oid, dbv);
+};
+
+void mainMenu::update(uint64_t oid, void* dbv) {
+  // getTransients(oid, dbv)
+};
+
+void mainMenu::spunUp(uint64_t oid, void* dbv) {
+  transients_t* transients = getTransients(oid, dbv);
+  auto on = getOnionFull();
+  transients->camera = on->create<OL_primaryCamera.id>();
+  transients->rect_test = on->create<OL_guiRect.id>();
+};
+
+void mainMenu::spunDown(uint64_t oid, void* dbv) {
+  transients_t* transients = getTransients(oid, dbv);
+  auto on = getOnionFull();
+  on->destroy(transients->camera);
+  on->destroy(transients->rect_test);
+};
+

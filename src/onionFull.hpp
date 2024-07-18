@@ -75,4 +75,6 @@ constexpr WITE::onionDescriptor onionFull_data = {
 
 typedef WITE::onion<onionFull_data> onionFull_t;
 
+onionFull_t* getOnionFull();
+
 #undef FILE_ID

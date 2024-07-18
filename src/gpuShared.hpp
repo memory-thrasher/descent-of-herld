@@ -35,13 +35,20 @@ struct cameraData_t {
   glm::vec4 geometry;//xy pixels
 };
 
-constexpr WITE::bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, 3, sizeof(cameraData_t)>::value,
+constexpr WITE::bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, FLID, sizeof(cameraData_t)>::value,
 	    BR_S_cameraData = WITE::withId(WITE::stagingRequirementsFor(BR_cameraData, 2), FLID);
 //!!append BR_all BR_cameraData
 //!!append BR_all BR_S_cameraData
 
-constexpr WITE::copyStep CP_transform = WITE::simpleCopy<FLID>::value,
-	    CP_data = WITE::simpleCopy<FLID>::value;
+constexpr WITE::copyStep CP_transform = {
+  .id = FLID,
+  .src = FLID,
+  .dst = FLID,
+}, CP_data {
+  .id = FLID,
+  .src = FLID,
+  .dst = FLID,
+};
 //!!append CS_all CP_transform
 //!!append CS_all CP_data
 

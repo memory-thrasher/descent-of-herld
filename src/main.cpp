@@ -14,8 +14,12 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <WITE/WITE.hpp>
 
-#include "onionWrapper.hpp"
 #include "dbWrapper.hpp"
+
+// implemented in onionFull.cpp
+void createOnionFull();
+void render();
+void onionDestroyAll();
 
 int main(int argc, char** argv) {
   WITE::configuration::setOptions(argc, argv);
@@ -33,6 +37,7 @@ int main(int argc, char** argv) {
     dbEndFrame();
     dbCycle();
   }
-  dbDestroy();
+  dbDestroyAll();
+  onionDestroyAll();
 }
 

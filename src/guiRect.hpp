@@ -72,8 +72,8 @@ constexpr WITE::graphicsShaderRequirements S_guiRect {
 //!!append S_RP_gui S_guiRect
 
 constexpr WITE::resourceReference RR_L_guiRect[] = {
-  // { CP_data.src, RS_S_guiRect.id },
-  // { CP_data.dst, RS_guiRect.id },
+  { CP_data.src, RS_S_guiRect.id },
+  { CP_data.dst, RS_guiRect.id },
   { RC_S_guiRect_source.id, RS_guiRect.id },
 };
 

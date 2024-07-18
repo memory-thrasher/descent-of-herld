@@ -14,5 +14,5 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-void createOnionFull();
-void render();
+
+

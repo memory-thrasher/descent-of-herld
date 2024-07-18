@@ -25,12 +25,18 @@ struct {
 } nextDb;
 
 void dbDestroy() {
+  if(!db) [[unlikely]] return;
   db->gracefulShutdown();
   if(dbIsTemp) db->deleteFiles();
   if(nextDb.db)
     db.reset(nextDb.db.release());
   else
     db.reset();
+};
+
+void dbDestroyAll() {
+  if(db) [[likely]] db.reset();
+  if(nextDb.db) [[likely]] nextDb.db.reset();
 };
 
 void dbCycle() {
@@ -67,23 +73,42 @@ void dbEndFrame() {
     db->endFrame();
 };
 
+std::filesystem::path getSaveDirImpl();
+
+std::filesystem::path getSaveDir() {
+  static std::filesystem::path ret;
+  if(ret.empty())
+    ret = getSaveDirImpl();
+  return ret;
+};
+
 #ifdef iswindows
 #include <windows.h>
 #include <shlobj.h>
-std::filesystem::path getSaveDir() {
-  char path[MAX_PATH];
+std::filesystem::path getSaveDirImpl() {
+  wchar_t*path;
   std::filesystem::path ret;
-  if(SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, path) == S_OK) //prefer the user home directory so the user can find them
-    ret = std::filesystem::path(path) / "Documents" / "My Games" / "Descent of Herld" / "saves";
-  if(ret.empty() && SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path) == S_OK) //fallback to the appdata dir
-    ret = std::filesystem::path(path) / "Descent of Herld" / "saves";
+  //Fallback: (temp?) std::filesystem::temp_directory_path
+  HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &path); //Preferred: (user's Documents)
+  if(SUCCEEDED(hr))
+    ret = std::filesystem::path(path) / "My Games" / "Descent of Herld" / "saves";
+  if(path)
+    free(path);
+  if(ret.empty()) {
+    hr = SHGetKnownFolderPath(FOLDERID_AppDataDocuments, 0, NULL, &path); //Alt: (appdata Documents)
+    if(SUCCEEDED(hr)) //Preferred: (user's Documents)
+      ret = std::filesystem::path(path) / "Descent of Herld" / "saves";
+  }
+  if(path)
+    free(path);
   if(ret.empty())
     ret = std::filesystem::temp_directory_path() / "Descent of Herld" / "saves";
   return ret;
 };
-#else
+
+#else //!iswindows
 #include <unistd.h>
-std::filesystem::path getSaveDir() {
+std::filesystem::path getSaveDirImpl() {
   std::filesystem::path ret;
   const char* path;
   path = getenv("XDG_DATA_HOME");
@@ -97,5 +122,5 @@ std::filesystem::path getSaveDir() {
   ret = ret / "Descent of Herld" / "saves";
   return ret;
 };
-#endif
+#endif //iswindows
 

@@ -21,7 +21,12 @@
 
 #define FILE_ID 1000000
 
-constexpr WITE::objectLayout OL_primaryCamera = { .id = FLID };
+constexpr uint64_t RC_ID_primaryCamera_present = FLID;
+
+constexpr WITE::objectLayout OL_primaryCamera = {
+	    .id = FLID,
+	    .windowConsumerId = RC_ID_primaryCamera_present,//this implicitly creates a window that presents the image here by RR
+	  };
 //!!append OL_all OL_primaryCamera
 
 constexpr uint64_t RC_ID_RP_gui_color = FLID,
@@ -45,9 +50,9 @@ constexpr WITE::resourceSlot RS_primaryCamera_cameraData = {
 	    .id = FLID,
 	    .requirementId = BR_S_singleTransform.id,
 	    .objectLayoutId = OL_primaryCamera.id,
-	  }, RS_primaryCamera_color_raw = {
+	  }, RS_primaryCamera_color = {
 	    .id = FLID,
-	    .requirementId = IR_intermediateColor.id,
+	    .requirementId = IR_color.id,
 	    .objectLayoutId = OL_primaryCamera.id,
 	    .resizeBehavior = WITE::resize_trackWindow_discard,
 	  }, RS_primaryCamera_depth = {
@@ -60,7 +65,7 @@ constexpr WITE::resourceSlot RS_primaryCamera_cameraData = {
 	    RS_S_primaryCamera_cameraData,
 	    RS_primaryCamera_transform,
 	    RS_S_primaryCamera_transform,
-	    RS_primaryCamera_color_raw,
+	    RS_primaryCamera_color,
 	    RS_primaryCamera_depth,
 	  };
 //!!append RS_all RS_primaryCamera_all
@@ -69,12 +74,13 @@ constexpr WITE::resourceSlot RS_primaryCamera_cameraData = {
 //!!append IDL_CP_L_gui CP_data.id
 
 constexpr WITE::resourceReference RR_L_primaryCamera_invariant[] = {
-	    // { CP_transform.src, RS_S_primaryCamera_transform.id },
-	    // { CP_transform.dst, RS_primaryCamera_transform.id },
-	    // { CP_data.src, RS_S_primaryCamera_cameraData.id },
-	    // { CP_data.dst, RS_primaryCamera_cameraData.id },
-	    { RC_ID_RP_gui_color, RS_primaryCamera_color_raw.id },
+	    { CP_transform.src, RS_S_primaryCamera_transform.id },
+	    { CP_transform.dst, RS_primaryCamera_transform.id },
+	    { CP_data.src, RS_S_primaryCamera_cameraData.id },
+	    { CP_data.dst, RS_primaryCamera_cameraData.id },
+	    { RC_ID_RP_gui_color, RS_primaryCamera_color.id },
 	    { RC_ID_RP_gui_depth, RS_primaryCamera_depth.id },
+	    { RC_ID_primaryCamera_present, RS_primaryCamera_color.id },
 	  };
 //!!append RR_L_primaryCamera RR_L_primaryCamera_invariant
 

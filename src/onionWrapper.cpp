@@ -28,3 +28,8 @@ void render() {
     onionFull->render();
 }
 
+void onionDestroyAll() {
+  if(onionFull)
+    onionFull.reset();
+};
+
