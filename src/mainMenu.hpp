@@ -17,15 +17,18 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <WITE/WITE.hpp>
 
-struct mainMenu {
-  static constexpr uint64_t typeId = 10001000;
-  static constexpr std::string dbFileId = "mainMenu";
-  static void update(uint64_t oid, void* db);
-  static void allocated(uint64_t oid, void* db);
-  static void freed(uint64_t oid, void* db);
-  static void spunUp(uint64_t oid, void* db);
-  static void spunDown(uint64_t oid, void* db);
-  void* transients;
-};
-//!!append DB_types mainMenu
+namespace doh {
 
+  struct mainMenu {
+    static constexpr uint64_t typeId = 10001000;
+    static constexpr std::string dbFileId = "mainMenu";
+    static void update(uint64_t oid, void* db);
+    static void allocated(uint64_t oid, void* db);
+    static void freed(uint64_t oid, void* db);
+    static void spunUp(uint64_t oid, void* db);
+    static void spunDown(uint64_t oid, void* db);
+    void* transients;
+  };
+  //!!append DB_types mainMenu
+
+}

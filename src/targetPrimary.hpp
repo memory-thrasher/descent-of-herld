@@ -21,68 +21,73 @@
 
 #define FILE_ID 1000000
 
-constexpr uint64_t RC_ID_primaryCamera_present = FLID;
+namespace doh {
 
-constexpr WITE::objectLayout OL_primaryCamera = {
-	    .id = FLID,
-	    .windowConsumerId = RC_ID_primaryCamera_present,//this implicitly creates a window that presents the image here by RR
-	  };
-//!!append OL_all OL_primaryCamera
+  constexpr uint64_t RC_ID_primaryCamera_present = FLID;
 
-constexpr uint64_t RC_ID_RP_gui_color = FLID,
-	    RC_ID_RP_gui_depth = FLID;
+  constexpr WITE::objectLayout OL_primaryCamera = {
+    .id = FLID,
+    .windowConsumerId = RC_ID_primaryCamera_present,//this implicitly creates a window that presents the image here by RR
+  };
+  //!!append OL_all OL_primaryCamera
 
-constexpr WITE::imageRequirements IR_color = WITE::simpleColor<gpuId, FLID>::value;
+  constexpr uint64_t RC_ID_RP_gui_color = FLID,
+	      RC_ID_RP_gui_depth = FLID;
 
-constexpr WITE::resourceSlot RS_primaryCamera_cameraData = {
-	    .id = FLID,
-	    .requirementId = BR_cameraData.id,
-	    .objectLayoutId = OL_primaryCamera.id,
-	  }, RS_S_primaryCamera_cameraData = {
-	    .id = FLID,
-	    .requirementId = BR_S_cameraData.id,
-	    .objectLayoutId = OL_primaryCamera.id,
-	  }, RS_primaryCamera_transform = {
-	    .id = FLID,
-	    .requirementId = BR_singleTransform.id,
-	    .objectLayoutId = OL_primaryCamera.id,
-	  }, RS_S_primaryCamera_transform = {
-	    .id = FLID,
-	    .requirementId = BR_S_singleTransform.id,
-	    .objectLayoutId = OL_primaryCamera.id,
-	  }, RS_primaryCamera_color = {
-	    .id = FLID,
-	    .requirementId = IR_color.id,
-	    .objectLayoutId = OL_primaryCamera.id,
-	    .resizeBehavior = WITE::resize_trackWindow_discard,
-	  }, RS_primaryCamera_depth = {
-	    .id = FLID,
-	    .requirementId = IR_depth.id,
-	    .objectLayoutId = OL_primaryCamera.id,
-	    .resizeBehavior = WITE::resize_trackWindow_discard,
-	  }, RS_primaryCamera_all[] = {
-	    RS_primaryCamera_cameraData,
-	    RS_S_primaryCamera_cameraData,
-	    RS_primaryCamera_transform,
-	    RS_S_primaryCamera_transform,
-	    RS_primaryCamera_color,
-	    RS_primaryCamera_depth,
-	  };
-//!!append RS_all RS_primaryCamera_all
+  constexpr WITE::imageRequirements IR_color = WITE::simpleColor<gpuId, FLID>::value;
+  //!!append IR_all IR_color
 
-//!!append IDL_CP_L_gui CP_transform.id
-//!!append IDL_CP_L_gui CP_data.id
+  constexpr WITE::resourceSlot RS_primaryCamera_cameraData = {
+    .id = FLID,
+    .requirementId = BR_cameraData.id,
+    .objectLayoutId = OL_primaryCamera.id,
+  }, RS_S_primaryCamera_cameraData = {
+    .id = FLID,
+    .requirementId = BR_S_cameraData.id,
+    .objectLayoutId = OL_primaryCamera.id,
+  }, RS_primaryCamera_transform = {
+    .id = FLID,
+    .requirementId = BR_singleTransform.id,
+    .objectLayoutId = OL_primaryCamera.id,
+  }, RS_S_primaryCamera_transform = {
+    .id = FLID,
+    .requirementId = BR_S_singleTransform.id,
+    .objectLayoutId = OL_primaryCamera.id,
+  }, RS_primaryCamera_color = {
+    .id = FLID,
+    .requirementId = IR_color.id,
+    .objectLayoutId = OL_primaryCamera.id,
+    .resizeBehavior = WITE::resize_trackWindow_discard,
+  }, RS_primaryCamera_depth = {
+    .id = FLID,
+    .requirementId = IR_depth.id,
+    .objectLayoutId = OL_primaryCamera.id,
+    .resizeBehavior = WITE::resize_trackWindow_discard,
+  }, RS_primaryCamera_all[] = {
+    RS_primaryCamera_cameraData,
+    RS_S_primaryCamera_cameraData,
+    RS_primaryCamera_transform,
+    RS_S_primaryCamera_transform,
+    RS_primaryCamera_color,
+    RS_primaryCamera_depth,
+  };
+  //!!append RS_all RS_primaryCamera_all
 
-constexpr WITE::resourceReference RR_L_primaryCamera_invariant[] = {
-	    { CP_transform.src, RS_S_primaryCamera_transform.id },
-	    { CP_transform.dst, RS_primaryCamera_transform.id },
-	    { CP_data.src, RS_S_primaryCamera_cameraData.id },
-	    { CP_data.dst, RS_primaryCamera_cameraData.id },
-	    { RC_ID_RP_gui_color, RS_primaryCamera_color.id },
-	    { RC_ID_RP_gui_depth, RS_primaryCamera_depth.id },
-	    { RC_ID_primaryCamera_present, RS_primaryCamera_color.id },
-	  };
-//!!append RR_L_primaryCamera RR_L_primaryCamera_invariant
+  //!!append IDL_CP_L_gui CP_transform.id
+  //!!append IDL_CP_L_gui CP_data.id
+
+  constexpr WITE::resourceReference RR_L_primaryCamera_invariant[] = {
+    { CP_transform.src, RS_S_primaryCamera_transform.id },
+    { CP_transform.dst, RS_primaryCamera_transform.id },
+    { CP_data.src, RS_S_primaryCamera_cameraData.id },
+    { CP_data.dst, RS_primaryCamera_cameraData.id },
+    { RC_ID_RP_gui_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_gui_depth, RS_primaryCamera_depth.id },
+    { RC_ID_primaryCamera_present, RS_primaryCamera_color.id },
+  };
+  //!!append RR_L_primaryCamera RR_L_primaryCamera_invariant
+
+}
 
 #undef FILE_ID
 

@@ -15,11 +15,9 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include <WITE/WITE.hpp>
 
 #include "dbWrapper.hpp"
+#include "onionWrapper.hpp"
 
-// implemented in onionFull.cpp
-void createOnionFull();
-void render();
-void onionDestroyAll();
+using namespace doh;
 
 int main(int argc, char** argv) {
   WITE::configuration::setOptions(argc, argv);

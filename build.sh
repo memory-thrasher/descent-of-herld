@@ -29,7 +29,7 @@ if [ -z "${VK_SDK_PATH}" ]; then
     VK_SDK_PATH="${VULKAN_SDK}"
 fi
 if [ -z "$VK_INCLUDE" -a -n "$VK_SDK_PATH" ]; then
-    VK_INCLUDE="-I${VK_SDK_PATH}/include"
+    export VK_INCLUDE="-I${VK_SDK_PATH}/include"
 fi
 if [ -n "$vk_lib_path" ]; then
     PATH="$vk_lib_path:$PATH"
@@ -71,6 +71,8 @@ done <<< "$ALLDSTFILES"
 ALLDSTFILES=
 
 generator/onionHelper.sh || exit 1
+
+tests/validateOnion.sh &
 
 #now the actual c++ code
 while IFS= read -d '' SRCFILE; do

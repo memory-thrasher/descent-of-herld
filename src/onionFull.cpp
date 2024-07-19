@@ -14,26 +14,29 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <memory>
 
-#include "onionWrapper.hpp"
 #include "onionFull.hpp"
 
-std::unique_ptr<onionFull_t> onionFull;
+namespace doh {
 
-void createOnionFull() {
-  onionFull = std::make_unique<onionFull_t>();
+  std::unique_ptr<onionFull_t> onionFull;
+
+  void createOnionFull() {
+    onionFull = std::make_unique<onionFull_t>();
+  }
+
+  onionFull_t* getOnionFull() {
+    return onionFull.get();
+  };
+
+  void render() {
+    if(onionFull)
+      onionFull->render();
+  }
+
+  void onionDestroyAll() {
+    if(onionFull)
+      onionFull.reset();
+  };
+
 }
-
-onionFull_t* getOnionFull() {
-  return onionFull.get();
-};
-
-void render() {
-  if(onionFull)
-    onionFull->render();
-}
-
-void onionDestroyAll() {
-  if(onionFull)
-    onionFull.reset();
-};
 

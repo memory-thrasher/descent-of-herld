@@ -17,64 +17,68 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #define FILE_ID 1000000000
 
-expand_RR_L_primaryCamera(WITE::resourceReference);
+namespace doh {
 
-constexpr WITE::targetLayout TL_primaryCamera = {
-  .id = FLID,
-  .objectLayoutId = OL_primaryCamera.id,
-  .resources = RR_L_primaryCamera,
-};
-//!!append TL_all TL_primaryCamera
+  expand_RR_L_primaryCamera(WITE::resourceReference);
 
-expand_S_RP_gui(WITE::graphicsShaderRequirements);
+  constexpr WITE::targetLayout TL_primaryCamera = {
+    .id = FLID,
+    .objectLayoutId = OL_primaryCamera.id,
+    .resources = RR_L_primaryCamera,
+  };
+  //!!append TL_all TL_primaryCamera
 
-constexpr WITE::renderPassRequirements RP_gui = {
-  .id = FLID,
-  .depth = RC_ID_RP_gui_depth,
-  .color = RC_ID_RP_gui_color,
-  .clearDepth = true,
-  .clearColor = true,
-  .shaders = S_RP_gui,
-};
-//!!append RPR_all RP_gui
+  expand_S_RP_gui(WITE::graphicsShaderRequirements);
 
-expand_IDL_CP_L_gui(uint64_t);
+  constexpr WITE::renderPassRequirements RP_gui = {
+    .id = FLID,
+    .depth = RC_ID_RP_gui_depth,
+    .color = RC_ID_RP_gui_color,
+    .clearDepth = true,
+    .clearColor = true,
+    .shaders = S_RP_gui,
+  };
+  //!!append RPR_all RP_gui
 
-constexpr WITE::layerRequirements L_gui = {
-  .copies = IDL_CP_L_gui,
-  .renders = RP_gui.id,
-};
-//!!append LR_all L_gui
+  expand_IDL_CP_L_gui(uint64_t);
 
-expand_IR_all(WITE::imageRequirements);
-expand_BR_all(WITE::bufferRequirements);
-expand_RS_all(WITE::resourceSlot);
-//expand_CSR_all(WITE::computeShaderRequirements);
-expand_RPR_all(WITE::renderPassRequirements);
-//expand_CL_all(WITE::clearStep);
-expand_CS_all(WITE::copyStep);
-expand_LR_all(WITE::layerRequirements);
-expand_OL_all(WITE::objectLayout);
-expand_TL_all(WITE::targetLayout);
-expand_SL_all(WITE::sourceLayout);
+  constexpr WITE::layerRequirements L_gui = {
+    .copies = IDL_CP_L_gui,
+    .renders = RP_gui.id,
+  };
+  //!!append LR_all L_gui
 
-constexpr WITE::onionDescriptor onionFull_data = {
-  .IRS = IR_all,
-  .BRS = BR_all,
-  .RSS = RS_all,
-  // .CSRS = CSR_all,
-  .RPRS = RPR_all,
-  // .CLS = CL_all,
-  .CSS = CS_all,
-  .LRS = LR_all,
-  .OLS = OL_all,
-  .TLS = TL_all,
-  .SLS = SL_all,
-  .GPUID = gpuId,
-};
+  expand_IR_all(WITE::imageRequirements);
+  expand_BR_all(WITE::bufferRequirements);
+  expand_RS_all(WITE::resourceSlot);
+  //expand_CSR_all(WITE::computeShaderRequirements);
+  expand_RPR_all(WITE::renderPassRequirements);
+  //expand_CL_all(WITE::clearStep);
+  expand_CS_all(WITE::copyStep);
+  expand_LR_all(WITE::layerRequirements);
+  expand_OL_all(WITE::objectLayout);
+  expand_TL_all(WITE::targetLayout);
+  expand_SL_all(WITE::sourceLayout);
 
-typedef WITE::onion<onionFull_data> onionFull_t;
+  constexpr WITE::onionDescriptor onionFull_data = {
+    .IRS = IR_all,
+    .BRS = BR_all,
+    .RSS = RS_all,
+    // .CSRS = CSR_all,
+    .RPRS = RPR_all,
+    // .CLS = CL_all,
+    .CSS = CS_all,
+    .LRS = LR_all,
+    .OLS = OL_all,
+    .TLS = TL_all,
+    .SLS = SL_all,
+    .GPUID = gpuId,
+  };
 
-onionFull_t* getOnionFull();
+  typedef WITE::onion<onionFull_data> onionFull_t;
+
+  onionFull_t* getOnionFull();
+
+}
 
 #undef FILE_ID

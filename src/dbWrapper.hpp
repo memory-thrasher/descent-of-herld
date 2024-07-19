@@ -16,13 +16,16 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <filesystem>
 
-void createMainMenu();
-void createNewGame(int slot);
-void dbUpdate();
-void dbEndFrame();
-void dbCycle();//destroys the current db only if a new one is waiting (from a prior create or load call).
-void dbDestroy();//not thread safe, only call when the db is not in use
-void dbDestroyAll();
-void dbLoadGame(int slot);
-std::filesystem::path getSaveDir();
+namespace doh {
 
+  void createMainMenu();
+  void createNewGame(int slot);
+  void dbUpdate();
+  void dbEndFrame();
+  void dbCycle();//destroys the current db only if a new one is waiting (from a prior create or load call).
+  void dbDestroy();//not thread safe, only call when the db is not in use
+  void dbDestroyAll();
+  void dbLoadGame(int slot);
+  std::filesystem::path getSaveDir();
+
+}

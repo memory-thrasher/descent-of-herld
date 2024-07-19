@@ -21,53 +21,57 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #define FLID (FILE_ID + __LINE__)
 
-//give each file a unique id, and the above macro will generate a unique id per-line (assuming the file ids are diverse enough)
+  //give each file a unique id, and the above macro will generate a unique id per-line (assuming the file ids are diverse enough)
 #define FILE_ID 0
 
-constexpr uint64_t gpuId = 0;
+namespace doh {
 
-constexpr WITE::bufferRequirements BR_singleTransform = WITE::singleTransform<gpuId, FLID>::value,
-	    BR_S_singleTransform = WITE::withId(WITE::stagingRequirementsFor(BR_singleTransform, 2), FLID);
-//!!append BR_all BR_singleTransform
-//!!append BR_all BR_S_singleTransform
+  constexpr uint64_t gpuId = 0;
 
-struct cameraData_t {
-  glm::vec4 geometry;//xy pixels
-};
+  constexpr WITE::bufferRequirements BR_singleTransform = WITE::singleTransform<gpuId, FLID>::value,
+	      BR_S_singleTransform = WITE::withId(WITE::stagingRequirementsFor(BR_singleTransform, 2), FLID);
+  //!!append BR_all BR_singleTransform
+  //!!append BR_all BR_S_singleTransform
 
-constexpr WITE::bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, FLID, sizeof(cameraData_t)>::value,
-	    BR_S_cameraData = WITE::withId(WITE::stagingRequirementsFor(BR_cameraData, 2), FLID);
-//!!append BR_all BR_cameraData
-//!!append BR_all BR_S_cameraData
+  struct cameraData_t {
+    glm::vec4 geometry;//xy pixels
+  };
 
-constexpr WITE::copyStep CP_transform = {
-  .id = FLID,
-  .src = FLID,
-  .dst = FLID,
-}, CP_data {
-  .id = FLID,
-  .src = FLID,
-  .dst = FLID,
-};
-//!!append CS_all CP_transform
-//!!append CS_all CP_data
+  constexpr WITE::bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, FLID, sizeof(cameraData_t)>::value,
+	      BR_S_cameraData = WITE::withId(WITE::stagingRequirementsFor(BR_cameraData, 2), FLID);
+  //!!append BR_all BR_cameraData
+  //!!append BR_all BR_S_cameraData
 
-constexpr uint64_t RC_ID_RP_1_color = FLID,
-	    RC_ID_RP_1_depth = FLID,
-	    RC_ID_RP_2_color = FLID,
-	    RC_ID_RP_2_depth = FLID,
-	    RC_ID_RP_3_color = FLID,
-	    RC_ID_RP_3_depth = FLID,
-	    RC_ID_RP_4_color = FLID,
-	    RC_ID_RP_4_depth = FLID,
-	    RC_ID_RP_5_color = FLID,
-	    RC_ID_RP_5_depth = FLID;
+  constexpr WITE::copyStep CP_transform = {
+    .id = FLID,
+    .src = FLID,
+    .dst = FLID,
+  }, CP_data {
+    .id = FLID,
+    .src = FLID,
+    .dst = FLID,
+  };
+  //!!append CS_all CP_transform
+  //!!append CS_all CP_data
 
-//this IR is the final target of reflection cube maps, getting resambled by future renders, and also the pre-bloom attachment for the screen target, which is resambled by the bloom shader.
-constexpr WITE::imageRequirements IR_intermediateColor = WITE::intermediateColor<gpuId, FLID, WITE::Format::RGBA32float>::value;
-//!!append IR_all IR_intermediateColor
+  constexpr uint64_t RC_ID_RP_1_color = FLID,
+	      RC_ID_RP_1_depth = FLID,
+	      RC_ID_RP_2_color = FLID,
+	      RC_ID_RP_2_depth = FLID,
+	      RC_ID_RP_3_color = FLID,
+	      RC_ID_RP_3_depth = FLID,
+	      RC_ID_RP_4_color = FLID,
+	      RC_ID_RP_4_depth = FLID,
+	      RC_ID_RP_5_color = FLID,
+	      RC_ID_RP_5_depth = FLID;
 
-constexpr WITE::imageRequirements IR_depth = WITE::simpleDepth<gpuId, FLID>::value;//depth are pretty much all the same
-//!!append IR_all IR_depth
+  //this IR is the final target of reflection cube maps, getting resambled by future renders, and also the pre-bloom attachment for the screen target, which is resambled by the bloom shader.
+  constexpr WITE::imageRequirements IR_intermediateColor = WITE::intermediateColor<gpuId, FLID, WITE::Format::RGBA32float>::value;
+  //!!append IR_all IR_intermediateColor
+
+  constexpr WITE::imageRequirements IR_depth = WITE::simpleDepth<gpuId, FLID>::value;//depth are pretty much all the same
+  //!!append IR_all IR_depth
 
 #undef FILE_ID
+
+}
