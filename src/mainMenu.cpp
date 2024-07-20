@@ -14,12 +14,15 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include "mainMenu.hpp"
 #include "dbFull.hpp"
+#include "cameraStuff.hpp"
+#include "../generated/targetPrimary_stub.hpp"
+#include "../generated/guiRect_stub.hpp"
 
 namespace doh {
 
   struct transients_t {
-    onionFull_t::object_t<OL_primaryCamera.id>* camera;
-    onionFull_t::object_t<OL_guiRect.id>* rect_test;
+    targetPrimary camera;
+    guiRect rect_test;
   };
 
   transients_t* getTransients(uint64_t oid, void* dbv) {
@@ -38,21 +41,24 @@ namespace doh {
   };
 
   void mainMenu::update(uint64_t oid, void* dbv) {
-    // getTransients(oid, dbv)
+    transients_t* transients = getTransients(oid, dbv);
+    constexpr guiRect_t testRectData { { -0.5f, -0.5f, 0.5f, 0.5f }, {}, { 0, 1, 0, 5 }, { 1, 1, 1, 1 } };
+    transients->rect_test.writeData(testRectData);
+    auto size = transients->camera.getWindow().getVecSize();
+    cameraData_t cameraData { { size, 0, 0 } };
+    transients->camera.writeCameraData(cameraData);
   };
 
   void mainMenu::spunUp(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    auto on = getOnionFull();
-    transients->camera = on->create<OL_primaryCamera.id>();
-    transients->rect_test = on->create<OL_guiRect.id>();
+    transients->camera = targetPrimary::create();
+    transients->rect_test = guiRect::create();
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    auto on = getOnionFull();
-    on->destroy(transients->camera);
-    on->destroy(transients->rect_test);
+    transients->camera.destroy();
+    transients->rect_test.destroy();
   };
 
 }

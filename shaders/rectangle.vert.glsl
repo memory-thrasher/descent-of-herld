@@ -13,6 +13,7 @@
 */
 
 #version 450
+#extension GL_ARB_separate_shader_objects : enable
 
 layout(std140, set = 0, binding = 0) uniform data_t {
   vec4 extents;//LTRB snorm screen
@@ -25,7 +26,8 @@ layout(std140, set = 1, binding = 0) uniform cameraData_t {
 layout(location = 0) out vec2 screenPxlPos;
 
 void main() {
-  const vec2 unorm = vec2(gl_VertexIndex & 1, gl_VertexIndex > 1 && gl_VertexIndex < 5) *
+  const int vi = gl_VertexIndex;
+  const vec2 unorm = vec2(vi & 1, vi > 1 && vi < 5) *
     (rectData.extents.xy - rectData.extents.zw) + rectData.extents.xy;//[0-1]
   gl_Position = vec4(unorm * 2 - vec2(1, 1), 0, 1);//[-1-1]
   screenPxlPos = unorm * cameraData.geometry.xy;

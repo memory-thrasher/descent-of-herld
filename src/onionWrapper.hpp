@@ -1,3 +1,5 @@
+#include "../generated/allStubs.hpp"
+
 namespace doh {
 
   void createOnionFull();

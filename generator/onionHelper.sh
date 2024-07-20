@@ -19,25 +19,49 @@
 
 #note: working directory is project root (executed from ../build.sh)
 allvars=
+echo > generated/allStubs.hpp_new
+echo '#include "allStubs.hpp"' > generated/allImpl.hpp_new
 while IFS= read -d $'\0' file; do
-    # echo "//note: begin $file"
+    objId=
+    fileRaw=$(basename "${file%.*}")
+    genStub="generated/${fileRaw}_stub.hpp"
+    genImpl="generated/${fileRaw}_impl.hpp"
+    genStubNew="generated/${fileRaw}_stub.hpp_new"
+    genImplNew="generated/${fileRaw}_impl.hpp_new"
+    echo "#include \"../${file}\"" > $genStubNew
+    echo 'namespace doh {' >> $genStubNew
+    echo "  struct ${fileRaw} {" >> $genStubNew
+    echo "    void* onionObj;" >> $genStubNew
+    echo 'namespace doh {' > $genImplNew
     while read line; do
-	# echo "processing: $line"
 	if [[ "$line" =~ \!\!onion\ (.*?) ]]; then
 	    onion="${BASH_REMATCH[1]}"
 	    #note: this doesn't do anything (yet) as I have only one onion
 	elif [[ "$line" =~ \!\!append\ (.*?)\ (.*?) ]]; then
 	    listName="${BASH_REMATCH[1]}"
 	    listNewVar="${BASH_REMATCH[2]}"
-	    # echo "//$listName += $listNewVar"
 	    if ! echo "$allvars" | grep -Fwq "$listName"; then
 		allvars="$listName $allvars"
 		eval "$listName='$listNewVar'"
 	    else
 		eval "$listName=\"\$$listName, $listNewVar\""
 	    fi
-	    # echo -n "//$listName="
-	    # eval echo \$$listName
+	elif [[ "$line" =~ \!\!genObj\ (.*?) ]]; then
+	    objId="${BASH_REMATCH[1]}.id" #actual factory generated later
+	    echo "#define castOnionObj reinterpret_cast<onionFull_t::object_t<$objId>*>(onionObj)" >> $genImplNew
+	elif [[ "$line" =~ \!\!genObjGetWindow ]]; then
+	    echo "    WITE::window& getWindow();" >> $genStubNew
+	    echo "  WITE::window& ${fileRaw}::getWindow() {" >> $genImplNew
+	    echo "    return castOnionObj->getWindow();" >> $genImplNew
+	    echo "  };" >> $genImplNew
+	elif [[ "$line" =~ \!\!genObjWrite\ (.*?)\ (.*?)\ (.*?) ]]; then
+	    rs="${BASH_REMATCH[1]}"
+	    fnName="${BASH_REMATCH[2]}"
+	    dataName="${BASH_REMATCH[3]}"
+	    echo "    void ${fnName}(const ${dataName}& data);" >> $genStubNew
+	    echo "  void ${fileRaw}::${fnName}(const ${dataName}& data) {" >> $genImplNew
+	    echo "    castOnionObj->template write<${rs}.id>(data);" >> $genImplNew
+	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!include\ me ]]; then
 	    echo "#include \"../$file\""
 	else
@@ -45,6 +69,34 @@ while IFS= read -d $'\0' file; do
 	    exit 1;
 	fi
     done < <(grep -ho '!!.*' "$file")
+    if [ -n "$objId" ]; then
+	echo "    void destroy();" >> $genStubNew
+	echo "    static ${fileRaw} create();" >> $genStubNew
+	echo '  };' >> $genStubNew #end struct
+	echo '}' >> $genStubNew #end namespace
+	echo "  void ${fileRaw}::destroy() {" >> $genImplNew
+	echo "    getOnionFull()->destroy(castOnionObj);" >> $genImplNew
+	echo '  };' >> $genImplNew
+	echo "  ${fileRaw} ${fileRaw}::create() { //static" >> $genImplNew
+	echo "    return ${fileRaw} { reinterpret_cast<void*>(getOnionFull()->template create<${objId}>()) };" >> $genImplNew
+	echo '  };' >> $genImplNew
+	echo '}' >> $genImplNew #end namespace
+	echo "#undef castOnionObj" >> $genImplNew
+	if ! test -f $genStub || diff -q $genStub $genStubNew | grep -q .; then
+	    mv $genStubNew $genStub
+	else
+	    rm $genStubNew
+	fi
+	if ! test -f $genImpl || diff -q $genImpl $genImplNew | grep -q .; then
+	    mv $genImplNew $genImpl
+	else
+	    rm $genImplNew
+	fi
+	echo "#include \"../$genStub\"" >> generated/allStubs.hpp_new
+	echo "#include \"../$genImpl\"" >> generated/allImpl.hpp_new
+    else
+	rm $genStubNew $genImplNew
+    fi
 done < <(find src -type f -not -iname '*~' -print0) >generated/onionHelper.hpp_new
 
 while read -d' ' var; do
@@ -56,10 +108,22 @@ while read -d' ' var; do
 done <<<$allvars >>generated/onionHelper.hpp_new
 
 #avoid updating the file if nothing changed to save build time
-if diff -q generated/onionHelper.hpp_new generated/onionHelper.hpp | grep -q .; then
+if ! test -f generated/onionHelper.hpp || diff -q generated/onionHelper.hpp_new generated/onionHelper.hpp | grep -q .; then
     mv generated/onionHelper.hpp_new generated/onionHelper.hpp
 else
     rm generated/onionHelper.hpp_new
+fi
+
+if ! test -f generated/allImpl.hpp || diff -q generated/allImpl.hpp_new generated/allImpl.hpp | grep -q .; then
+    mv generated/allImpl.hpp_new generated/allImpl.hpp
+else
+    rm generated/allImpl.hpp_new
+fi
+
+if ! test -f generated/allStubs.hpp || diff -q generated/allStubs.hpp_new generated/allStubs.hpp | grep -q .; then
+    mv generated/allStubs.hpp_new generated/allStubs.hpp
+else
+    rm generated/allStubs.hpp_new
 fi
 
 

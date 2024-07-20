@@ -24,6 +24,7 @@ namespace doh {
 
   constexpr WITE::objectLayout OL_guiRect = { .id = FLID };
   //!!append OL_all OL_guiRect
+  //!!genObj OL_guiRect
 
   struct guiRect_t {
     glm::vec4 extents;//LTRB snorm screen
@@ -50,6 +51,7 @@ namespace doh {
     RS_S_guiRect,
   };
   //!!append RS_all RS_guiRect_all
+  //!!genObjWrite RS_S_guiRect writeData guiRect_t
 
   constexpr WITE::resourceConsumer RC_S_guiRect_source = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment>::value;
 
@@ -76,7 +78,7 @@ namespace doh {
   constexpr WITE::resourceReference RR_L_guiRect[] = {
     { CP_data.src, RS_S_guiRect.id },
     { CP_data.dst, RS_guiRect.id },
-    // { RC_S_guiRect_source.id, RS_guiRect.id },
+    { RC_S_guiRect_source.id, RS_guiRect.id },
   };
 
   constexpr WITE::sourceLayout SL_guiRect = {

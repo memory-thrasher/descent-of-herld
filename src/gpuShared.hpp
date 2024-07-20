@@ -16,6 +16,8 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <WITE/WITE.hpp>
 
+#include "cameraStuff.hpp"
+
 //!!include me
 //!!onion all
 
@@ -32,10 +34,6 @@ namespace doh {
 	      BR_S_singleTransform = WITE::withId(WITE::stagingRequirementsFor(BR_singleTransform, 2), FLID);
   //!!append BR_all BR_singleTransform
   //!!append BR_all BR_S_singleTransform
-
-  struct cameraData_t {
-    glm::vec4 geometry;//xy pixels
-  };
 
   constexpr WITE::bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, FLID, sizeof(cameraData_t)>::value,
 	      BR_S_cameraData = WITE::withId(WITE::stagingRequirementsFor(BR_cameraData, 2), FLID);

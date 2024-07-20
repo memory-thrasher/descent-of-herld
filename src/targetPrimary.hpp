@@ -30,6 +30,8 @@ namespace doh {
     .windowConsumerId = RC_ID_primaryCamera_present,//this implicitly creates a window that presents the image here by RR
   };
   //!!append OL_all OL_primaryCamera
+  //!!genObj OL_primaryCamera
+  //!!genObjGetWindow
 
   constexpr uint64_t RC_ID_RP_gui_color = FLID,
 	      RC_ID_RP_gui_depth = FLID;
@@ -72,6 +74,8 @@ namespace doh {
     RS_primaryCamera_depth,
   };
   //!!append RS_all RS_primaryCamera_all
+  //!!genObjWrite RS_S_primaryCamera_cameraData writeCameraData cameraData_t
+  //!!genObjWrite RS_S_primaryCamera_transform writeCameraTransform glm::mat4
 
   //!!append IDL_CP_L_gui CP_transform.id
   //!!append IDL_CP_L_gui CP_data.id

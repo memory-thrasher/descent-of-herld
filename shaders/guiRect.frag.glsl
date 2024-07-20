@@ -13,6 +13,7 @@
 */
 
 #version 450
+#extension GL_ARB_separate_shader_objects : enable
 
 layout(std140, set = 0, binding = 0) uniform data_t {
   vec4 extents;//LTRB snorm screen
@@ -34,7 +35,7 @@ void main() {
   const float borderSize = rectData.borderColor.w;
   bool onBorder = borderSize > 0 && (pxlWithinRect.x < borderSize || pxlWithinRect.y < borderSize || pxlWithinRect.x > pxlWithinRect.w - borderSize || pxlWithinRect.y > pxlWithinRect.z - borderSize);
   bool inCorner = false;
-  //manhattan distance from each corner via scaling transform
+  // manhattan distance from each corner via scaling transform
   if(rectData.clip.x * rectData.clip.y * borderSize > 0) {//ul
     const vec2 rv = pxlWithinRect.xy;
     const vec2 dv = rv / rectData.clip.xy;
@@ -67,5 +68,6 @@ void main() {
   else if(onBorder) outColor = vec4(rectData.borderColor.rgb, 1);
   else if(rectData.fillColor.a > 0) outColor = vec4(rectData.fillColor.rgb, 1);
   else discard;
+  outColor = vec4(1, 1, 1, 1);
 }
 
