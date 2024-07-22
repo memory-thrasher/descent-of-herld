@@ -68,6 +68,5 @@ void main() {
   else if(onBorder) outColor = vec4(rectData.borderColor.rgb, 1);
   else if(rectData.fillColor.a > 0) outColor = vec4(rectData.fillColor.rgb, 1);
   else discard;
-  outColor = vec4(1, 1, 1, 1);
 }
 

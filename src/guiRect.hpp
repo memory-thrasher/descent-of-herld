@@ -31,7 +31,7 @@ namespace doh {
     glm::vec4 clip;//LTRB in pixels, distance to truncate corners. One possible value would result in an octagon.
     glm::vec4 borderColor;//a=thickness pxls
     glm::vec4 fillColor;//a=0|1
-  };//no staging, set with out of band when creating. Rectangles should not move
+  };
 
   constexpr WITE::bufferRequirements BR_guiRect = WITE::simpleUB<gpuId, FLID, sizeof(guiRect_t)>::value,
 	      BR_S_guiRect = WITE::withId(WITE::stagingRequirementsFor(BR_guiRect, 2), FLID);

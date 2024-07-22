@@ -28,18 +28,24 @@ namespace doh {
   transients_t* getTransients(uint64_t oid, void* dbv) {
     auto db = reinterpret_cast<db_t*>(dbv);
     mainMenu mm;
-    db->readCommitted<mainMenu>(oid, &mm);
+    db->readCurrent<mainMenu>(oid, &mm);//current because old pointers don't help
     return reinterpret_cast<transients_t*>(mm.transients);
   };
 
   void mainMenu::allocated(uint64_t oid, void* dbv) {
-    new(getTransients(oid, dbv))transients_t();
+    auto db = reinterpret_cast<db_t*>(dbv);
+    mainMenu mm;
+    WITE::scopeLock lock(db->mutexFor<mainMenu>(oid));//note: not necessary in allocation
+    db->read<mainMenu>(oid, 0, &mm);
+    mm.transients = reinterpret_cast<void*>(new transients_t());
+    db->write<mainMenu>(oid, &mm);
   };
 
   void mainMenu::freed(uint64_t oid, void* dbv) {
     delete getTransients(oid, dbv);
   };
 
+  static_assert(WITE::has_update<mainMenu>::value);
   void mainMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     constexpr guiRect_t testRectData { { -0.5f, -0.5f, 0.5f, 0.5f }, {}, { 0, 1, 0, 5 }, { 1, 1, 1, 1 } };

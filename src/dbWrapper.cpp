@@ -30,10 +30,7 @@ namespace doh {
     if(!db) [[unlikely]] return;
     db->gracefulShutdown();
     if(dbIsTemp) db->deleteFiles();
-    if(nextDb.db)
-      db.reset(nextDb.db.release());
-    else
-      db.reset();
+    db.reset();
   };
 
   void dbDestroyAll() {
@@ -43,7 +40,11 @@ namespace doh {
 
   void dbCycle() {
     if(!nextDb.db) [[likely]] return;
-    if(db) [[likely]] dbDestroy();
+    if(db) [[likely]] {
+      db->gracefulShutdown();
+      if(dbIsTemp) [[unlikely]] db->deleteFiles();
+    }
+    db.reset(nextDb.db.release());
     dbIsTemp = nextDb.isTemp;
   };
 

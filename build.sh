@@ -54,7 +54,7 @@ while IFS= read -d '' SRCFILE; do
 	rm "${DSTFILE}" 2>/dev/null
 	(
 	    #echo building
-	    $WORKNICE $GLCOMPILER -V --target-env vulkan1.3 -gVS "${SRCFILE}" -o "${DSTFILE}" --vn "${VARNAME}" || rm "${DSTFILE}" 2>/dev/null
+	    $WORKNICE $GLCOMPILER -V --target-env vulkan1.3 -Os "${SRCFILE}" -o "${DSTFILE}" --vn "${VARNAME}" || rm "${DSTFILE}" 2>/dev/null
 	) 2>&1 | grep -v "^${SRCFILE}$" &
     fi
 done < <(find shaders -iname '*.glsl' -type f -print0)
@@ -94,7 +94,7 @@ while IFS= read -d '' SRCFILE; do
 		fi
 	    done <"${DEPENDENCIES}" | grep -Fm1 rebuild || exit 0;
 	else
-	    $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" -E -o /dev/null -w -ferror-limit=1 -H "${SRCFILE}" 2>&1 | grep '^\.' | grep -o '[^[:space:]]*$' | sort -u >"${DEPENDENCIES}" &
+	    $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" -E -o /dev/null -w -ferror-limit=1 -H "${SRCFILE}" --std=c++20 -fPIC -fdata-sections -ffunction-sections -fdata-sections -DDEBUG -g $BOTHOPTS 2>&1 | grep '^\.' | grep -o '[^[:space:]]*$' | sort -u >"${DEPENDENCIES}" &
 	fi
 	#use dd as a buffer so the output from parallel jobs collides less
 	(if ! $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" --std=c++20 -fPIC -fdata-sections -ffunction-sections -fdata-sections -DDEBUG -g $BOTHOPTS -Werror -Wall "${SRCFILE}" -c -o "${DBGDSTFILE}" 2>&1 | dd bs=4096 status=none; then
