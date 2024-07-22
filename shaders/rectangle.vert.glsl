@@ -19,7 +19,7 @@ layout(std140, set = 0, binding = 0) uniform data_t {
 } rectData;
 
 layout(std140, set = 1, binding = 0) uniform cameraData_t {
-  vec4 geometry;//xy pixels
+  vec4 geometry;//xy = surface size in pixels
 } cameraData;
 
 layout(location = 0) out vec2 screenPxlPos;

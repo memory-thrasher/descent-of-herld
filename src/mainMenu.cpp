@@ -48,7 +48,7 @@ namespace doh {
   static_assert(WITE::has_update<mainMenu>::value);
   void mainMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    constexpr guiRect_t testRectData { { -0.5f, -0.5f, 0.5f, 0.5f }, {}, { 0, 1, 0, 5 }, { 1, 1, 1, 1 } };
+    constexpr guiRect_t testRectData { { -0.5f, -0.5f, 0.5f, 0.5f }, { 25, 25, 25, 25 }, { 0.5f, 0.35f, 0, 5 }, { 0.1f, 0.07f, 0, 1 } };
     transients->rect_test.writeData(testRectData);
     auto size = transients->camera.getWindow().getVecSize();
     cameraData_t cameraData { { size, 0, 0 } };
