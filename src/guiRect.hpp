@@ -26,34 +26,53 @@ namespace doh {
   //!!append OL_all OL_guiRect
   //!!genObj OL_guiRect
 
-  struct guiRect_t {
+  struct guiRectInstance_t {
     glm::vec4 extents;//LTRB snorm screen
+  };
+
+  struct guiRectStyle_t {
     glm::vec4 clip;//LTRB in pixels, distance to truncate corners. One possible value would result in an octagon.
-    glm::vec4 borderColor;//a=thickness pxls
+    glm::vec4 borderColor;
+    glm::vec4 borderThickness;//LTRB
     glm::vec4 fillColor;//a=0|1
   };
 
-  constexpr WITE::bufferRequirements BR_guiRect = WITE::simpleUB<gpuId, FLID, sizeof(guiRect_t)>::value,
-	      BR_S_guiRect = WITE::withId(WITE::stagingRequirementsFor(BR_guiRect, 2), FLID);
-  //!!append BR_all BR_guiRect
-  //!!append BR_all BR_S_guiRect
+  constexpr WITE::bufferRequirements BR_guiRectInstance = WITE::simpleUB<gpuId, FLID, sizeof(guiRectInstance_t)>::value,
+	      BR_S_guiRectInstance = WITE::withId(WITE::stagingRequirementsFor(BR_guiRectInstance, 2), FLID);
+  //!!append BR_all BR_guiRectInstance
+  //!!append BR_all BR_S_guiRectInstance
 
-  constexpr WITE::resourceSlot RS_guiRect = {
+  constexpr WITE::bufferRequirements BR_guiRectStyle = WITE::simpleUB<gpuId, FLID, sizeof(guiRectStyle_t)>::value;
+  //!!append BR_all BR_guiRectStyle
+
+  constexpr WITE::resourceSlot RS_guiRectInstance = {
     .id = FLID,
-    .requirementId = BR_guiRect.id,
+    .requirementId = BR_guiRectInstance.id,
     .objectLayoutId = OL_guiRect.id,
-  }, RS_S_guiRect = {
+  }, RS_S_guiRectInstance = {
     .id = FLID,
-    .requirementId = BR_S_guiRect.id,
+    .requirementId = BR_S_guiRectInstance.id,
     .objectLayoutId = OL_guiRect.id,
+  }, RS_guiRectStyle = {
+    .id = FLID,
+    .requirementId = BR_guiRectStyle.id,
+    .objectLayoutId = OL_guiRect.id,
+    .external = true,
   }, RS_guiRect_all[] = {
-    RS_guiRect,
-    RS_S_guiRect,
+    RS_guiRectInstance,
+    RS_S_guiRectInstance,
+    RS_guiRectStyle,
   };
   //!!append RS_all RS_guiRect_all
-  //!!genObjWrite RS_S_guiRect writeData guiRect_t
+  //!!genObjWrite RS_S_guiRectInstance writeInstanceData guiRectInstance_t
+  //!!genObjSet RS_guiRectStyle setStyle WITE::buffer<BR_guiRectStyle>
 
-  constexpr WITE::resourceConsumer RC_S_guiRect_source = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment>::value;
+  constexpr WITE::resourceConsumer RC_S_guiRect_instance = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment>::value,
+	      RC_S_guiRect_style = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eFragment>::value,
+	      RC_S_guiRect_sourceAll[] = {
+		RC_S_guiRect_instance,
+		RC_S_guiRect_style,
+	      };
 
   constexpr WITE::resourceConsumer RC_S_guiRect_target = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment>::value;
 
@@ -69,16 +88,17 @@ namespace doh {
     .id = FLID,
     .modules = SM_L_guiRect,
     .targetProvidedResources = RC_S_guiRect_target,
-    .sourceProvidedResources = RC_S_guiRect_source,
+    .sourceProvidedResources = RC_S_guiRect_sourceAll,
     .cullMode = vk::CullModeFlagBits::eNone,
     .vertexCountOverride = 6
   };
   //!!append S_RP_gui S_guiRect
 
   constexpr WITE::resourceReference RR_L_guiRect[] = {
-    { CP_data.src, RS_S_guiRect.id },
-    { CP_data.dst, RS_guiRect.id },
-    { RC_S_guiRect_source.id, RS_guiRect.id },
+    { CP_data.src, RS_S_guiRectInstance.id },
+    { CP_data.dst, RS_guiRectInstance.id },
+    { RC_S_guiRect_instance.id, RS_guiRectInstance.id },
+    { RC_S_guiRect_style.id, RS_guiRectStyle.id },
   };
 
   constexpr WITE::sourceLayout SL_guiRect = {

@@ -15,6 +15,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "mainMenu.hpp"
 #include "dbFull.hpp"
 #include "cameraStuff.hpp"
+#include "uiStyle.hpp"
 #include "../generated/targetPrimary_stub.hpp"
 #include "../generated/guiRect_stub.hpp"
 
@@ -33,9 +34,14 @@ namespace doh {
   };
 
   void mainMenu::allocated(uint64_t oid, void* dbv) {
+    //temp: this should be somewhere else
+    auto& btn = btnStyle();
+    guiRectStyle_t styleData = { { 25, 25, 25, 25 }, { 0.5f, 0.35f, 0, 5 }, { 5, 5, 5, 5 }, { 0.1f, 0.07f, 0, 1 } };
+    btn.slowOutOfBandSet(styleData);
+    //end temp
     auto db = reinterpret_cast<db_t*>(dbv);
     mainMenu mm;
-    WITE::scopeLock lock(db->mutexFor<mainMenu>(oid));//note: not necessary in allocation
+    // WITE::scopeLock lock(db->mutexFor<mainMenu>(oid));//note: not necessary in allocation
     db->read<mainMenu>(oid, 0, &mm);
     mm.transients = reinterpret_cast<void*>(new transients_t());
     db->write<mainMenu>(oid, &mm);
@@ -48,8 +54,8 @@ namespace doh {
   static_assert(WITE::has_update<mainMenu>::value);
   void mainMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    constexpr guiRect_t testRectData { { -0.5f, -0.5f, 0.5f, 0.5f }, { 25, 25, 25, 25 }, { 0.5f, 0.35f, 0, 5 }, { 0.1f, 0.07f, 0, 1 } };
-    transients->rect_test.writeData(testRectData);
+    constexpr guiRectInstance_t testRectData { { -0.5f, -0.5f, 0.5f, 0.5f } };
+    transients->rect_test.writeInstanceData(testRectData);
     auto size = transients->camera.getWindow().getVecSize();
     cameraData_t cameraData { { size, 0, 0 } };
     transients->camera.writeCameraData(cameraData);
@@ -59,6 +65,7 @@ namespace doh {
     transients_t* transients = getTransients(oid, dbv);
     transients->camera = targetPrimary::create();
     transients->rect_test = guiRect::create();
+    transients->rect_test.setStyle(btnStyle());
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {

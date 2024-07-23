@@ -62,6 +62,14 @@ while IFS= read -d $'\0' file; do
 	    echo "  void ${fileRaw}::${fnName}(const ${dataName}& data) {" >> $genImplNew
 	    echo "    castOnionObj->template write<${rs}.id>(data);" >> $genImplNew
 	    echo "  };" >> $genImplNew
+	elif [[ "$line" =~ \!\!genObjSet\ (.*?)\ (.*?)\ (.*?) ]]; then
+	    rs="${BASH_REMATCH[1]}"
+	    fnName="${BASH_REMATCH[2]}"
+	    dataName="${BASH_REMATCH[3]}"
+	    echo "    void ${fnName}(${dataName}& data);" >> $genStubNew
+	    echo "  void ${fileRaw}::${fnName}(${dataName}& data) {" >> $genImplNew
+	    echo "    castOnionObj->template set<${rs}.id>(&data);" >> $genImplNew
+	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!include\ me ]]; then
 	    echo "#include \"../$file\""
 	else
