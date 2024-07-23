@@ -34,11 +34,6 @@ namespace doh {
   };
 
   void mainMenu::allocated(uint64_t oid, void* dbv) {
-    //temp: this should be somewhere else
-    auto& btn = btnStyle();
-    guiRectStyle_t styleData = { { 25, 25, 25, 25 }, { 0.5f, 0.35f, 0, 5 }, { 5, 5, 5, 5 }, { 0.1f, 0.07f, 0, 1 } };
-    btn.slowOutOfBandSet(styleData);
-    //end temp
     auto db = reinterpret_cast<db_t*>(dbv);
     mainMenu mm;
     // WITE::scopeLock lock(db->mutexFor<mainMenu>(oid));//note: not necessary in allocation

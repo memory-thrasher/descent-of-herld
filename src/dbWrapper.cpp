@@ -16,6 +16,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include "dbWrapper.hpp"
 #include "dbFull.hpp"
+#include "config.hpp"
 
 namespace doh {
 
@@ -76,55 +77,11 @@ namespace doh {
       db->endFrame();
   };
 
-  std::filesystem::path getSaveDirImpl();
-
   std::filesystem::path getSaveDir() {
     static std::filesystem::path ret;
     if(ret.empty())
-      ret = getSaveDirImpl();
+      ret = getDataDir() / "saves";
     return ret;
   };
-
-#ifdef iswindows
-#include <windows.h>
-#include <shlobj.h>
-  std::filesystem::path getSaveDirImpl() {
-    wchar_t*path;
-    std::filesystem::path ret;
-    //Fallback: (temp?) std::filesystem::temp_directory_path
-    HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &path); //Preferred: (user's Documents)
-    if(SUCCEEDED(hr))
-      ret = std::filesystem::path(path) / "My Games" / "Descent of Herld" / "saves";
-    if(path)
-      free(path);
-    if(ret.empty()) {
-      hr = SHGetKnownFolderPath(FOLDERID_AppDataDocuments, 0, NULL, &path); //Alt: (appdata Documents)
-      if(SUCCEEDED(hr)) //Preferred: (user's Documents)
-	ret = std::filesystem::path(path) / "Descent of Herld" / "saves";
-    }
-    if(path)
-      free(path);
-    if(ret.empty())
-      ret = std::filesystem::temp_directory_path() / "Descent of Herld" / "saves";
-    return ret;
-  };
-
-#else //!iswindows
-#include <unistd.h>
-  std::filesystem::path getSaveDirImpl() {
-    std::filesystem::path ret;
-    const char* path;
-    path = getenv("XDG_DATA_HOME");
-    if(!path) [[unlikely]]
-      path = getenv("XDG_CONFIG_HOME");
-    if(!path) [[unlikely]]
-      path = getenv("HOME");
-    ret = std::string(path);
-    if(ret.empty()) [[unlikely]]
-      ret = std::filesystem::temp_directory_path();
-    ret = ret / "Descent of Herld" / "saves";
-    return ret;
-  };
-#endif //iswindows
 
 }
