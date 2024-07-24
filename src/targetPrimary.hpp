@@ -31,6 +31,7 @@ namespace doh {
   };
   //!!append OL_all OL_primaryCamera
   //!!genObj OL_primaryCamera
+  //!!genObjGlobalCollection
   //!!genObjGetWindow
 
   constexpr uint64_t RC_ID_RP_gui_color = FLID,

@@ -21,6 +21,8 @@
 allvars=
 echo > generated/allStubs.hpp_new
 echo '#include "allStubs.hpp"' > generated/allImpl.hpp_new
+echo '#include <set>' > generated/allStubs.hpp_new
+echo '#include <WITE/WITE.hpp>' >> generated/allStubs.hpp_new
 while IFS= read -d $'\0' file; do
     objId=
     fileRaw=$(basename "${file%.*}")
@@ -28,6 +30,7 @@ while IFS= read -d $'\0' file; do
     genImpl="generated/${fileRaw}_impl.hpp"
     genStubNew="generated/${fileRaw}_stub.hpp_new"
     genImplNew="generated/${fileRaw}_impl.hpp_new"
+    hasGlobalCollection=false
     echo "#include \"../${file}\"" > $genStubNew
     echo 'namespace doh {' >> $genStubNew
     echo "  struct ${fileRaw} {" >> $genStubNew
@@ -49,9 +52,11 @@ while IFS= read -d $'\0' file; do
 	elif [[ "$line" =~ \!\!genObj\ (.*?) ]]; then
 	    objId="${BASH_REMATCH[1]}.id" #actual factory generated later
 	    echo "#define castOnionObj reinterpret_cast<onionFull_t::object_t<$objId>*>(onionObj)" >> $genImplNew
+	elif [[ "$line" =~ \!\!genObjGlobalCollection ]]; then
+	    hasGlobalCollection=true
 	elif [[ "$line" =~ \!\!genObjGetWindow ]]; then
-	    echo "    WITE::window& getWindow();" >> $genStubNew
-	    echo "  WITE::window& ${fileRaw}::getWindow() {" >> $genImplNew
+	    echo "    WITE::window& getWindow() const;" >> $genStubNew
+	    echo "  WITE::window& ${fileRaw}::getWindow() const {" >> $genImplNew
 	    echo "    return castOnionObj->getWindow();" >> $genImplNew
 	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!genObjWrite\ (.*?)\ (.*?)\ (.*?) ]]; then
@@ -78,15 +83,31 @@ while IFS= read -d $'\0' file; do
 	fi
     done < <(grep -ho '!!.*' "$file")
     if [ -n "$objId" ]; then
+	if $hasGlobalCollection; then
+	    echo "    static std::set<${fileRaw}> allInstances;" >> $genStubNew
+	    echo "    static WITE::syncLock allInstances_mutex;" >> $genStubNew
+	    echo "  std::set<${fileRaw}> ${fileRaw}::allInstances;" >> $genImplNew
+	    echo "  WITE::syncLock ${fileRaw}::allInstances_mutex;" >> $genImplNew
+	fi
+	echo "    auto operator<=>(const ${fileRaw}& o) const = default;" >> $genStubNew
 	echo "    void destroy();" >> $genStubNew
 	echo "    static ${fileRaw} create();" >> $genStubNew
 	echo '  };' >> $genStubNew #end struct
 	echo '}' >> $genStubNew #end namespace
 	echo "  void ${fileRaw}::destroy() {" >> $genImplNew
+	if $hasGlobalCollection; then
+	    echo "    WITE::scopeLock lock(&allInstances_mutex);" >> $genImplNew
+	    echo "    allInstances.erase(allInstances.find(*this));" >> $genImplNew
+	fi
 	echo "    getOnionFull()->destroy(castOnionObj);" >> $genImplNew
 	echo '  };' >> $genImplNew
 	echo "  ${fileRaw} ${fileRaw}::create() { //static" >> $genImplNew
-	echo "    return ${fileRaw} { reinterpret_cast<void*>(getOnionFull()->template create<${objId}>()) };" >> $genImplNew
+	echo "    ${fileRaw} ret { reinterpret_cast<void*>(getOnionFull()->template create<${objId}>()) };" >> $genImplNew
+	if $hasGlobalCollection; then
+	    echo "    WITE::scopeLock lock(&allInstances_mutex);" >> $genImplNew
+	    echo "    allInstances.insert(ret);" >> $genImplNew
+	fi
+	echo "    return ret;" >> $genImplNew
 	echo '  };' >> $genImplNew
 	echo '}' >> $genImplNew #end namespace
 	echo "#undef castOnionObj" >> $genImplNew
