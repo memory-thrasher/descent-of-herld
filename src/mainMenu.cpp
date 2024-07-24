@@ -18,6 +18,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "uiStyle.hpp"
 #include "../generated/targetPrimary_stub.hpp"
 #include "../generated/guiRect_stub.hpp"
+#include "math.hpp"
 
 namespace doh {
 
@@ -49,18 +50,24 @@ namespace doh {
   static_assert(WITE::has_update<mainMenu>::value);
   void mainMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    constexpr guiRectInstance_t testRectData { { -0.5f, -0.5f, 0.5f, 0.5f } };
-    transients->rect_test.writeInstanceData(testRectData);
-    auto size = transients->camera.getWindow().getVecSize();
+    const auto size = transients->camera.getWindow().getVecSize();
     cameraData_t cameraData { { size, 0, 0 } };
     transients->camera.writeCameraData(cameraData);
+    WITE::winput::compositeInputData cid;
+    WITE::winput::getInput(WITE::winput::mouse, cid);
+    glm::vec2 mouseInSnorm(cid.axes[0].current / size.x * 2 - 1,
+			   cid.axes[1].current / size.y * 2 - 1);
+    constexpr guiRectInstance_t testRectData { { -0.5f, -0.5f, 0.5f, 0.5f } };
+    transients->rect_test.writeInstanceData(testRectData);
+    transients->rect_test.setStyle(rectContainsPoint(testRectData.extents, mouseInSnorm) ? btnStyleHov() : btnStyle());
   };
 
   void mainMenu::spunUp(uint64_t oid, void* dbv) {
+    std::cout << "spinning up";
     transients_t* transients = getTransients(oid, dbv);
     transients->camera = targetPrimary::create();
     transients->rect_test = guiRect::create();
-    transients->rect_test.setStyle(btnStyle());
+    transients->rect_test.setStyle(btnStyleHov());
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {

@@ -36,12 +36,22 @@ namespace doh {
   void loadDefaults() {//both for populating global buffers and populating any missing arguments with nontrivial defaults
     int clip = WITE::configuration::getOption("buttonCornerClip", 25);
     int borderWidth = WITE::configuration::getOption("buttonBorderWidth", 5);
-    glm::vec4 border = getOptionColor("buttonColorBorder", { 0.5f, 0.35f, 0, 1 });
-    glm::vec4 fill = getOptionColor("buttonColorFill", { 0.1f, 0.07f, 0, 1 });
-    auto& btn = btnStyle();
-    guiRectStyle_t styleData = { { clip, clip, clip, clip }, border,
-				 { borderWidth, borderWidth, borderWidth, borderWidth }, fill };
-    btn.slowOutOfBandSet(styleData);
+    {
+      glm::vec4 border = getOptionColor("buttonColorBorder", { 0.5f, 0.35f, 0, 1 });
+      glm::vec4 fill = getOptionColor("buttonColorFill", { 0.1f, 0.07f, 0, 1 });
+      auto& btn = btnStyle();
+      guiRectStyle_t styleData = { { clip, clip, clip, clip }, border,
+				   { borderWidth, borderWidth, borderWidth, borderWidth }, fill };
+      btn.slowOutOfBandSet(styleData);
+    }
+    {
+      glm::vec4 border = getOptionColor("buttonHovColorBorder", { 0.7f, 0.55f, 0, 1 });
+      glm::vec4 fill = getOptionColor("buttonHovColorFill", { 0.3f, 0.21f, 0, 1 });
+      auto& btn = btnStyleHov();
+      guiRectStyle_t styleData = { { clip, clip, clip, clip }, border,
+				   { borderWidth, borderWidth, borderWidth, borderWidth }, fill };
+      btn.slowOutOfBandSet(styleData);
+    }
   };
 
   void loadConfig() {
