@@ -42,7 +42,7 @@ namespace doh {
   //!!append BR_all BR_guiRectInstance
   //!!append BR_all BR_S_guiRectInstance
 
-  constexpr WITE::bufferRequirements BR_guiRectStyle = WITE::simpleUB<gpuId, FLID, sizeof(guiRectStyle_t)>::value;
+  constexpr WITE::bufferRequirements BR_guiRectStyle = WITE::swappableUB<gpuId, FLID, sizeof(guiRectStyle_t)>::value;
   //!!append BR_all BR_guiRectStyle
 
   constexpr WITE::resourceSlot RS_guiRectInstance = {
