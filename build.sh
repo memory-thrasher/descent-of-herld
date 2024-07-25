@@ -35,6 +35,8 @@ if [ -n "$vk_lib_path" ]; then
     PATH="$vk_lib_path:$PATH"
 fi;
 
+cp -u $WITEBUILD/shared/font.hpp generated/
+
 mkdir build build/shaders build/debug build/release build/windows build/dependmap 2>/dev/null
 
 #delete any obj files that no longer have a corresponding cpp file
