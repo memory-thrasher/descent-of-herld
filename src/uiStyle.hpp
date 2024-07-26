@@ -12,14 +12,28 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#pragma once
+
 #include <WITE/WITE.hpp>
 
 #include "guiRect.hpp"
+#include "guiText.hpp"
 
 namespace doh {
 
-  WITE::buffer<BR_guiRectStyle>& btnStyle();
-  WITE::buffer<BR_guiRectStyle>& btnStyleHov();
+  struct buttonStyle_t {
+    WITE::buffer<BR_guiRectStyle> rectNormalBuf, rectHovBuf, rectPressBuf;
+    WITE::buffer<BR_guiTextStyle> textNormalBuf, textHovBuf, textPressBuf;
+    guiRectStyle_t rectNormal, rectHov, rectPress;
+    guiTextStyle_t textNormal, textHov, textPress;
+    float width, height;
+    void pushToBuffers();
+  };
+
+  buttonStyle_t& btnBig();
+  buttonStyle_t& btnHuge();
+  buttonStyle_t& btnNormal();
+  buttonStyle_t& btnSmall();
 
 }
 

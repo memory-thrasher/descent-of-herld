@@ -13,10 +13,9 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #version 450
-#extension GL_ARB_separate_shader_objects : enable
 
-layout(std140, set = 0, binding = 0) uniform instance_t {
-  vec4 bbox;//xy = upper-left, zw = width,height; all in signed normalized screen coords
+layout(std140, set = 0, binding = 1) uniform instance_t {
+  vec4 bbox;//LTRB
 } instance;
 
 layout(std140, set = 0, binding = 0) uniform style_t {
@@ -27,8 +26,8 @@ layout(std140, set = 0, binding = 0) uniform style_t {
 layout(location = 0) in uvec2 coords;
 
 void main() {
-  const float widthChars = floor(instance.bbox.z/style.charMetric.x);
+  const float widthChars = floor((instance.bbox.z - instance.bbox.x)/style.charMetric.x);
   const uvec2 charPos = uvec2(mod(gl_InstanceIndex, widthChars), gl_InstanceIndex / widthChars);
   //TODO truncate at height?
-  gl_Position = vec4(drawData.bbox.xy + drawData.charMetric.xy * (charPos + drawData.charMetric.zw + coords * 0.0714f), 0, 1);
+  gl_Position = vec4(instance.bbox.xy + style.charMetric.xy * (charPos + (style.charMetric.zw - style.charMetric.xy) + coords * 0.0714f), 0, 1);
 }

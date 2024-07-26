@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <cstdio>
+#include <cstdarg>
+
 #include "gpuShared.hpp"
 #include "../generated/font.hpp"
 
@@ -27,6 +30,7 @@ namespace doh {
 
   constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::RG8uint, sizeof(font_triangles)/2, FLID> fontMesh = font_triangles;
   constexpr size_t guiText_maxCharsPerString = 128;
+  //!!append BR_all fontMesh.bufferRequirements_v
 
   constexpr WITE::objectLayout OL_guiText = { .id = FLID };
   //!!append OL_all OL_guiText
@@ -40,20 +44,28 @@ namespace doh {
     glm::vec4 color, charMetric;
   };
 
-  constexpr WITE::bufferRequirements BR_guiTextInstance = WITE::simpleUB<gpuId, FLID, sizeof(guiTextInstance_t)>::value,
+  struct guiTextIndirectBuffer_t {
+    glm::uvec4 size;//mostly pad  TODO verify pad is necessary
+    vk::DrawIndirectCommand drawCommands[guiText_maxCharsPerString];
+  };
+
+  int guiTextFormat(guiTextIndirectBuffer_t& out, const char* format, ...);
+  decltype(fontMesh)::buffer_t& fontMeshBuffer();
+
+  constexpr WITE::bufferRequirements BR_guiTextInstance = WITE::swappableUB<gpuId, FLID, sizeof(guiTextInstance_t)>::value,
 	      BR_guiTextStyle = WITE::swappableUB<gpuId, FLID, sizeof(guiTextStyle_t)>::value,
-	      BR_textIndirect = {
+	      BR_guiTextIndirect = {
 		.deviceId = gpuId,
 		.id = FLID,
 		.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndirectBuffer,
-		.size = 16 + guiText_maxCharsPerString * sizeof(vk::drawIndirectCommand),
-		.frameswapCount = 1,
+		.size = 16 + guiText_maxCharsPerString * sizeof(vk::DrawIndirectCommand),
+		.frameswapCount = 2,
 		.hostVisible = false,
 	      };
-  static_cast(guiText_maxCharsPerString % 16 == 0);
+  static_assert(guiText_maxCharsPerString % 16 == 0);
   //!!append BR_all BR_guiTextInstance
   //!!append BR_all BR_guiTextStyle
-  //!!append BR_all BR_textIndirect
+  //!!append BR_all BR_guiTextIndirect
 
   constexpr WITE::resourceSlot RS_guiTextInstance = {
     .id = FLID,
@@ -68,22 +80,67 @@ namespace doh {
     .id = FLID,
     .requirementId = BR_guiTextIndirect.id,
     .objectLayoutId = OL_guiText.id,
+  }, RS_guiTextMesh = {
+    .id = FLID,
+    .requirementId = fontMesh.bufferRequirements_v.id,
+    .objectLayoutId = OL_guiText.id,
+    .external = true,
   }, RS_guiText_all[] = {
     RS_guiTextInstance,
     RS_guiTextStyle,
     RS_guiTextIndirect,
+    RS_guiTextMesh,
   };
   //!!append RS_all RS_guiText_all
-  //!!genObjWrite RS_S_guiTextInstance writeInstanceData guiTextInstance_t
+  //!!genObjSlowWrite RS_guiTextInstance writeInstanceData guiTextInstance_t
+  //!!genObjSlowWrite RS_guiTextIndirect writeIndirectBuffer guiTextIndirectBuffer_t
   //!!genObjSet RS_guiTextStyle setStyle WITE::buffer<BR_guiTextStyle>
-  //!!genObjWrite RS_S_guiTextIndirect writeIndirectBuffer vk::drawIndirectCommand[guiText_maxCharsPerString]
+  //!!genObjSet RS_guiTextMesh setTextMesh WITE::buffer<fontMesh.bufferRequirements_v>
 
-  constexpr WITE::resourceConsumer RC_S_guiText_instance = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment>::value,
-	      RC_S_guiText_style = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eFragment>::value,
+  constexpr WITE::resourceConsumer RC_S_guiText_instance = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex>::value,
+	      RC_S_guiText_style = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment>::value,
 	      RC_S_guiText_indirect = WITE::indirectConsumer<FLID>::value,
+	      RC_S_guiText_indirectCount = WITE::indirectCountConsumer<FLID>::value,
 	      RC_S_guiText_sourceAll[] = {
-		RC_S_guiText_instance,
 		RC_S_guiText_style,
+		RC_S_guiText_instance,
+		RC_S_guiText_indirect,
+		RC_S_guiText_indirectCount,
+		fontMesh.resourceConsumer_v
 	      };
 
+#include "text.vert.spv.h"
+#include "solidColor.frag.spv.h"
+
+  constexpr WITE::shaderModule SM_L_guiText[] {
+    { text_vert, sizeof(text_vert), vk::ShaderStageFlagBits::eVertex },
+    { solidColor_frag, sizeof(solidColor_frag), vk::ShaderStageFlagBits::eFragment },
+  };
+
+  constexpr WITE::graphicsShaderRequirements S_guiText {
+    .id = FLID,
+    .modules = SM_L_guiText,
+    .sourceProvidedResources = RC_S_guiText_sourceAll,
+    .cullMode = vk::CullModeFlagBits::eNone,
+  };
+  //!!append S_RP_gui S_guiText
+
+  constexpr WITE::resourceReference RR_L_guiText[] = {
+    { .resourceConsumerId = RC_S_guiText_indirectCount.id, .resourceSlotId = RS_guiTextIndirect.id, .subresource = {0, 16} },
+    { .resourceConsumerId = RC_S_guiText_indirect.id, .resourceSlotId = RS_guiTextIndirect.id, .subresource = {16} },
+    { RC_S_guiText_style.id, RS_guiTextStyle.id },
+    { RC_S_guiText_instance.id, RS_guiTextInstance.id },
+    { fontMesh.resourceConsumer_v.id, RS_guiTextMesh.id },
+  };
+
+  constexpr WITE::sourceLayout SL_guiText = {
+    .id = FLID,
+    .objectLayoutId = OL_guiText.id,
+    .resources = RR_L_guiText,
+  };
+  //!!append SL_all SL_guiText
+
 }
+
+#undef FILE_ID
+

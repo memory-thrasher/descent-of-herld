@@ -12,28 +12,14 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
-#pragma once
+#version 450
 
-#include "uiStyle.hpp"
-#include "../generated/guiRect_stub.hpp"
-#include "../generated/guiText_stub.hpp"
+layout(std140, set = 0, binding = 0) uniform color_t {
+  vec4 color;
+} color;
 
-namespace doh {
+layout(location = 0) out vec4 outColor;
 
-  struct guiButton {
-    guiRect rect;
-    guiRectInstance_t rectData;
-    guiText label;
-    guiTextInstance_t labelData;
-    guiTextIndirectBuffer_t labelContent;
-    const buttonStyle_t& style;
-    guiButton() = delete;
-    guiButton(guiButton&&) = delete;
-    guiButton(const buttonStyle_t& style, glm::vec2 location, std::string label);
-    ~guiButton();
-    void resize(glm::vec4);
-    void setLabel(std::string);
-    void update();
-  };
-
+void main() {
+  outColor = color.color;
 }

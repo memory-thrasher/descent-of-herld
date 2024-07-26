@@ -27,7 +27,7 @@ namespace doh {
   struct transients_t {
     targetPrimary camera = targetPrimary::create();
     guiButton buttons[1] {
-      { { -0.95f, -0.95f, -0.65f, -0.85f }, "Continue" },
+      { btnHuge(), { -0.95f, -0.95f }, "Continue" },
     };
   };
 

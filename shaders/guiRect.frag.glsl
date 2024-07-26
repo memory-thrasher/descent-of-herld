@@ -20,51 +20,55 @@ layout(std140, set = 0, binding = 0) uniform instance_t {
 } rectInstance;
 
 layout(std140, set = 0, binding = 1) uniform style_t {
-  vec4 clip;//LTRB in pixels, distance to truncate corners. One possible value would result in an octagon.
+  vec4 clip;//LTRB screen snorm width, distance to truncate corners.
   vec4 borderColor;
-  vec4 borderThickness;
-  vec4 fillColor;//a=0|1
+  vec4 borderThickness;//LTRB screen snorm width
+  vec4 fillColor;//a=0|1 to turn fill on or off
 } rectStyle;
 
 layout(std140, set = 1, binding = 0) uniform cameraData_t {
   vec4 geometry;//xy = surface size in pixels
 } cameraData;
 
-layout(location = 0) in vec2 screenPxlPos;
+layout(location = 0) in vec2 screenSnormPos;
 layout(location = 0) out vec4 outColor;
 
 void main() {
-  const vec4 extentsPxl = (rectInstance.extents + (1).xxxx) * 0.5f * cameraData.geometry.xyxy;
-  const vec4 pxlWithinRect = vec4(screenPxlPos, extentsPxl.zw) - extentsPxl.xyxy;
-  bool onBorder = (pxlWithinRect.x < rectStyle.borderThickness.x || pxlWithinRect.y < rectStyle.borderThickness.y || pxlWithinRect.x > pxlWithinRect.z - rectStyle.borderThickness.z || pxlWithinRect.y > pxlWithinRect.w - rectStyle.borderThickness.w);
+  const float aspect = cameraData.geometry.x / cameraData.geometry.y;
+  const vec4 aspectAdj = vec4(1, aspect, 1, aspect);
+  const vec4 clip = rectStyle.clip * aspectAdj;
+  const vec4 borderThickness = rectStyle.borderThickness * aspectAdj;
+  const vec4 posInRect = vec4(screenSnormPos.xy - rectInstance.extents.xy,
+			      rectInstance.extents.zw - screenSnormPos.xy);//zw point relative to rect lr
+  bool onBorder = any(lessThan(posInRect, borderThickness));
   bool inCorner = false;
   // manhattan distance from each corner via scaling transform
-  if(rectStyle.clip.x * rectStyle.clip.y > 0) {//ul
-    const vec2 rv = pxlWithinRect.xy;
-    const vec2 dv = rv / rectStyle.clip.xy;
+  if(clip.x * clip.y > 0) {//ul
+    const vec2 rv = posInRect.xy;
+    const vec2 dv = rv / clip.xy;
     inCorner = inCorner || dv.x + dv.y < 1;
-    const vec2 bv = rv / (rectStyle.clip.xy + rectStyle.borderThickness.xy);
+    const vec2 bv = rv / (clip.xy + borderThickness.xy);
     onBorder = onBorder || bv.x + bv.y < 1;
   }
-  if(rectStyle.clip.z * rectStyle.clip.y > 0) {//ur
-    const vec2 rv = vec2(pxlWithinRect.z - pxlWithinRect.x, pxlWithinRect.y);
-    const vec2 dv = rv / rectStyle.clip.zy;
+  if(clip.z * clip.y > 0) {//ur
+    const vec2 rv = posInRect.zy;
+    const vec2 dv = rv / clip.zy;
     inCorner = inCorner || dv.x + dv.y < 1;
-    const vec2 bv = rv / (rectStyle.clip.zy + rectStyle.borderThickness.zy);
+    const vec2 bv = rv / (clip.zy + borderThickness.zy);
     onBorder = onBorder || bv.x + bv.y < 1;
   }
-  if(rectStyle.clip.x * rectStyle.clip.w > 0) {//ll
-    const vec2 rv = vec2(pxlWithinRect.x, pxlWithinRect.w - pxlWithinRect.y);
-    const vec2 dv = rv / rectStyle.clip.xw;
+  if(clip.x * clip.w > 0) {//ll
+    const vec2 rv = posInRect.xw;
+    const vec2 dv = rv / clip.xw;
     inCorner = inCorner || dv.x + dv.y < 1;
-    const vec2 bv = rv / (rectStyle.clip.xw + rectStyle.borderThickness.xw);
+    const vec2 bv = rv / (clip.xw + borderThickness.xw);
     onBorder = onBorder || bv.x + bv.y < 1;
   }
-  if(rectStyle.clip.w * rectStyle.clip.z > 0) {//ul
-    const vec2 rv = pxlWithinRect.zw - pxlWithinRect.xy;
-    const vec2 dv = rv / rectStyle.clip.zw;
+  if(clip.w * clip.z > 0) {//ul
+    const vec2 rv = posInRect.zw;
+    const vec2 dv = rv / clip.zw;
     inCorner = inCorner || dv.x + dv.y < 1;
-    const vec2 bv = rv / (rectStyle.clip.zw + rectStyle.borderThickness.zw);
+    const vec2 bv = rv / (clip.zw + borderThickness.zw);
     onBorder = onBorder || bv.x + bv.y < 1;
   }
   if(inCorner) discard;

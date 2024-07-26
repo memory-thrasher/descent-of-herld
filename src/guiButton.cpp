@@ -22,11 +22,19 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  guiButton::guiButton(glm::vec4 extent, std::string label) :
+  guiButton::guiButton(const buttonStyle_t& style, glm::vec2 location, std::string labelStr) :
     rect(guiRect::create()),
-    instanceData(extent)
+    rectData({ location, location.x + style.width, location.y + style.height }),
+    label(guiText::create()),
+    labelData({ location, location.x + style.width, location.y + style.height }),
+    style(style)
   {
-    rect.setStyle(btnStyle());
+    rect.setStyle(style.rectNormalBuf);
+    label.setTextMesh(fontMeshBuffer());
+    label.setStyle(style.textNormalBuf);
+    guiTextFormat(labelContent, "%s", labelStr.c_str());
+    label.writeIndirectBuffer(labelContent);
+    label.writeInstanceData(labelData);
   };
 
   guiButton::~guiButton() {
@@ -43,14 +51,15 @@ namespace doh {
 	const auto size = camera.getWindow().getVecSize();
 	glm::vec2 mouseInSnorm(cid.axes[0].current / size.x * 2 - 1,
 			       cid.axes[1].current / size.y * 2 - 1);
-	if(rectContainsPoint(instanceData.extents, mouseInSnorm)) {
+	if(rectContainsPoint(rectData.extents, mouseInSnorm)) {
 	  isHovered = true;
 	  break;
 	}
       }
     }
-    rect.setStyle(isHovered ? btnStyleHov() : btnStyle());
-    rect.writeInstanceData(instanceData);
+    //TODO pressed style
+    rect.setStyle(isHovered ? style.rectHov : style.rectNormal);
+    rect.writeInstanceData(rectData);
   };
 
   void guiButton::resize(glm::vec4) {

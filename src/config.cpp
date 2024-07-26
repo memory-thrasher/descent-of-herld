@@ -34,24 +34,37 @@ namespace doh {
   };
 
   void loadDefaults() {//both for populating global buffers and populating any missing arguments with nontrivial defaults
-    int clip = WITE::configuration::getOption("buttonCornerClip", 25);
-    int borderWidth = WITE::configuration::getOption("buttonBorderWidth", 5);
+    glm::vec4 normalBorder = getOptionColor("btn-border-color", { 0.5f, 0.35f, 0, 1 });
+    glm::vec4 normalFill = getOptionColor("btn-fill-color", { 0.1f, 0.07f, 0, 1 });
+    glm::vec4 normalTextColor = getOptionColor("btn-text-color", { 1, 1, 1, 1 });
+    glm::vec4 hovBorder = getOptionColor("btn-hov-border-color", { 0.7f, 0.55f, 0, 1 });
+    glm::vec4 hovFill = getOptionColor("btn-hov-fill-color", { 0.3f, 0.21f, 0, 1 });
+    glm::vec4 hovTextColor = getOptionColor("btn-hov-text-color", { 1, 1, 1, 1 });
+    glm::vec4 pressBorder = getOptionColor("btn-press-border-color", { 0.9f, 0.75f, 0, 1 });
+    glm::vec4 pressFill = getOptionColor("btn-press-fill-color", { 0.5f, 0.4f, 0, 1 });
+    glm::vec4 pressTextColor = getOptionColor("btn-press-text-color", { 1, 1, 1, 1 });
     {
-      glm::vec4 border = getOptionColor("buttonColorBorder", { 0.5f, 0.35f, 0, 1 });
-      glm::vec4 fill = getOptionColor("buttonColorFill", { 0.1f, 0.07f, 0, 1 });
-      auto& btn = btnStyle();
-      guiRectStyle_t styleData = { { clip, clip, clip, clip }, border,
-				   { borderWidth, borderWidth, borderWidth, borderWidth }, fill };
-      btn.slowOutOfBandSet(styleData);
+      float clip = WITE::configuration::getOption("btn-huge-corner", 0.01f);//x&y relative to screen width
+      float borderWidth = WITE::configuration::getOption("btn-huge-border-width", 0.001f);//x&y relative to screen width
+      float textWidth = WITE::configuration::getOption("btn-huge-text-width", 0.01f);
+      float textHeight = WITE::configuration::getOption("btn-huge-text-height", 0.01f);
+      float width = WITE::configuration::getOption("btn-huge-width", 0.3f);
+      float height = WITE::configuration::getOption("btn-huge-height", 0.1f);
+      auto& btn = btnHuge();
+      btn.rectNormal = { { clip, clip, clip, clip }, normalBorder,
+			 { borderWidth, borderWidth, borderWidth, borderWidth }, normalFill };
+      btn.rectHov = { { clip, clip, clip, clip }, hovBorder,
+			 { borderWidth, borderWidth, borderWidth, borderWidth }, hovFill };
+      btn.rectPress = { { clip, clip, clip, clip }, pressBorder,
+			 { borderWidth, borderWidth, borderWidth, borderWidth }, pressFill };
+      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip, (textHeight - height)/2 } };
+      btn.textHov = { hovTextColor, { textWidth, textHeight, clip, (textHeight - height)/2 } };
+      btn.textPress = { pressTextColor, { textWidth, textHeight, clip, (textHeight - height)/2 } };
+      btn.width = width;
+      btn.height = height;
+      btn.pushToBuffers();
     }
-    {
-      glm::vec4 border = getOptionColor("buttonHovColorBorder", { 0.7f, 0.55f, 0, 1 });
-      glm::vec4 fill = getOptionColor("buttonHovColorFill", { 0.3f, 0.21f, 0, 1 });
-      auto& btn = btnStyleHov();
-      guiRectStyle_t styleData = { { clip, clip, clip, clip }, border,
-				   { borderWidth, borderWidth, borderWidth, borderWidth }, fill };
-      btn.slowOutOfBandSet(styleData);
-    }
+    //TODO other sizes
   };
 
   void loadConfig() {

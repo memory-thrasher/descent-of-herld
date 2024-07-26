@@ -12,22 +12,32 @@
   Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
-#version 450
+#include "guiText.hpp"
 
-layout(std140, set = 0, binding = 0) uniform data_t {
-  vec4 extents;//LTRB snorm screen
-} rectData;
+namespace doh {
 
-// layout(std140, set = 1, binding = 0) uniform cameraData_t {
-//   vec4 geometry;//xy = surface size in pixels
-// } cameraData;
+  int guiTextFormat(guiTextIndirectBuffer_t& out, const char* format, ...) {//move to cpp file?
+    char buffer[guiText_maxCharsPerString+1];//null terminated
+    std::va_list args;
+    va_start(args, format);
+    int ret = std::vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    for(out.size.x = 0;out.size.x < guiText_maxCharsPerString && buffer[out.size.x];++out.size.x) {
+      const auto& fce = font_character_extents[(unsigned)buffer[out.size.x]].data;//offset-length pair
+      out.drawCommands[out.size.x] = vk::DrawIndirectCommand { fce[1], 1, fce[0], out.size.x };
+    }
+    return ret;
+  };
 
-layout(location = 0) out vec2 screenSnormPos;
+  decltype(fontMesh)::buffer_t& fontMeshBuffer() {
+    static decltype(fontMesh)::buffer_t ret;
+    static bool loaded = false;
+    if(!loaded) {
+      loaded = true;
+      fontMesh.load(&ret);
+    }
+    return ret;
+  };
 
-void main() {
-  const vec2 snorm = vec2(gl_VertexIndex & 1, gl_VertexIndex > 1 && gl_VertexIndex < 5) *
-    (rectData.extents.zw - rectData.extents.xy) + rectData.extents.xy;
-  gl_Position = vec4(snorm, 0.0001f, 1);
-  screenSnormPos = snorm;
 }
 

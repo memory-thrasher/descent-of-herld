@@ -16,13 +16,32 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  WITE::buffer<BR_guiRectStyle>& btnStyle() {
-    static WITE::buffer<BR_guiRectStyle> ret;
+  void buttonStyle_t::pushToBuffers() {
+    textHovBuf.slowOutOfBandSet(textHov);
+    textNormalBuf.slowOutOfBandSet(textNormal);
+    textPressBuf.slowOutOfBandSet(textPress);
+    rectHovBuf.slowOutOfBandSet(rectHov);
+    rectNormalBuf.slowOutOfBandSet(rectNormal);
+    rectPressBuf.slowOutOfBandSet(rectPress);
+  };
+
+  buttonStyle_t& btnBig() {
+    static buttonStyle_t ret;
     return ret;
   };
 
-  WITE::buffer<BR_guiRectStyle>& btnStyleHov() {
-    static WITE::buffer<BR_guiRectStyle> ret;
+  buttonStyle_t& btnHuge() {
+    static buttonStyle_t ret;
+    return ret;
+  };
+
+  buttonStyle_t& btnNormal() {
+    static buttonStyle_t ret;
+    return ret;
+  };
+
+  buttonStyle_t& btnSmall() {
+    static buttonStyle_t ret;
     return ret;
   };
 
