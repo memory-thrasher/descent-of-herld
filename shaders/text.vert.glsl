@@ -29,5 +29,5 @@ void main() {
   const float widthChars = floor((instance.bbox.z - instance.bbox.x)/style.charMetric.x);
   const uvec2 charPos = uvec2(mod(gl_InstanceIndex, widthChars), gl_InstanceIndex / widthChars);
   //TODO truncate at height?
-  gl_Position = vec4(instance.bbox.xy + style.charMetric.xy * (charPos + (style.charMetric.zw - style.charMetric.xy) + coords * 0.0714f), 0, 1);
+  gl_Position = vec4(instance.bbox.xy + style.charMetric.zw + style.charMetric.xy * (charPos + coords * 0.0714f), 0, 1);
 }

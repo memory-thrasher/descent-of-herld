@@ -46,8 +46,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("btn-huge-corner", 0.01f);//x&y relative to screen width
       float borderWidth = WITE::configuration::getOption("btn-huge-border-width", 0.001f);//x&y relative to screen width
-      float textWidth = WITE::configuration::getOption("btn-huge-text-width", 0.01f);
-      float textHeight = WITE::configuration::getOption("btn-huge-text-height", 0.01f);
+      float textWidth = WITE::configuration::getOption("btn-huge-text-width", 0.025f);
+      float textHeight = WITE::configuration::getOption("btn-huge-text-height", 0.05f);
       float width = WITE::configuration::getOption("btn-huge-width", 0.3f);
       float height = WITE::configuration::getOption("btn-huge-height", 0.1f);
       auto& btn = btnHuge();
@@ -57,9 +57,9 @@ namespace doh {
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, hovFill };
       btn.rectPress = { { clip, clip, clip, clip }, pressBorder,
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, pressFill };
-      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip, (textHeight - height)/2 } };
-      btn.textHov = { hovTextColor, { textWidth, textHeight, clip, (textHeight - height)/2 } };
-      btn.textPress = { pressTextColor, { textWidth, textHeight, clip, (textHeight - height)/2 } };
+      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip, (height - textHeight)/2 } };
+      btn.textHov = { hovTextColor, { textWidth, textHeight, clip, (height - textHeight)/2 } };
+      btn.textPress = { pressTextColor, { textWidth, textHeight, clip, (height - textHeight)/2 } };
       btn.width = width;
       btn.height = height;
       btn.pushToBuffers();

@@ -22,7 +22,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  guiButton::guiButton(const buttonStyle_t& style, glm::vec2 location, std::string labelStr) :
+  guiButton::guiButton(buttonStyle_t& style, glm::vec2 location, std::string labelStr) :
     rect(guiRect::create()),
     rectData({ location, location.x + style.width, location.y + style.height }),
     label(guiText::create()),
@@ -57,8 +57,9 @@ namespace doh {
 	}
       }
     }
-    //TODO pressed style
-    rect.setStyle(isHovered ? style.rectHov : style.rectNormal);
+    bool isClicked = WITE::winput::getButton(WITE::winput::lmb);
+    rect.setStyle(isHovered ? isClicked ? style.rectPressBuf : style.rectHovBuf : style.rectNormalBuf);
+    label.setStyle(isHovered ? isClicked ? style.textPressBuf : style.textHovBuf : style.textNormalBuf);
     rect.writeInstanceData(rectData);
   };
 

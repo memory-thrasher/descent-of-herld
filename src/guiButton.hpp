@@ -26,10 +26,10 @@ namespace doh {
     guiText label;
     guiTextInstance_t labelData;
     guiTextIndirectBuffer_t labelContent;
-    const buttonStyle_t& style;
+    buttonStyle_t& style;
     guiButton() = delete;
     guiButton(guiButton&&) = delete;
-    guiButton(const buttonStyle_t& style, glm::vec2 location, std::string label);
+    guiButton(buttonStyle_t& style, glm::vec2 location, std::string label);
     ~guiButton();
     void resize(glm::vec4);
     void setLabel(std::string);
