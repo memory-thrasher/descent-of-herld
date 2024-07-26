@@ -30,6 +30,7 @@ namespace doh {
     style(style)
   {
     rect.setStyle(style.rectNormalBuf);
+    rect.writeInstanceData(rectData);
     label.setTextMesh(fontMeshBuffer());
     label.setStyle(style.textNormalBuf);
     guiTextFormat(labelContent, "%s", labelStr.c_str());
@@ -60,7 +61,6 @@ namespace doh {
     bool isClicked = WITE::winput::getButton(WITE::winput::lmb);
     rect.setStyle(isHovered ? isClicked ? style.rectPressBuf : style.rectHovBuf : style.rectNormalBuf);
     label.setStyle(isHovered ? isClicked ? style.textPressBuf : style.textHovBuf : style.textNormalBuf);
-    rect.writeInstanceData(rectData);
   };
 
   void guiButton::resize(glm::vec4) {
