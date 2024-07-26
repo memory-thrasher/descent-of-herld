@@ -27,7 +27,7 @@ layout(location = 0) out vec2 screenSnormPos;
 void main() {
   const vec2 snorm = vec2(gl_VertexIndex & 1, gl_VertexIndex > 1 && gl_VertexIndex < 5) *
     (rectData.extents.zw - rectData.extents.xy) + rectData.extents.xy;
-  gl_Position = vec4(snorm, 0.0001f, 1);
+  gl_Position = vec4(snorm, 0, 1);
   screenSnormPos = snorm;
 }
 
