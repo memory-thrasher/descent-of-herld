@@ -40,37 +40,11 @@ void main() {
   const vec4 borderThickness = rectStyle.borderThickness * aspectAdj;
   const vec4 posInRect = vec4(screenSnormPos.xy - rectInstance.extents.xy,
 			      rectInstance.extents.zw - screenSnormPos.xy);//zw point relative to rect lr
-  bool onBorder = any(lessThan(posInRect, borderThickness));
-  bool inCorner = false;
+  const vec4 bv = posInRect / (clip + borderThickness);
+  const bool onBorder = any(lessThan(posInRect, borderThickness)) || any(lessThan(bv + bv.yzwx, (1.41f).xxxx));
   // manhattan distance from each corner via scaling transform
-  if(clip.x * clip.y > 0) {//ul
-    const vec2 rv = posInRect.xy;
-    const vec2 dv = rv / clip.xy;
-    inCorner = inCorner || dv.x + dv.y < 1;
-    const vec2 bv = rv / (clip.xy + borderThickness.xy);
-    onBorder = onBorder || bv.x + bv.y < 1;
-  }
-  if(clip.z * clip.y > 0) {//ur
-    const vec2 rv = posInRect.zy;
-    const vec2 dv = rv / clip.zy;
-    inCorner = inCorner || dv.x + dv.y < 1;
-    const vec2 bv = rv / (clip.zy + borderThickness.zy);
-    onBorder = onBorder || bv.x + bv.y < 1;
-  }
-  if(clip.x * clip.w > 0) {//ll
-    const vec2 rv = posInRect.xw;
-    const vec2 dv = rv / clip.xw;
-    inCorner = inCorner || dv.x + dv.y < 1;
-    const vec2 bv = rv / (clip.xw + borderThickness.xw);
-    onBorder = onBorder || bv.x + bv.y < 1;
-  }
-  if(clip.w * clip.z > 0) {//ul
-    const vec2 rv = posInRect.zw;
-    const vec2 dv = rv / clip.zw;
-    inCorner = inCorner || dv.x + dv.y < 1;
-    const vec2 bv = rv / (clip.zw + borderThickness.zw);
-    onBorder = onBorder || bv.x + bv.y < 1;
-  }
+  const vec4 dv = posInRect / clip;
+  const bool inCorner = any(lessThan(dv + dv.yzwx, (1.41f).xxxx));
   if(inCorner) discard;
   else if(onBorder) outColor = vec4(rectStyle.borderColor.rgb, 1);
   else if(rectStyle.fillColor.a > 0) outColor = vec4(rectStyle.fillColor.rgb, 1);
