@@ -50,11 +50,11 @@ namespace doh {
     .objectLayoutId = OL_primaryCamera.id,
   }, RS_primaryCamera_transform = {
     .id = FLID,
-    .requirementId = BR_singleTransform.id,
+    .requirementId = BR_compoundTransform.id,
     .objectLayoutId = OL_primaryCamera.id,
   }, RS_S_primaryCamera_transform = {
     .id = FLID,
-    .requirementId = BR_S_singleTransform.id,
+    .requirementId = BR_S_compoundTransform.id,
     .objectLayoutId = OL_primaryCamera.id,
   }, RS_primaryCamera_color = {
     .id = FLID,
@@ -76,7 +76,7 @@ namespace doh {
   };
   //!!append RS_all RS_primaryCamera_all
   //!!genObjWrite RS_S_primaryCamera_cameraData writeCameraData cameraData_t
-  //!!genObjWrite RS_S_primaryCamera_transform writeCameraTransform glm::mat4
+  //!!genObjWrite RS_S_primaryCamera_transform writeCameraTransform compoundTransform_packed_t
 
   //!!append IDL_CP_L_gui CP_transform.id
   //!!append IDL_CP_L_gui CP_data.id

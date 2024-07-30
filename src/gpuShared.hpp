@@ -30,10 +30,43 @@ namespace doh {
 
   constexpr uint64_t gpuId = 0;
 
-  constexpr WITE::bufferRequirements BR_singleTransform = WITE::singleTransform<gpuId, FLID>::value,
-	      BR_S_singleTransform = WITE::withId(WITE::stagingRequirementsFor(BR_singleTransform, 2), FLID);
-  //!!append BR_all BR_singleTransform
-  //!!append BR_all BR_S_singleTransform
+  /*
+    The playable area is larger than the representation of a float, yet doubles are slow, so the playable space is divded into grid cubes of integer coordinates, and floats represent any position within the cube. The orientation part of the matrix applies equally to all layers of the grid.
+
+    The least significant component of each position identifier is a 3d vector of 32-bit floats. The unit of this component is one meter. The second-least significant component is a 3d vector of unsigned 32-bit integers. Each grid cube in this vector is called a chunk. A chunk measures 2^16 meters on each axis. A single body, including sizable asteroids and even the smallest of planets, may well span multiple chunks. meter=[0,0,0] is centered in the chunk, whereas the chunk origin in the sector and the sector origin in the universe are each an extreme corner of their respective spaces, being indexed by an unisgned int.
+
+    A grid of (2^32)^3 chunks is called a sector. A sector is therefore a cube of size 2^48 meters or about 0.03ly or 1882au, about 5 times the heliopause diameter of Sol. If a sector contains one or more stars, they will be located near the center of the sector (for rendering convenience at long range).
+
+    The universe is divded into (2^32)^3 sectors. This gives the universe a hard boundary of 2^80 meters, about 8.4*10^12 ly, about 1000 times larger than the real-life observable universe.
+
+    Sectors are not arranged in galaxies. They have approximately even distribution throughout the universe. Most celestial objects are stationary, and will not collapse or orbit naturally, though they may spawn arranged in a way that implies they do orbit.
+  */
+
+  constexpr float chunkMeters = 1 << 16;
+  constexpr int64_t chunksPerSector = std::numeric_limits<uint32_t>::max();
+
+  struct compoundTransform_packed_t;
+
+  struct compoundTransform_t {
+    glm::mat3 orientation; //stable rotation-only transform, and therefore trivially reversible
+    glm::vec3 meters;
+    glm::uvec3 chunk, sector;
+    void pack(compoundTransform_packed_t* out);
+    void stabilize();//ensure axes are perpendicular and vector columns and rows are normal
+    void move(const glm::vec3& deltaMeters, const glm::ivec3& deltaChunk = glm::ivec3(), const glm::ivec3& deltaSector = glm::ivec3());
+  };
+
+  //because std140 doesn't like non-256-bit-multiple objects.
+  struct compoundTransform_packed_t {
+    glm::mat4x3 transform;//orientation and meter-part of the location combined
+    glm::uvec4 chunk, sector;//w is pad
+    void unpack(compoundTransform_t* out);
+  };
+
+  constexpr WITE::bufferRequirements BR_compoundTransform = WITE::simpleUB<gpuId, FLID, sizeof(compoundTransform_packed_t)>::value,
+	      BR_S_compoundTransform = WITE::withId(WITE::stagingRequirementsFor(BR_compoundTransform, 2), FLID);
+  //!!append BR_all BR_compoundTransform
+  //!!append BR_all BR_S_compoundTransform
 
   constexpr WITE::bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, FLID, sizeof(cameraData_t)>::value,
 	      BR_S_cameraData = WITE::withId(WITE::stagingRequirementsFor(BR_cameraData, 2), FLID);
