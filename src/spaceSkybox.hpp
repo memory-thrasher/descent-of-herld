@@ -19,5 +19,24 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 //sector saturation distance = 687 sectors beyond which a sector might fall entirely between pixels
 //size saturation distance (1080p) = 4 sectors (7000 au) where a star found will only be one pixel or smaller
 //a renderer (type TBD) will render the star in the camera's current sector
-//a mesh renderer that outputs points will shader stars in other sectors within 700 sectors
+//a mesh or geometry renderer that outputs points will shader stars in other sectors within 700 sectors
 //a whole-screen analytical fragment shader will query stars behind each pixel beyond 700 sectors away
+
+/* near-ish stars: geometry shader
+   each input plane is a vertex (data in vertex buffer), override the instance count to max plane count (render depth)
+   vertex shader projects the plane into camera space and passes along as much as we can pre-compute
+   geometry shader, one invocation per plane, "points" in, actual points out.
+ */
+
+namespace doh {
+
+  //global constants because we might need them in other shaders
+  constexpr uint32_t starGridCount = 1;//for testing, later will have many more
+  //note: due to max output vertex limitations and to take advantage of parallelism, favor more planes of lower density
+  const glm::uvec2 starGrids[starGridCount] = {
+    { glm::packInt4x8({ 19, 11, 29, 1 }), glm::packUint4x8({ 12, 42, 18, 19 }) },
+    //y.xy*y.w and (y.y, y.-x)*y.w define the axis of a grid along the z=0 plan where ray origins are found. Each ray spawns a star every x.xyz*x.w sectors.
+  };
+
+}
+

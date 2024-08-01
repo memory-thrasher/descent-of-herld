@@ -17,7 +17,8 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 namespace doh {
 
   struct cameraData_t {
-    glm::vec4 geometry;//xy pixels
+    glm::vec4 geometry;//xy pixels, zw=cotan(fov.xy)
+    glm::uvec4 renderDistances;//4 size categories: ship, rock, planet, star (stars in systems, others in chunks)
   };
 
 }
