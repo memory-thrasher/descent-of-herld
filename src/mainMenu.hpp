@@ -17,6 +17,8 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <WITE/WITE.hpp>
 
+#include "gpuShared.hpp"
+
 namespace doh {
 
   struct mainMenu {
@@ -28,6 +30,9 @@ namespace doh {
     static void spunUp(uint64_t oid, void* db);
     static void spunDown(uint64_t oid, void* db);
     void* transients;
+    cameraData_t cameraData;
+    compoundTransform_t cameraTrans;
+    float cotFov;
   };
   //!!append DB_types mainMenu
 

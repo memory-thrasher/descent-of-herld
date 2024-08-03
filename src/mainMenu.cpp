@@ -19,6 +19,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "cameraStuff.hpp"
 #include "uiStyle.hpp"
 #include "../generated/targetPrimary_stub.hpp"
+#include "../generated/spaceSkybox_stub.hpp"
 #include "math.hpp"
 #include "guiButton.hpp"
 
@@ -33,6 +34,7 @@ namespace doh {
       { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings" },
       { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit" },
     };
+    spaceSkybox space = spaceSkybox::create();
   };
 
   transients_t* getTransients(uint64_t oid, void* dbv) {
@@ -43,6 +45,21 @@ namespace doh {
   };
 
   void mainMenu::allocated(uint64_t oid, void* dbv) {
+    auto db = reinterpret_cast<db_t*>(dbv);
+    mainMenu mm;
+    db->readCurrent<mainMenu>(oid, &mm);
+    mm.cameraData = {
+      { 0, 0, 0, 0 },
+      { 10, 1000, 100000, 700 },//chunks, chunks, chunks, sectors
+    };
+    mm.cameraTrans = {
+      glm::mat3(1),
+      { 0, 0, 0 },
+      { 0, 0, 0 },
+      { 2048, 2048, 2048 },
+    };
+    mm.cotFov = 1/std::tan(WITE::configuration::getOption("fov", 90.0f)/2);
+    db->write(oid, &mm);
   };
 
   void mainMenu::freed(uint64_t oid, void* dbv) {
@@ -52,19 +69,30 @@ namespace doh {
   void mainMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     const auto size = transients->camera.getWindow().getVecSize();
-    cameraData_t cameraData { { size, 0, 0 } };
-    transients->camera.writeCameraData(cameraData);
     for(auto& btn : transients->buttons)
       btn.update();
+    auto db = reinterpret_cast<db_t*>(dbv);
+    mainMenu mm;
+    db->readCommitted<mainMenu>(oid, &mm);
+    mm.cameraData.geometry = { size, mm.cotFov, mm.cotFov*size.x/size.y };
+    transients->camera.writeCameraData(mm.cameraData);
+    mm.cameraTrans.move({}, {}, { 0, 0, 1 });
+    compoundTransform_packed_t cameraTransPacked;
+    mm.cameraTrans.pack(&cameraTransPacked);
+    transients->camera.writeCameraTransform(cameraTransPacked);
+    db->write(oid, &mm);
   };
 
   void mainMenu::spunUp(uint64_t oid, void* dbv) {
     auto db = reinterpret_cast<db_t*>(dbv);
     mainMenu mm;
-    // WITE::scopeLock lock(db->mutexFor<mainMenu>(oid));//note: not necessary in allocation
-    db->read<mainMenu>(oid, 0, &mm);
-    mm.transients = reinterpret_cast<void*>(new transients_t());
+    db->readCurrent<mainMenu>(oid, &mm);
+    auto* transients = new transients_t();
+    mm.transients = reinterpret_cast<void*>(transients);
     db->write<mainMenu>(oid, &mm);
+    auto& space = transients->space;
+    space.setStarTypes(starTypesBuffer());
+    space.setStarGridMesh(starGridMeshBuffer());
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {

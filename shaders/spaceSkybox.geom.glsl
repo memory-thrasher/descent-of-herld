@@ -14,8 +14,10 @@
 
 #version 450
 
-layout(points) in;//TODO invocations? (max=32)
-layout(points, max_vertices=256) out;
+const uint instances = 512, invocations = 32, maxVertices = 256;//sync with spaceSkybox.hpp
+
+layout(points, invocations=invocations) in;
+layout(points, max_vertices=maxVertices) out;
 
 // layout(std140, set = 0, binding = 0) uniform data_t {
 //   vec4 extents;//LTRB snorm screen
@@ -29,8 +31,10 @@ layout(std140, set = 1, binding = 0) uniform cameraTransform_t {
 
 layout(std140, set = 1, binding = 1) uniform cameraData_t {
   vec4 geometry;//xy = size pixels, zw = cotan(fov.xy/2)
-  vec4 renderDistances;
+  uvec4 renderDistances;
 } cameraData;
+
+layout(location = 0) in uvec2[] vert;
 
 //layout(location = 0) out vec2 screenSnormPos;
 
@@ -40,24 +44,100 @@ ivec4 unpackInt4x8(uint i) {
 }
 
 void main() {
+  //
+  // const vec3 gridOrigin = vec3(0, 0, 0);//in camera space
+  // //
+  // const ivec4 rawIncrements = unpackInt4x8(vert[0].x);
+  // const ivec3 worldGridIncrements = rawIncrements.xyz*rawIncrements.w;
+  // const ivec4 rawOrigins = unpackInt4x8(vert[0].y);
+  // const ivec2 worldRayOriginGrid = rawOrigins.xy * rawOrigins.w;
+  // const mat3 camToRay = mat3();
+  // ivec3 bboxMin = (gridOrigin).xxx, bboxMax = bboxMin;
+  // for(int x = -1;x <= 1; x += 2) {
+  //   for(int y = -1;y <= 1;y += 2) {
+  //     const ivec3 corner = ivec3(/*camToRay * */(cameraData.renderDistances.w * vec3(x * cameraData.geometry.z, y * cameraData.geometry.w, 1) - gridOrigin) /* * camToRay */);
+  //     bboxMax = max(bboxMax, corner);
+  //     bboxMin = min(bboxMin, corner);
+  //   }
+  // }
+  // bboxMax += (1).xxx;//many truncations happen above
+  // // const ivec3 bboxMin = ivec3(-350, -350, 0), bboxMax = ivec3(350, 350, 700), lineGridSize = bboxMax - bboxMin;
+  // // const vec3 rayUp = vec3(12, 42, 0), rayRight = vec3(42, -12, 0), rayForward = vec3(12, 42, 18) * 19;
+  // //
+  // const ivec2 lineGridSize = bboxMax.xy - bboxMin.xy;
+  // const uint lines = lineGridSize.x * lineGridSize.y;
+  // const uint linesPerWorker = max(uint(lines / float(invocations * instances) + 0.5f), 1);
+  // //stuff below this line is not shared between instances and cannot be moved to the vertex shader
+  // const uint workerId = uint(gl_in[0].gl_Position.x) * invocations + gl_InvocationID;
+  // const uint endLine = min(linesPerWorker * (workerId + 1), lines);
+  // uint vertsEmitted = 0;
+  // for(uint lineId = linesPerWorker * workerId;lineId < endLine && vertsEmitted < maxVertices;lineId++) {
+  //   const vec3 lineOrigin = gridOrigin + camToRay[1] * int(bboxMin.y + lineId / lineGridSize.x) + camToRay[0] * int(bboxMin.x + lineId % lineGridSize.x);
+  //   for(int pntId = bboxMin.z;pntId <= bboxMax.z && vertsEmitted < maxVertices;++pntId) {
+  //     //TODO refine min and max values for this ray's intersection?
+  //     const vec3 pnt = lineOrigin + camToRay[2] * pntId;
+  //     const vec2 screenPnt = cameraData.geometry.zw * pnt.xy / abs(pnt.z);
+  //     if(all(lessThanEqual(abs(screenPnt.xy), (1).xx)) && pnt.z > 0 && pnt.z <= cameraData.renderDistances.w) {
+  // 	gl_Position = vec4(screenPnt, 1, 1);
+  // 	EmitVertex();
+  // 	vertsEmitted++;
+  //     }
+  //   }
+  // }
+  //
   //TODO move as much of this as possible to vertex shader
-  const uint instanceID = uint(gl_in[0].gl_Position.x);
-  const ivec4 rawIncrements = unpackInt4x8(vert.x);
-  const ivec3 worldGridIncrements = vert.xyz*vert.w;
-  const vec3 rayForward = (vec3(worldGridIncrements.xy, 0) * cameraTransform.transform).xyz;
-  const ivec4 rawOrigins = unpackInt4x8(vert.y);
-  const ivec4 worldRayOriginGrid = ivec4(rawOrigins.xy, rawOrigins.y, -rawOrigins.x) * rawOrigins.w;
-  const vec3 rayRight = (vec3(worldRayOriginGrid.xy, 0) * cameraTransform.transform).xyz;
-  const vec3 rayUp = (vec3(worldRayOriginGrid.zw, 0) * cameraTransform.transform).xyz;
-  //any point with a star will do, so get one near the camera location to reduce float precision issues
-  uvec3 gridOriginInRayUnits;//note: trunction happens each time this is populated
-  gridOriginInRayUnits.z = cameraTransform.sector.z / worldGridIncrements.z;
-  const uvec2 cameraProjToZ0 = cameraTransform.sector.xy - worldGridIncrements.xy * gridOriginInRayUnits.z;
-  gridOriginInRayUnits.y = (cameraProjToZ0.x * worldRayOriginGrid.y - cameraProjToZ0.y * worldRayOriginGrid.x) /
-    (worldRayOriginGrid.x^2 + worldRayOriginGrid.y^2);
-  gridOriginInRayUnits.x = (cameraProjToZ0.y + gridOriginInRayUnits.y * worldRayOriginGrid.x) / worldRayOriginGrid.y;
-  const vec3 gridOrigin = (ivec3(uvec3(gridOriginInRayUnits.x * worldRayOriginGrid.xy + cameraProjToZ0.y * worldRayOriginGrid.zw, 0) + worldRayOriginGrid.z * worldGridIncrements - cameraTransform.sector) * cameraTransform.transform).xyz;
-  //need a range of planes that intersect the observable volume. It'll be near one of the five corners.
+  // const ivec4 rawIncrements = unpackInt4x8(vert[0].x);
+  // const ivec3 worldGridIncrements = rawIncrements.xyz*rawIncrements.w;
+  // const ivec4 rawOrigins = unpackInt4x8(vert[0].y);
+  // const ivec4 worldRayOriginGrid = ivec4(rawOrigins.xy, rawOrigins.y, -rawOrigins.x) * rawOrigins.w;
+  // //any point with a star will do, so get one near the camera location to reduce float precision issues
+  // uvec3 gridOriginInRayUnits;//note: trunction happens each time this is populated
+  // gridOriginInRayUnits.z = cameraTransform.sector.z / worldGridIncrements.z;
+  // const uvec2 cameraProjToZ0 = cameraTransform.sector.xy - worldGridIncrements.xy * gridOriginInRayUnits.z;
+  // gridOriginInRayUnits.y = (cameraProjToZ0.x * worldRayOriginGrid.y - cameraProjToZ0.y * worldRayOriginGrid.x) /
+  //   (worldRayOriginGrid.x^2 + worldRayOriginGrid.y^2);
+  // gridOriginInRayUnits.x = (cameraProjToZ0.y + gridOriginInRayUnits.y * worldRayOriginGrid.x) / worldRayOriginGrid.y;
+  // const vec3 gridOrigin = (ivec3(uvec3(gridOriginInRayUnits.x * worldRayOriginGrid.xy + cameraProjToZ0.y * worldRayOriginGrid.zw, 0) + worldRayOriginGrid.z * worldGridIncrements - cameraTransform.sector.xyz) * cameraTransform.transform).xyz;
+  // //TODO ^ account for chunk location as fractional system
+  // //need a range of planes that intersect the observable volume.
+  // const float rayOriginLenSqr = dot(worldRayOriginGrid.xy, worldRayOriginGrid.xy);
+  // const vec3 rayRight = (vec3(worldRayOriginGrid.xy, 0) * cameraTransform.transform).xyz,
+  //   rayUp = (vec3(worldRayOriginGrid.zw, 0) * cameraTransform.transform).xyz,
+  //   rayForward = (vec3(worldGridIncrements.xy, 0) * cameraTransform.transform).xyz,
+  //   rayRightScaled = rayRight / rayOriginLenSqr,
+  //   rayUpScaled = rayUp / rayOriginLenSqr,
+  //   rayForwardScaled = rayForward / dot(worldGridIncrements.xy, worldGridIncrements.xy),
+  //   offset = vec3(dot(rayRightScaled, -gridOrigin), dot(rayUpScaled, -gridOrigin), dot(rayForwardScaled, -gridOrigin));
+  // const mat4x3 camToRay = mat4x3(vec4(rayRightScaled, offset.x), vec4(rayUpScaled, offset.y), vec4(rayForwardScaled, offset.z));
+  // ivec3 bboxMin = ivec3(offset), bboxMax = bboxMin;
+  // for(int x = -1;x <= 1; x += 2) {
+  //   for(int y = -1;y <= 1;y += 2) {
+  //     const ivec3 corner = ivec3(camToRay * vec4(cameraData.renderDistances.w * vec3(x * cameraData.geometry.z, y * cameraData.geometry.w, 1), 1));
+  //     bboxMax = max(bboxMax, corner);
+  //     bboxMin = min(bboxMin, corner);
+  //   }
+  // }
+  // bboxMax += (1).xxx;//many truncations happen above
+  // const ivec2 lineGridSize = bboxMax.xy - bboxMin.xy;
+  // const uint lines = lineGridSize.x * lineGridSize.y;
+  // const uint linesPerWorker = max(uint(lines / float(invocations * instances) + 0.5f), 1);
+  // //stuff below this line is not shared between instances and cannot be moved to the vertex shader
+  // const uint workerId = uint(gl_in[0].gl_Position.x) * invocations + gl_InvocationID;
+  // const uint endLine = min(linesPerWorker * (workerId + 1), lines);
+  // uint vertsEmitted = 0;
+  // for(uint lineId = linesPerWorker * workerId;lineId < endLine && vertsEmitted < maxVertices;lineId++) {
+  //   const vec3 lineOrigin = gridOrigin + rayUp * int(bboxMin.y + lineId / lineGridSize.x) + rayRight * int(bboxMin.x + lineId % lineGridSize.x);
+  //   for(int pntId = bboxMin.z;pntId <= bboxMax.z && vertsEmitted < maxVertices;++pntId) {
+  //     //TODO refine min and max values for this ray's intersection?
+  //     const vec3 pnt = lineOrigin + rayForward * pntId;
+  //     const vec2 screenPnt = cameraData.geometry.zw * pnt.xy / abs(pnt.z);
+  //     if(all(lessThanEqual(abs(screenPnt.xy), (1).xx)) && pnt.z > 0 && pnt.z <= cameraData.renderDistances.w) {
+  // 	gl_Position = vec4(screenPnt, 1, 1);
+  // 	EmitVertex();
+  // 	vertsEmitted++;
+  //     }
+  //   }
+  // }
 }
 
 /*

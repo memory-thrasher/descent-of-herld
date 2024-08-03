@@ -47,6 +47,7 @@ namespace doh {
     }
     db.reset(nextDb.db.release());
     dbIsTemp = nextDb.isTemp;
+    db->endFrame();//frame barrer between setup and first frame
   };
 
   void createMainMenu() {

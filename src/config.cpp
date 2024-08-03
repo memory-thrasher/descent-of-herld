@@ -143,7 +143,6 @@ namespace doh {
 	while(!config.eof()) {
 	  config.getline(lineTemp, MAX_LINE_LENGTH);
 	  WITE::configuration::appendOption(lineTemp);
-	  LOG("Config file option: ", lineTemp);
 	}
       } else {
 	WARN("failed to open config file, continuing with defaults");
@@ -158,13 +157,12 @@ namespace doh {
   void saveConfig() {
     std::ofstream config { getDataDir() / "config.txt" };
     ASSERT_TRAP(config.is_open(), "failed to create config file");
-    WITE::configuration::trimOptions();
     WITE::configuration::dumpOptions(config);
     config << std::flush;
   };
 
   glm::vec4 getOptionColor(const char* key, glm::vec4 def) {
-    char* option = WITE::configuration::getOption(key);
+    const char* option = WITE::configuration::getOption(key);
     if(option) {
       uint32_t raw = std::stoul(option, NULL, 16);
       return glm::vec4(((raw >> (3*8)) & 0xFF) / 255.0f,

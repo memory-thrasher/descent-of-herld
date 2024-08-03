@@ -12,13 +12,29 @@
   Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
-#version 450
+#include "spaceSkybox.hpp"
 
-layout(location = 0) in uvec2 vertIn;
-layout(location = 0) out uvec2 vertOut;
+namespace doh {
 
-void main() {
-  vertOut = vertIn;
-  gl_Position = vec4(gl_InstanceIndex + 0.5f, 0, 1, 1);
+  decltype(starGridMesh)::buffer_t& starGridMeshBuffer() {
+    static decltype(starGridMesh)::buffer_t ret;
+    static bool loaded = false;
+    if(!loaded) {
+      loaded = true;
+      starGridMesh.load(&ret);
+    }
+    return ret;
+  };
+
+  WITE::buffer<BR_starTypes>& starTypesBuffer() {
+    static WITE::buffer<BR_starTypes> ret;
+    static bool loaded = false;
+    if(!loaded) {
+      loaded = true;
+      ret.slowOutOfBandSet(starTypes);
+    }
+    return ret;
+  };
+
 }
 

@@ -14,11 +14,10 @@
 
 #version 450
 
-layout(location = 0) in uvec2 vertIn;
-layout(location = 0) out uvec2 vertOut;
+layout(location = 0) out vec4 outColor;
 
 void main() {
-  vertOut = vertIn;
-  gl_Position = vec4(gl_InstanceIndex + 0.5f, 0, 1, 1);
+  outColor = vec4(1, 1, 1, 1);
+  //TODO
 }
 

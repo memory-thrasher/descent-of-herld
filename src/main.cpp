@@ -20,7 +20,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 using namespace doh;
 
-int main(int argc, char** argv) {
+int main(int argc, const char** argv) {
   WITE::configuration::setOptions(argc, argv);
   WITE::gpu::init("Descent of Herld");
   WITE::winput::initInput();
