@@ -17,19 +17,17 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 namespace doh {
 
   void compoundTransform_t::pack(compoundTransform_packed_t* out) {
-    out->transform = glm::mat4x3(glm::column(orientation, 0),
-				 glm::column(orientation, 1),
-				 glm::column(orientation, 2),
-				 meters);
+    for(int i = 0;i < 3;i++)
+      out->transform[i] = glm::vec4(glm::row(orientation, i), meters[i]);
     out->chunk = glm::uvec4(chunk, 0);
     out->sector = glm::uvec4(sector, 0);
   };
 
   void compoundTransform_packed_t::unpack(compoundTransform_t* out) {
-    out->orientation = glm::mat3(glm::column(transform, 0),
-				 glm::column(transform, 1),
-				 glm::column(transform, 2));
-    out->meters = glm::column(transform, 3);
+    for(int i = 0;i < 3;i++) {
+      out->orientation = glm::row(out->orientation, i, glm::vec3(transform[i]));
+      out->meters[i] = transform[i].w;
+    }
     out->chunk = glm::uvec3(chunk);
     out->sector = glm::uvec3(sector);
   };
@@ -49,6 +47,10 @@ namespace doh {
       chunk[i] = (chunksPerSector + newChunk) % chunksPerSector;
       sector[i] += newChunk / chunksPerSector + deltaSector[i];
     }
+  };
+
+  void compoundTransform_t::rotate(const glm::vec3& axis, float angle) {
+    //
   };
 
 }

@@ -32,7 +32,7 @@ namespace doh {
     void* transients;
     cameraData_t cameraData;
     compoundTransform_t cameraTrans;
-    float cotFov;
+    float fov;
   };
   //!!append DB_types mainMenu
 

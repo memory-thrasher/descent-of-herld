@@ -54,11 +54,12 @@ namespace doh {
     void pack(compoundTransform_packed_t* out);
     void stabilize();//ensure axes are perpendicular and vector columns and rows are normal
     void move(const glm::vec3& deltaMeters, const glm::ivec3& deltaChunk = glm::ivec3(), const glm::ivec3& deltaSector = glm::ivec3());
+    void rotate(const glm::vec3& axis, float angle);
   };
 
   //because std140 doesn't like non-256-bit-multiple objects.
   struct compoundTransform_packed_t {
-    glm::mat4x3 transform;//orientation and meter-part of the location combined
+    glm::vec4 transform[3];//orientation and meter-part of the location combined, row-major
     glm::uvec4 chunk, sector;//w is pad
     void unpack(compoundTransform_t* out);
   };

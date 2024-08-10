@@ -17,7 +17,8 @@
 layout(location = 0) out vec4 outColor;
 
 void main() {
-  outColor = vec4(1, 1, 1, 1);
+  outColor = vec4((gl_PrimitiveID >> 16) & 0xFF, (gl_PrimitiveID >> 8) & 0xFF, gl_PrimitiveID & 0xFF, 1) / 255.0f;
+  // outColor = (1).xxxx;
   //TODO
 }
 

@@ -51,9 +51,11 @@ namespace doh {
   constexpr uint32_t starGridCount = 1;//for testing, later will have many more
   //note: due to max output vertex limitations and to take advantage of parallelism, favor more planes of lower density
 
-  constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::RG32uint, starGridCount, FLID> starGridMesh = {
-    { pack(19, 11, 29, 1), pack(12, 42, 18, 19) },
-    //y.xy*y.w and (y.y, y.-x)*y.w define the axes of a grid along the z=0 plane where ray origins are found. Each ray spawns a star every x.xyz*x.w sectors.
+  //ideally there should be 64 planes (roughtly one star per pixel at 4k on 512 instances and 256 verts per instance
+  constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::RGBA8int, starGridCount, FLID> starGridMesh = {
+    //xyz ray direction (z must be positive), w=grid spacing (axis aligned) on Z=0 plane (unsigned packed as signed)
+    { 42, -81, 101, 219-256 },
+    // { 0, 0, 10, 10 },
   };
   //!!append BR_all starGridMesh.bufferRequirements_v
 
@@ -97,7 +99,7 @@ namespace doh {
   decltype(starGridMesh)::buffer_t& starGridMeshBuffer();
   WITE::buffer<BR_starTypes>& starTypesBuffer();
 
-  constexpr uint32_t starGridInstancesPerGrid = 512;//sync with shaders (instances in spaceSkybox.geom.glsl)
+  constexpr uint32_t starGridInstancesPerGrid = 64;
 
   constexpr WITE::objectLayout OL_spaceSkybox { FLID };
   //!!append OL_all OL_spaceSkybox
@@ -121,8 +123,8 @@ namespace doh {
   //!!genObjSet RS_spaceSkybox_starGridMesh setStarGridMesh WITE::buffer<starGridMesh.bufferRequirements_v>
   //!!genObjSet RS_spaceSkybox_starTypes setStarTypes WITE::buffer<BR_starTypes>
 
-  constexpr WITE::resourceConsumer RC_S_spaceSkybox_cameraTransform = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eGeometry>::value,
-	      RC_S_spaceSkybox_cameraData = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eGeometry>::value,
+  constexpr WITE::resourceConsumer RC_S_spaceSkybox_cameraTransform = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eGeometry>::value,
+	      RC_S_spaceSkybox_cameraData = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eGeometry>::value,
 	      RC_S_spaceSkybox_cameraAll[] = {
 		RC_S_spaceSkybox_cameraTransform,
 		RC_S_spaceSkybox_cameraData,
