@@ -14,11 +14,17 @@
 
 #version 450
 
+layout(std140, set = 0, binding = 0) uniform starData_t {
+  uvec4[5] starTypes;
+} starData;
+
 layout(location = 0) out vec4 outColor;
 
 void main() {
-  outColor = vec4((gl_PrimitiveID >> 16) & 0xFF, (gl_PrimitiveID >> 8) & 0xFF, gl_PrimitiveID & 0xFF, 1) / 255.0f;
+  // outColor = vec4((gl_PrimitiveID >> 16) & 0xFF, (gl_PrimitiveID >> 8) & 0xFF, gl_PrimitiveID & 0xFF, 1) / 255.0f;
   // outColor = (1).xxxx;
-  //TODO
+  const uint pack = starData.starTypes[gl_PrimitiveID / 4][gl_PrimitiveID % 4];
+  const uvec4 upack = ((pack).xxxx >> uvec4(24, 16, 8, 0)) & 0xFF;
+  outColor = vec4(clamp(upack.xyz / 256.0f, 0, 1), 1);//TODO distance shading?
 }
 

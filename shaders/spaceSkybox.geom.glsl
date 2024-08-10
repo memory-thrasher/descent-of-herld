@@ -34,7 +34,8 @@ layout(std140, set = 1, binding = 1) uniform cameraData_t {
   uvec4 renderDistances;
 } cameraData;
 
-layout(location = 0) in uvec4[] planeMin;//min.xy, z = planeZ, w = unused
+layout(location = 0) in uvec4[] rayCluster; //xyz = delta between (potential) stars along each ray with origins every 2^z along plane Z=0
+layout(location = 1) in uvec4[] planeInfo;//xy = min ray base location, z = depth along ray of plane, w = bool enabled
 
 // void debugEmitToColor(uint value, uint y) {
 //   gl_Position = vec4(0, y * 0.002f, 1, 1);
@@ -58,19 +59,23 @@ layout(location = 0) in uvec4[] planeMin;//min.xy, z = planeZ, w = unused
 //   EmitVertex();
 // }
 
+#define raySpacing (1 << rayCluster[0].w)
+
 void main() {
-  if(planeMin[0].w == 0) return;
+  if(planeInfo[0].w == 0) return;
   const uvec3 bboxSize = uvec3(gl_in[0].gl_Position.xyz + (0.5f).xxx);//z = area
-  const uvec2 workRange = bboxSize.z * uvec2(0, 1) / (planeMin[0].w * planeMin[0].w);
+  const uvec2 workRange = bboxSize.z * uvec2(gl_InvocationID, gl_InvocationID+1) / invocations;
   uint vertsEmitted = 0;
   for(uint w = workRange.x;w < workRange.y && vertsEmitted < maxVertices;++w) {
     //mix in a rough approximation of the camera's location within the sector before projecting
-    const vec3 pnt = ((vec3(ivec3(planeMin[0].xyz + uvec3((w * planeMin[0].w) % bboxSize.x, (w * planeMin[0].w * planeMin[0].w) / bboxSize.x, 0) - cameraTransform.sector.xyz)) - (cameraTransform.chunk.xyz >> 16) / 65536.0f) * cameraTransform.transform).xyz;
-    const vec2 screenPnt = pnt.xy / (pnt.z * cameraData.geometry.zw);
-    if(pnt.z <= cameraData.renderDistances.w && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx))) {
+    const uvec3 worldPnt = uvec3(planeInfo[0].xy + uvec2(w % bboxSize.x, w / bboxSize.x), 0) * raySpacing + rayCluster[0].xyz * planeInfo[0].z;
+    gl_PrimitiveID = int(worldPnt.x*worldPnt.x*3 + worldPnt.x*7 + worldPnt.y*worldPnt.y*13 + worldPnt.y*17 + worldPnt.z*worldPnt.z*23 + worldPnt.z*29) & 0x1F;
+    const vec3 pnt = ((vec3(ivec3(worldPnt - cameraTransform.sector.xyz)) - (cameraTransform.chunk.xyz >> 16) / 65536.0f) * cameraTransform.transform).xyz;
+    const vec2 screenPnt = pnt.xy / (abs(pnt.z) * cameraData.geometry.zw);
+    if(dot(pnt, pnt) <= cameraData.renderDistances.w * cameraData.renderDistances.w
+       && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) && gl_PrimitiveID < 20) {
       //TODO point size (need a star diameter var in the star types list, and also vk wants a flag set)
       gl_Position = vec4(screenPnt.xy, 1, 1);
-      gl_PrimitiveID = 0xFFFFFF;
       EmitVertex();
       vertsEmitted++;
     }
