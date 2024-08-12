@@ -27,12 +27,17 @@ namespace doh {
 
   struct transients_t {
     targetPrimary camera = targetPrimary::create();
-    guiButton buttons[5] {
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue" },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load" },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New" },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings" },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit" },
+    guiButton buttons[5] = {
+      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue",
+	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load",
+	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New",
+	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
+	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
+	guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
     };
     spaceSkybox space = spaceSkybox::create();
   };
@@ -76,7 +81,7 @@ namespace doh {
     db->readCommitted<mainMenu>(oid, &mm);
     mm.cameraData.geometry = { size, mm.fov*size.x/size.y, mm.fov };
     transients->camera.writeCameraData(mm.cameraData);
-    mm.cameraTrans.move({}, { 0, 0, 1 << 28 }, {});
+    mm.cameraTrans.move({}, { 0, 1 << 26, 1 << 28 }, {});
     compoundTransform_packed_t cameraTransPacked;
     mm.cameraTrans.pack(&cameraTransPacked);
     transients->camera.writeCameraTransform(cameraTransPacked);

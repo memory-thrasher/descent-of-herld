@@ -20,6 +20,8 @@ layout(std140, set = 0, binding = 0) uniform starData_t {
 
 layout(location = 0) out vec4 outColor;
 
+//TODO ask for early fragment tests
+
 void main() {
   // outColor = vec4((gl_PrimitiveID >> 16) & 0xFF, (gl_PrimitiveID >> 8) & 0xFF, gl_PrimitiveID & 0xFF, 1) / 255.0f;
   // outColor = (1).xxxx;

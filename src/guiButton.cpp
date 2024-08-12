@@ -22,12 +22,14 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  guiButton::guiButton(buttonStyle_t& style, glm::vec2 location, std::string labelStr) :
+  guiButton::guiButton(buttonStyle_t& style, glm::vec2 location, std::string labelStr, clickAction ca) :
     rect(guiRect::create()),
     rectData({ location, location.x + style.width, location.y + style.height }),
     label(guiText::create()),
     labelData({ location, location.x + style.width, location.y + style.height }),
-    style(style)
+    style(style),
+    labelStr(labelStr),
+    onClick(ca)
   {
     rect.setStyle(style.rectNormalBuf);
     rect.writeInstanceData(rectData);
@@ -44,8 +46,8 @@ namespace doh {
 
   void guiButton::update() {
     WITE::winput::compositeInputData cid;
-    WITE::winput::getInput(WITE::winput::mouse, cid);
     bool isHovered = false;
+    WITE::winput::getInput(WITE::winput::mouse, cid);
     {
       WITE::scopeLock lock(&targetPrimary::allInstances_mutex);
       for(const targetPrimary& camera : targetPrimary::allInstances) {
@@ -58,9 +60,20 @@ namespace doh {
 	}
       }
     }
-    bool isClicked = WITE::winput::getButton(WITE::winput::lmb);
-    rect.setStyle(isHovered ? isClicked ? style.rectPressBuf : style.rectHovBuf : style.rectNormalBuf);
-    label.setStyle(isHovered ? isClicked ? style.textPressBuf : style.textHovBuf : style.textNormalBuf);
+    if(!isHovered) [[likely]]
+      isPressed = false; //dragging off a button = abort
+    else if(WITE::winput::getButtonDown(WITE::winput::lmb)) [[unlikely]]
+      isPressed = true;
+    else if(!isPressed && WITE::winput::getButton(WITE::winput::lmb)) [[unlikely]]
+      //dragging on does not proc indication of press sensitivity
+      isHovered = false;
+    else if(!WITE::winput::getButton(WITE::winput::lmb)) {
+      if(isPressed && WITE::winput::getButtonUp(WITE::winput::lmb)) [[unlikely]]
+	onClick(this);
+      isPressed = false;
+    }
+    rect.setStyle(isPressed ? style.rectPressBuf : isHovered ? style.rectHovBuf : style.rectNormalBuf);
+    label.setStyle(isPressed ? style.textPressBuf : isHovered ? style.textHovBuf : style.textNormalBuf);
   };
 
   void guiButton::resize(glm::vec4) {

@@ -21,15 +21,19 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 namespace doh {
 
   struct guiButton {
+    typedefCB(clickAction, void, guiButton*);
     guiRect rect;
     guiRectInstance_t rectData;
     guiText label;
     guiTextInstance_t labelData;
     guiTextIndirectBuffer_t labelContent;
     buttonStyle_t& style;
+    std::string labelStr;//for debugging
+    clickAction onClick;
+    bool isPressed = false;
     guiButton() = delete;
     guiButton(guiButton&&) = delete;
-    guiButton(buttonStyle_t& style, glm::vec2 location, std::string label);
+    guiButton(buttonStyle_t& style, glm::vec2 location, std::string label, clickAction ca);
     ~guiButton();
     void resize(glm::vec4);
     void setLabel(std::string);
