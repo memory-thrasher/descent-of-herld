@@ -46,30 +46,32 @@ namespace doh {
   };
 
   void guiButton::update() {
-    WITE::winput::compositeInputData cid;
+    WITE::winput::compositeInputData mouseLocation, lmbCid;
     bool isHovered = false;
-    WITE::winput::getInput(WITE::winput::mouse, cid);
+    WITE::winput::getInput(WITE::winput::mouse, mouseLocation);
     {
       WITE::scopeLock lock(&targetPrimary::allInstances_mutex);
       for(const targetPrimary& camera : targetPrimary::allInstances) {
 	const auto size = camera.getWindow().getVecSize();
-	glm::vec2 mouseInSnorm(cid.axes[0].current / size.x * 2 - 1,
-			       cid.axes[1].current / size.y * 2 - 1);
+	glm::vec2 mouseInSnorm(mouseLocation.axes[0].current / size.x * 2 - 1,
+			       mouseLocation.axes[1].current / size.y * 2 - 1);
 	if(rectContainsPoint(rectData.extents, mouseInSnorm)) {
 	  isHovered = true;
 	  break;
 	}
       }
     }
+    WITE::winput::getInput(WITE::winput::lmb, lmbCid);
+    auto& lmb = lmbCid.axes[0];
     if(!isHovered) [[likely]]
       isPressed = false; //dragging off a button = abort
-    else if(WITE::winput::getButtonDown(WITE::winput::lmb)) [[unlikely]]
+    else if(lmb.justPressed()) [[unlikely]]
       isPressed = true;
-    else if(!isPressed && WITE::winput::getButton(WITE::winput::lmb)) [[unlikely]]
+    else if(!isPressed && lmb.isPressed()) [[unlikely]]
       //dragging on does not proc indication of press sensitivity
       isHovered = false;
-    else if(!WITE::winput::getButton(WITE::winput::lmb)) {
-      if(isPressed && WITE::winput::getButtonUp(WITE::winput::lmb)) [[unlikely]]
+    else if(!lmb.isPressed()) {
+      if(lmb.justClicked() || (isPressed && lmb.justReleased())) [[unlikely]]
 	onClick(this);
       isPressed = false;
     }
