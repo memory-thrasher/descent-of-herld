@@ -45,7 +45,7 @@ namespace doh {
   };
 
   struct guiTextIndirectBuffer_t {
-    glm::uvec4 size;//mostly pad  TODO verify pad is necessary
+    glm::uvec4 size;//mostly pad
     vk::DrawIndirectCommand drawCommands[guiText_maxCharsPerString];
   };
 

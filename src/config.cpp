@@ -109,7 +109,7 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("btn-small-corner", 0);//x&y relative to screen width
       float borderWidth = WITE::configuration::getOption("btn-small-border-width", 0);//x&y relative to screen width
-      float textWidth = WITE::configuration::getOption("btn-small-text-width", 0.007292f);//48pt on 1080p
+      float textWidth = WITE::configuration::getOption("btn-small-text-width", 0.007292f);
       float textHeight = WITE::configuration::getOption("btn-small-text-height", 0.014584f);
       float width = WITE::configuration::getOption("btn-small-width", 0.075f);
       float height = WITE::configuration::getOption("btn-small-height", 0.03f);
@@ -126,6 +126,27 @@ namespace doh {
       btn.width = width;
       btn.height = height;
       btn.pushToBuffers();
+    }
+    {
+      float textWidth = WITE::configuration::getOption("txt-big-text-width", 0.025f);//48pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-big-text-height", 0.05f);
+      auto& txt = textOnlyBig();
+      txt.text = { normalTextColor, { textWidth, textHeight, 0, 0 } };
+      txt.pushToBuffer();
+    }
+    {
+      float textWidth = WITE::configuration::getOption("txt-normal-text-width", 0.0125f);//24pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-normal-text-height", 0.025f);
+      auto& txt = textOnlyNormal();
+      txt.text = { normalTextColor, { textWidth, textHeight, 0, 0 } };
+      txt.pushToBuffer();
+    }
+    {
+      float textWidth = WITE::configuration::getOption("txt-small-text-width", 0.007292f);//14pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-small-text-height", 0.014584f);
+      auto& txt = textOnlySmall();
+      txt.text = { normalTextColor, { textWidth, textHeight, 0, 0 } };
+      txt.pushToBuffer();
     }
   };
 

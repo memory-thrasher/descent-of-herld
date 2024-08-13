@@ -42,6 +42,7 @@ namespace doh {
 
   guiButton::~guiButton() {
     rect.destroy();
+    label.destroy();
   };
 
   void guiButton::update() {

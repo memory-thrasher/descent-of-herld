@@ -12,57 +12,46 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#include <set>
+#include <iostream>
+
+#include "fpsCounter.hpp"
+#include "math.hpp"
 #include "uiStyle.hpp"
 
 namespace doh {
 
-  void buttonStyle_t::pushToBuffers() {
-    textHovBuf.slowOutOfBandSet(textHov);
-    textNormalBuf.slowOutOfBandSet(textNormal);
-    textPressBuf.slowOutOfBandSet(textPress);
-    rectHovBuf.slowOutOfBandSet(rectHov);
-    rectNormalBuf.slowOutOfBandSet(rectNormal);
-    rectPressBuf.slowOutOfBandSet(rectPress);
+  //temp, should do a more comprehensive timing within WITE (including times waiting for fences)
+  inline uint64_t getNs() {
+    return std::chrono::time_point_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now()).time_since_epoch().count();
   };
 
-  buttonStyle_t& btnBig() {
-    static buttonStyle_t ret;
-    return ret;
+  fpsCounter::fpsCounter() :
+    txt(guiTextVolatile::create()),
+    txtData({ { -1, -1, 1, 1 } })
+  {
+    txt.setTextMesh(fontMeshBuffer());
+    txt.setStyle(textOnlySmall().textBuf);
+    guiTextFormat(txtContent, "%s", "FPS: XX");
+    txt.writeIndirectBuffer(txtContent);
+    txt.writeInstanceData(txtData);
+    //simplified fps counting for now
+    lastTimeStamp = getNs();
   };
 
-  buttonStyle_t& btnHuge() {
-    static buttonStyle_t ret;
-    return ret;
+  fpsCounter::~fpsCounter() {
+    txt.destroy();
   };
 
-  buttonStyle_t& btnNormal() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  buttonStyle_t& btnSmall() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  void textOnlyStyle_t::pushToBuffer() {
-    textBuf.slowOutOfBandSet(text);
-  };
-
-  textOnlyStyle_t& textOnlyBig() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
-
-  textOnlyStyle_t& textOnlyNormal() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
-
-  textOnlyStyle_t& textOnlySmall() {
-    static textOnlyStyle_t ret;
-    return ret;
+  void fpsCounter::update() {
+    uint64_t timeStamp = getNs();
+    if(timeStamp <= lastTimeStamp)
+      guiTextFormat(txtContent, "%s", "FPS: too many");
+    else
+      guiTextFormat(txtContent, "FPS: %0.2f  (%0.6f ms)", 1e9/(timeStamp - lastTimeStamp), (timeStamp - lastTimeStamp) * 1e-6);
+    lastTimeStamp = timeStamp;
+    txt.writeIndirectBuffer(txtContent);
+    txt.writeInstanceData(txtData);
   };
 
 }
-

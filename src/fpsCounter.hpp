@@ -14,36 +14,20 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-#include <WITE/WITE.hpp>
-
-#include "guiRect.hpp"
-#include "guiText.hpp"
+#include "uiStyle.hpp"
+#include "../generated/guiTextVolatile_stub.hpp"
 
 namespace doh {
 
-  struct buttonStyle_t {
-    WITE::buffer<BR_guiRectStyle> rectNormalBuf, rectHovBuf, rectPressBuf;
-    WITE::buffer<BR_guiTextStyle> textNormalBuf, textHovBuf, textPressBuf;
-    guiRectStyle_t rectNormal, rectHov, rectPress;
-    guiTextStyle_t textNormal, textHov, textPress;
-    float width, height;
-    void pushToBuffers();
+  struct fpsCounter {
+    uint64_t lastTimeStamp;
+    guiTextVolatile txt;
+    guiTextInstance_t txtData;
+    guiTextIndirectBuffer_t txtContent;
+    fpsCounter();
+    fpsCounter(fpsCounter&&) = delete;
+    ~fpsCounter();
+    void update();
   };
-
-  buttonStyle_t& btnBig();
-  buttonStyle_t& btnHuge();
-  buttonStyle_t& btnNormal();
-  buttonStyle_t& btnSmall();
-
-  struct textOnlyStyle_t {
-    WITE::buffer<BR_guiTextStyle> textBuf;
-    guiTextStyle_t text;
-    void pushToBuffer();
-  };
-
-  textOnlyStyle_t& textOnlyBig();
-  textOnlyStyle_t& textOnlyNormal();
-  textOnlyStyle_t& textOnlySmall();
 
 }
-

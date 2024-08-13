@@ -22,6 +22,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "../generated/spaceSkybox_stub.hpp"
 #include "math.hpp"
 #include "guiButton.hpp"
+#include "fpsCounter.hpp"
 
 namespace doh {
 
@@ -40,6 +41,7 @@ namespace doh {
 	guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
     };
     spaceSkybox space = spaceSkybox::create();
+    fpsCounter fps;
   };
 
   transients_t* getTransients(uint64_t oid, void* dbv) {
@@ -76,6 +78,7 @@ namespace doh {
     const auto size = transients->camera.getWindow().getVecSize();
     for(auto& btn : transients->buttons)
       btn.update();
+    transients->fps.update();
     auto db = reinterpret_cast<db_t*>(dbv);
     mainMenu mm;
     db->readCommitted<mainMenu>(oid, &mm);
