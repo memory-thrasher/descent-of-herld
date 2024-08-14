@@ -16,16 +16,6 @@
 
 namespace doh {
 
-  decltype(starGridMesh)::buffer_t& starGridMeshBuffer() {
-    static decltype(starGridMesh)::buffer_t ret;
-    static bool loaded = false;
-    if(!loaded) {
-      loaded = true;
-      starGridMesh.load(&ret);
-    }
-    return ret;
-  };
-
   WITE::buffer<BR_starTypes>& starTypesBuffer() {
     static WITE::buffer<BR_starTypes> ret;
     static bool loaded = false;

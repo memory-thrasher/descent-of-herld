@@ -86,16 +86,8 @@ namespace doh {
   //!!append CS_all CP_transform
   //!!append CS_all CP_data
 
-  constexpr uint64_t RC_ID_RP_1_color = FLID,
-	      RC_ID_RP_1_depth = FLID,
-	      RC_ID_RP_2_color = FLID,
-	      RC_ID_RP_2_depth = FLID,
-	      RC_ID_RP_3_color = FLID,
-	      RC_ID_RP_3_depth = FLID,
-	      RC_ID_RP_4_color = FLID,
-	      RC_ID_RP_4_depth = FLID,
-	      RC_ID_RP_5_color = FLID,
-	      RC_ID_RP_5_depth = FLID;
+  // constexpr uint64_t RC_ID_RP_skybox_color = FLID,
+  // 	      RC_ID_RP_skybox_depth = FLID;
 
   //this IR is the final target of reflection cube maps, getting resambled by future renders, and also the pre-bloom attachment for the screen target, which is resambled by the bloom shader.
   constexpr WITE::imageRequirements IR_intermediateColor = WITE::intermediateColor<gpuId, FLID, WITE::Format::RGBA32float>::value;

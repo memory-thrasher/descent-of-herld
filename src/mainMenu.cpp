@@ -60,7 +60,7 @@ namespace doh {
       { 10, 1000, 100000, 700 },//chunks, chunks, chunks, sectors
     };
     mm.cameraTrans = {
-      glm::mat3(1),
+      glm::mat3({0, 0, 1}, {0, 1, 0}, {-1, 0, 0}),
       { 0, 0, 0 },
       { 0, 0, 0 },
       { 204887, 20487, 2348 },
@@ -84,7 +84,8 @@ namespace doh {
     db->readCommitted<mainMenu>(oid, &mm);
     mm.cameraData.geometry = { size, mm.fov*size.x/size.y, mm.fov };
     transients->camera.writeCameraData(mm.cameraData);
-    mm.cameraTrans.move({}, { 0, 1 << 26, 1 << 28 }, {});
+    mm.cameraTrans.rotate({ 0, 1, 0 }, 0.0001f);
+    mm.cameraTrans.move({}, { 0, 0, 1 << 28 }, {});
     compoundTransform_packed_t cameraTransPacked;
     mm.cameraTrans.pack(&cameraTransPacked);
     transients->camera.writeCameraTransform(cameraTransPacked);
@@ -100,7 +101,6 @@ namespace doh {
     db->write<mainMenu>(oid, &mm);
     auto& space = transients->space;
     space.setStarTypes(starTypesBuffer());
-    space.setStarGridMesh(starGridMeshBuffer());
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {

@@ -27,6 +27,6 @@ void main() {
   // outColor = (1).xxxx;
   const uint pack = starData.starTypes[gl_PrimitiveID / 4][gl_PrimitiveID % 4];
   const uvec4 upack = ((pack).xxxx >> uvec4(24, 16, 8, 0)) & 0xFF;
-  outColor = vec4(clamp(upack.xyz / 256.0f, 0, 1), 1);//TODO distance shading?
+  outColor = vec4(clamp(upack.xyz / 256.0f, 0, 1) * (1-gl_FragCoord.z), 1);
 }
 
