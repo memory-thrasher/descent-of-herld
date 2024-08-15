@@ -45,6 +45,7 @@ uint dot(uvec3 a, uvec3 b) {
   return a.x*b.x + a.y*b.y + a.z*b.z;
 }
 
+// //local storage
 // void main() {
 //   if(planeData.w == 0) return;
 //   if(gl_LocalInvocationID == (0).xxx)
@@ -75,11 +76,11 @@ uint dot(uvec3 a, uvec3 b) {
 //   }
 // }
 
+//two-pass
 void main() {
   if(planeData.w == 0) return;
   if(gl_LocalInvocationID == (0).xxx)
     atomicAnd(outIdx, 0);//barrier-free set to 0
-  memoryBarrierShared();
   uint localCnt = 0, localMin = 0xFFFF, localMax = 0;
   //first check how many we are going to write
   for(uint i = 0;i < testsPerInvocation;i++) {
@@ -135,4 +136,7 @@ void main() {
 //380g, 150r, 32inv,  3FFmod: 1200 banding
 //350g, 250r, 32inv,  1FFmod: 1200 banding
 //700g, 250r, 32inv, 1FFFmod: 380 90k
+//implemented per-plane bbox limitation
+//700g, 250r, 32inv, 1FFFmod: 800-1400 91k  (two-pass)
+//700g, 250r, 32inv, 1FFFmod: 800-1400 91k  (local storage)
 

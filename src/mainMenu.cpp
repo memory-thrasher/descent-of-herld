@@ -60,9 +60,9 @@ namespace doh {
       { 10, 1000, 100000, 250 },//chunks, chunks, chunks, sectors
     };
     mm.cameraTrans = {
-      glm::mat3({0, 0, 1}, {0, 1, 0}, {-1, 0, 0}),
+      glm::mat3(1),
       { 0, 0, 0 },
-      { 0, 0, 0 },
+      { 0, 0, 100000 },
       { 204887, 20487, 2348 },
     };
     mm.fov = 1/std::tan(glm::radians(WITE::configuration::getOption("fov", 90.0f)/2));
@@ -84,7 +84,7 @@ namespace doh {
     db->readCommitted<mainMenu>(oid, &mm);
     mm.cameraData.geometry = { size, mm.fov*size.x/size.y, mm.fov };
     transients->camera.writeCameraData(mm.cameraData);
-    mm.cameraTrans.rotate({ 0, 1, 0 }, 0.0001f);
+    // mm.cameraTrans.rotate({ 0, 1, 0 }, 0.0001f);
     mm.cameraTrans.move({}, { 0, 0, 1 << 28 }, {});
     compoundTransform_packed_t cameraTransPacked;
     mm.cameraTrans.pack(&cameraTransPacked);

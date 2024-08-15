@@ -33,6 +33,10 @@ layout(std140, set = 1, binding = 1) uniform cameraData_t {
 
 taskPayloadSharedEXT uvec4 planeData;//xyz = bbox min, w = packed uint16 bbox size xy
 
+int sqr(int x) {
+  return x*x;
+}
+
 void main() {
   uvec3 bboxMax, bboxMin = bboxMax = cameraTransform.sector.xyz;
   for(int x = -1;x <= 1;++x) {
@@ -47,10 +51,36 @@ void main() {
   if(planeData.z > bboxMax.z) {
     planeData = (0).xxxx;
   } else {
-    //TODO limit bbox by projecting the viewable volume
-    planeData.w = 1;
-    ((bboxMax.x - bboxMin.x) << 16) | (bboxMax.y - bboxMin.y);
+    //limit bbox to the viewable portion of this plane
+    //project the four corners of the screen
+    //reset but can't use camera origin as sentinel this time
+    uvec4 planeBbox = uvec4(bboxMax.xy, (0).xx);//min.xy, max.xy
+    if(planeData.z == cameraTransform.sector.z) { //camera origin is on this plane, revert to original bbox
+      planeBbox.zw = bboxMax.xy;
+      planeBbox.xy = bboxMin.xy;
+    } else {
+      for(int x = -1;x <= 1;++x) {
+	for(int y = -1;y <= 1;++y) {
+	  const vec3 rayDelta = cameraTransform.transform * vec4(vec2(x, y) * cameraData.geometry.zw, 1, 0);
+	  const float mul = int(planeData.z - cameraTransform.sector.z) / rayDelta.z;
+	  uvec2 corner;
+	  if(mul < 0 || mul != mul) {
+	    //intersection is behind camera or ray is on plane, so extend the new bbox forward to the original bbox bounds
+	    corner = mix(bboxMin.xy, bboxMax.xy, greaterThan(rayDelta.xy, (0).xx));
+	  } else {
+	    corner = clamp(cameraTransform.sector.xy + ivec2(rayDelta.xy * mul), bboxMin.xy, bboxMax.xy);
+	  }
+	  planeBbox.zw = max(planeBbox.zw, corner);
+	  planeBbox.xy = min(planeBbox.xy, corner);
+	}
+      }
+    }
+    //render distance limit: what segment is in range (spherical)
+    const uint sphericalIntersectionRadius = uint(sqrt(sqr(int(cameraData.renderDistances.w)) - sqr(int(planeData.z - cameraTransform.sector.z))));
+    bboxMax.xy = min(planeBbox.zw, cameraTransform.sector.xy + sphericalIntersectionRadius.xx);
+    bboxMin.xy = max(planeBbox.xy, cameraTransform.sector.xy - sphericalIntersectionRadius.xx);
     planeData.xy = bboxMin.xy;
+    planeData.w = 1;
   }
   EmitMeshTasksEXT((bboxMax.x - bboxMin.x) / meshWorkgroupOutput + 1, bboxMax.y - bboxMin.y, planeData.w);
 }
