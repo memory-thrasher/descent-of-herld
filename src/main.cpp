@@ -22,10 +22,11 @@ using namespace doh;
 
 int main(int argc, const char** argv) {
   WITE::configuration::setOptions(argc, argv);
-  WITE::gpu::init("Descent of Herld");
+  loadConfig();
+  WITE::gpu::init("Descent of Herld", {}, {}, {"VK_EXT_mesh_shader"});
   WITE::winput::initInput();
   WITE::wsound::initSound();
-  loadConfig();
+  loadDefaults();
   createOnionFull();
   createMainMenu();
   dbCycle();

@@ -14,6 +14,12 @@
 
 #version 450
 
+#extension GL_EXT_mesh_shader : require
+
+const uint meshWorkgroupOutput = 256;//should match max_vertices in mesh shader
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
 layout(std140, set = 1, binding = 0) uniform cameraTransform_t {
   layout(row_major) mat4x3 transform;
   uvec4 chunk;
@@ -25,16 +31,9 @@ layout(std140, set = 1, binding = 1) uniform cameraData_t {
   uvec4 renderDistances;
 } cameraData;
 
-layout(location = 0) out ivec3 rayCluster;//xyz = delta between (potential) stars along each ray with origins every 2^z along plane Z=0
-layout(location = 1) out uvec4 planeInfo;//xy = min ray base location, z = depth along ray of plane, w = unused
-
-const uint raySpacing = 256;
+taskPayloadSharedEXT uvec4 planeData;//xyz = bbox min, w = packed uint16 bbox size xy
 
 void main() {
-  // rayCluster = ivec3(int(((gl_VertexIndex + 12583) * 62053) & 0x7F) - 64,
-  // 		     int(((gl_VertexIndex +  5153) * 48821) & 0x7F) - 64,
-  // 		     int(((gl_VertexIndex + 15131) * 51539) & 0x3F) + 64);
-  rayCluster = (((gl_VertexIndex.xxx + ivec3(-12583, 5153, 15131)) * ivec3(62053, 48821, 51539)) & ivec3(0x7F.xx, 0x3F)) + ivec3(-64, -64, 64);
   uvec3 bboxMax, bboxMin = bboxMax = cameraTransform.sector.xyz;
   for(int x = -1;x <= 1;++x) {
     for(int y = -1;y <= 1;++y) {
@@ -43,19 +42,15 @@ void main() {
       bboxMin = min(bboxMin, corner);
     }
   }
-  const uvec3 minOffsetFromZ0 = uvec3(rayCluster.xy, 1) * (bboxMin.z / rayCluster.z);
-  const uint planeCount = bboxMax.z / rayCluster.z - minOffsetFromZ0.z + 1;
-  if(gl_InstanceIndex > planeCount) {
-    planeInfo.w = 0;
-    return;
+  bboxMax += (1).xxx;//correct potential rounding errors
+  planeData.z = bboxMin.z + gl_WorkGroupID.x;
+  if(planeData.z > bboxMax.z) {
+    planeData = (0).xxxx;
+  } else {
+    //TODO limit bbox by projecting the viewable volume
+    planeData.w = 1;
+    ((bboxMax.x - bboxMin.x) << 16) | (bboxMax.y - bboxMin.y);
+    planeData.xy = bboxMin.xy;
   }
-  planeInfo.w = 1;
-  const uint planeId = cameraTransform.sector.z > ((bboxMax.z + bboxMin.z) >> 1) ? planeCount - gl_InstanceIndex - 1 : gl_InstanceIndex;
-  planeInfo.xy = (bboxMin.xy - minOffsetFromZ0.xy - rayCluster.xy * planeId) / raySpacing;
-  planeInfo.z = minOffsetFromZ0.z + planeId;
-  const uvec2 size = (bboxMax.xy - bboxMin.xy) / raySpacing + (1).xx;
-  //TODO prioritize those nearest the camera (z or -z)?
-  gl_Position = vec4(size.xy, size.x * size.y, 1);
-  gl_PointSize = 1;
+  EmitMeshTasksEXT((bboxMax.x - bboxMin.x) / meshWorkgroupOutput + 1, bboxMax.y - bboxMin.y, planeData.w);
 }
-

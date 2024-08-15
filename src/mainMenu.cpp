@@ -57,7 +57,7 @@ namespace doh {
     db->readCurrent<mainMenu>(oid, &mm);
     mm.cameraData = {
       { 0, 0, 0, 0 },
-      { 10, 1000, 100000, 700 },//chunks, chunks, chunks, sectors
+      { 10, 1000, 100000, 250 },//chunks, chunks, chunks, sectors
     };
     mm.cameraTrans = {
       glm::mat3({0, 0, 1}, {0, 1, 0}, {-1, 0, 0}),

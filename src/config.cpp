@@ -171,8 +171,7 @@ namespace doh {
     } else {
       LOG("note: config file does not exist, creating: ", confPath);
     }
-    loadDefaults();
-    saveConfig();//apply any cli options or defaults
+    saveConfig();//apply any cli options
   };
 
   void saveConfig() {

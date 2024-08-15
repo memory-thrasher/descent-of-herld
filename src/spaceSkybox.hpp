@@ -47,10 +47,6 @@ namespace doh {
     return std::min<uint8_t>(static_cast<uint8_t>(unorm * 256), 255);
   };
 
-  //global constants because we might need them in other shaders
-  constexpr uint32_t starGridCount = 65536, starGridInstancesPerGrid = 32;
-  //note: due to max output vertex limitations and to take advantage of parallelism, favor more planes of lower density
-
   constexpr ::WITE::udmObject<WITE::UDM::R32uint> starTypes[] = {
     { pack(unormToUint(0.6f), unormToUint(0.69f), 255, 10 * 2) },
     { pack(unormToUint(0.57f), unormToUint(0.71f), 255, 8 * 2) },
@@ -105,8 +101,8 @@ namespace doh {
   //!!append RS_all RS_L_spaceSkybox
   //!!genObjSet RS_spaceSkybox_starTypes setStarTypes WITE::buffer<BR_starTypes>
 
-  constexpr WITE::resourceConsumer RC_S_spaceSkybox_cameraTransform = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eGeometry>::value,
-	      RC_S_spaceSkybox_cameraData = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eGeometry>::value,
+  constexpr WITE::resourceConsumer RC_S_spaceSkybox_cameraTransform = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eMeshEXT | vk::ShaderStageFlagBits::eTaskEXT>::value,
+	      RC_S_spaceSkybox_cameraData = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eMeshEXT | vk::ShaderStageFlagBits::eTaskEXT>::value,
 	      RC_S_spaceSkybox_cameraAll[] = {
 		RC_S_spaceSkybox_cameraTransform,
 		RC_S_spaceSkybox_cameraData,
@@ -116,13 +112,13 @@ namespace doh {
 		RC_S_spaceSkybox_starTypes,
 	      };
 
-#include "spaceSkybox.vert.spv.h"
-#include "spaceSkybox.geom.spv.h"
+#include "spaceSkybox.task.spv.h"
+#include "spaceSkybox.mesh.spv.h"
 #include "spaceSkybox.frag.spv.h"
 
-  constexpr WITE::shaderModule SM_L_spaceSkybox[] {
-    { spaceSkybox_vert, sizeof(spaceSkybox_vert), vk::ShaderStageFlagBits::eVertex },
-    { spaceSkybox_geom, sizeof(spaceSkybox_geom), vk::ShaderStageFlagBits::eGeometry },
+  constexpr WITE::shaderModule SM_L_spaceSkybox[] = {
+    { spaceSkybox_task, sizeof(spaceSkybox_task), vk::ShaderStageFlagBits::eTaskEXT },
+    { spaceSkybox_mesh, sizeof(spaceSkybox_mesh), vk::ShaderStageFlagBits::eMeshEXT },
     { spaceSkybox_frag, sizeof(spaceSkybox_frag), vk::ShaderStageFlagBits::eFragment },
   };
 
@@ -133,8 +129,7 @@ namespace doh {
     .sourceProvidedResources = RC_S_spaceSkybox_sourceAll,
     .topology = vk::PrimitiveTopology::ePointList,
     .cullMode = vk::CullModeFlagBits::eNone,
-    .vertexCountOverride = starGridCount,
-    .instanceCountOverride = starGridInstancesPerGrid,
+    .meshGroupCountX = 700,
   };
   //!!append S_RP_gui S_spaceSkybox
 
