@@ -16,19 +16,6 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 //!!include me
 //!!onion all
 
-//NOTE: cotangent of one pixel's FOV is ~688 for 45 degree total fov on a 1080p screen
-//intensity saturation distance = 9k sectors (360ly) beyond which stars are unlikely to shade a pixel at all
-//sector saturation distance = 687 sectors beyond which a sector might fall entirely between pixels
-//size saturation distance (1080p) = 4 sectors (7000 au) where a star found will only be one pixel or smaller
-//a renderer (type TBD) will render the star in the camera's current sector
-//a mesh or geometry renderer that outputs points will shader stars in other sectors within 700 sectors
-//a whole-screen analytical fragment shader will query stars behind each pixel beyond 700 sectors away
-
-/* near-ish stars: geometry shader
-   each input plane is a vertex (data in vertex buffer), override the instance count to max plane count (render depth)
-   vertex shader projects the plane into camera space and passes along as much as we can pre-compute
-   geometry shader, one invocation per plane, "points" in, actual points out.
- */
 
 #include <algorithm>
 
@@ -107,7 +94,7 @@ namespace doh {
 		RC_S_spaceSkybox_cameraTransform,
 		RC_S_spaceSkybox_cameraData,
 	      },
-	      RC_S_spaceSkybox_starTypes = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eFragment>::value,
+	      RC_S_spaceSkybox_starTypes = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eMeshEXT | vk::ShaderStageFlagBits::eFragment>::value,
 	      RC_S_spaceSkybox_sourceAll[] = {
 		RC_S_spaceSkybox_starTypes,
 	      };

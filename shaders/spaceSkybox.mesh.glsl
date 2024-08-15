@@ -25,6 +25,10 @@ const uvec3 seedA = uvec3(37, 139, 199),
 layout(local_size_x = maxInvocations, local_size_y = 1, local_size_z = 1) in;
 layout(points, max_vertices=maxVertices, max_primitives=maxVertices) out;
 
+layout(std140, set = 0, binding = 0) uniform starData_t {
+  uvec4[5] starTypes;
+} starData;
+
 layout(std140, set = 1, binding = 0) uniform cameraTransform_t {
   layout(row_major) mat4x3 transform;
   uvec4 chunk;
@@ -104,13 +108,13 @@ void main() {
   for(uint i = localMin;i <= localMax;i++) {
     const uvec3 worldPnt = planeData.xyz + uvec3(gl_WorkGroupID.x * maxVertices + gl_LocalInvocationID.x * testsPerInvocation + i, gl_WorkGroupID.y, 0);
     const vec3 pnt = vec3(((vec3(ivec3(worldPnt - cameraTransform.sector.xyz)) - (cameraTransform.chunk.xyz >> 16) / 65536.0f) * cameraTransform.transform).xyz);
-    gl_MeshPrimitivesEXT[dst].gl_PrimitiveID = int(dot(worldPnt, worldPnt * seedA) + dot(worldPnt, seedB)) & modulus;
+    const int pid = int(dot(worldPnt, worldPnt * seedA) + dot(worldPnt, seedB)) & modulus;
     const vec2 screenPnt = pnt.xy / (abs(pnt.z) * cameraData.geometry.zw);
     const float dstSqrNorm = dot(pnt, pnt) / (cameraData.renderDistances.w * cameraData.renderDistances.w);
-    if(dstSqrNorm <= 1 && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) &&
-       gl_MeshPrimitivesEXT[dst].gl_PrimitiveID < 20) {
+    if(dstSqrNorm <= 1 && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) && pid < 20) {
       gl_MeshVerticesEXT[dst].gl_Position = vec4(screenPnt.xy, dstSqrNorm, 1);
-      //TODO point size (need a star diameter var in the star types list, and also vk wants a flag set)
+      gl_MeshVerticesEXT[dst].gl_PointSize = max(1, int(starData.starTypes[pid / 4][pid % 4] & 0xFF) * 2.466e-6 * cameraData.geometry.w * cameraData.geometry.y / length(pnt));
+      gl_MeshPrimitivesEXT[dst].gl_PrimitiveID = pid;
       gl_PrimitivePointIndicesEXT[dst] = dst;//dumb loop for point output meshes
       dst++;
     }
