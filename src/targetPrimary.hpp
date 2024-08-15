@@ -88,6 +88,8 @@ namespace doh {
     { CP_data.dst, RS_primaryCamera_cameraData.id },
     { RC_ID_RP_gui_color, RS_primaryCamera_color.id },
     { RC_ID_RP_gui_depth, RS_primaryCamera_depth.id },
+    { RC_ID_RP_skybox_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_skybox_depth, RS_primaryCamera_depth.id },
     { RC_ID_primaryCamera_present, RS_primaryCamera_color.id },
   };
   //!!append RR_L_primaryCamera RR_L_primaryCamera_invariant

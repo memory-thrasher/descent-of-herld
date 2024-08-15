@@ -48,6 +48,21 @@ namespace doh {
   };
   //!!append LR_all L_gui
 
+  expand_S_RP_skybox(WITE::graphicsShaderRequirements);
+
+  constexpr WITE::renderPassRequirements RP_skybox = {
+    .id = FLID,
+    .depth = RC_ID_RP_skybox_depth,
+    .color = RC_ID_RP_skybox_color,
+    .shaders = S_RP_skybox,
+  };
+  //!!append RPR_all RP_skybox
+
+  constexpr WITE::layerRequirements L_skybox = {
+    .renders = RP_skybox.id,
+  };
+  //!!append LR_all L_skybox
+
   expand_IR_all(WITE::imageRequirements);
   expand_BR_all(WITE::bufferRequirements);
   expand_RS_all(WITE::resourceSlot);

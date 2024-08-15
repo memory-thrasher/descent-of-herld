@@ -118,7 +118,7 @@ namespace doh {
     .cullMode = vk::CullModeFlagBits::eNone,
     .meshGroupCountX = 700,
   };
-  //!!append S_RP_gui S_spaceSkybox
+  //!!append S_RP_skybox S_spaceSkybox
 
   constexpr WITE::resourceReference RR_L_spaceSkybox_source[] = {
     { RC_S_spaceSkybox_starTypes.id, RS_spaceSkybox_starTypes.id },
