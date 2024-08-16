@@ -99,8 +99,6 @@ namespace doh {
     auto* transients = new transients_t();
     mm.transients = reinterpret_cast<void*>(transients);
     db->write<mainMenu>(oid, &mm);
-    auto& space = transients->space;
-    space.setStarTypes(starTypesBuffer());
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {

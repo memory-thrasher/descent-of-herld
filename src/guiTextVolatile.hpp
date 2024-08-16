@@ -81,7 +81,7 @@ namespace doh {
   };
   //!!append RS_all RS_guiTextVolatile_all
   //!!genObjSet RS_guiTextVolatileStyle setStyle WITE::buffer<BR_guiTextStyle>
-  //!!genObjSet RS_guiTextVolatileMesh setTextMesh WITE::buffer<fontMesh.bufferRequirements_v>
+  //!!genObjSingleton RS_guiTextVolatileMesh &fontMeshBuffer()
   //!!genObjWrite RS_S_guiTextVolatileIndirect writeIndirectBuffer guiTextIndirectBuffer_t
   //!!genObjWrite RS_S_guiTextVolatileInstance writeInstanceData guiTextInstance_t
 

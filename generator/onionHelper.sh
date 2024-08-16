@@ -31,6 +31,7 @@ while IFS= read -d $'\0' file; do
     genStubNew="generated/${fileRaw}_stub.hpp_new"
     genImplNew="generated/${fileRaw}_impl.hpp_new"
     hasGlobalCollection=false
+    singletons=
     echo "#include \"../${file}\"" > $genStubNew
     echo 'namespace doh {' >> $genStubNew
     echo "  struct ${fileRaw} {" >> $genStubNew
@@ -75,6 +76,10 @@ while IFS= read -d $'\0' file; do
 	    echo "  void ${fileRaw}::${fnName}(${dataName}& data) {" >> $genImplNew
 	    echo "    castOnionObj->template set<${rs}.id>(&data);" >> $genImplNew
 	    echo "  };" >> $genImplNew
+	elif [[ "$line" =~ \!\!genObjSingleton\ (.*?)\ (.*?) ]]; then
+	    rs="${BASH_REMATCH[1]}"
+	    valueName="${BASH_REMATCH[2]}"
+	    singletons="    handle->template set<${rs}.id>($valueName);"$'\n'
 	elif [[ "$line" =~ \!\!genObjSlowWrite\ (.*?)\ (.*?)\ (.*?) ]]; then
 	    rs="${BASH_REMATCH[1]}"
 	    fnName="${BASH_REMATCH[2]}"
@@ -114,6 +119,10 @@ while IFS= read -d $'\0' file; do
 	if $hasGlobalCollection; then
 	    echo "    WITE::scopeLock lock(&allInstances_mutex);" >> $genImplNew
 	    echo "    allInstances.insert(ret);" >> $genImplNew
+	fi
+	if [ -n "$singletons" ]; then
+	    echo "    auto handle = reinterpret_cast<onionFull_t::object_t<$objId>*>(ret.onionObj);" >> $genImplNew
+	    echo -n "$singletons" >> $genImplNew
 	fi
 	echo "    return ret;" >> $genImplNew
 	echo '  };' >> $genImplNew

@@ -33,7 +33,6 @@ namespace doh {
   {
     rect.setStyle(style.rectNormalBuf);
     rect.writeInstanceData(rectData);
-    label.setTextMesh(fontMeshBuffer());
     label.setStyle(style.textNormalBuf);
     guiTextFormat(labelContent, "%s", labelStr.c_str());
     label.writeIndirectBuffer(labelContent);

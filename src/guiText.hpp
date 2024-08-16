@@ -95,7 +95,7 @@ namespace doh {
   //!!genObjSlowWrite RS_guiTextInstance writeInstanceData guiTextInstance_t
   //!!genObjSlowWrite RS_guiTextIndirect writeIndirectBuffer guiTextIndirectBuffer_t
   //!!genObjSet RS_guiTextStyle setStyle WITE::buffer<BR_guiTextStyle>
-  //!!genObjSet RS_guiTextMesh setTextMesh WITE::buffer<fontMesh.bufferRequirements_v>
+  //!!genObjSingleton RS_guiTextMesh &fontMeshBuffer()
 
   constexpr WITE::resourceConsumer RC_S_guiText_instance = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex>::value,
 	      RC_S_guiText_style = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment>::value,

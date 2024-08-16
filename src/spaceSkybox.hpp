@@ -86,7 +86,7 @@ namespace doh {
     RS_spaceSkybox_starTypes,
   };
   //!!append RS_all RS_L_spaceSkybox
-  //!!genObjSet RS_spaceSkybox_starTypes setStarTypes WITE::buffer<BR_starTypes>
+  //!!genObjSingleton RS_spaceSkybox_starTypes &starTypesBuffer()
 
   constexpr WITE::resourceConsumer RC_S_spaceSkybox_cameraTransform = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eMeshEXT | vk::ShaderStageFlagBits::eTaskEXT>::value,
 	      RC_S_spaceSkybox_cameraData = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eMeshEXT | vk::ShaderStageFlagBits::eTaskEXT>::value,

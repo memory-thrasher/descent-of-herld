@@ -30,7 +30,6 @@ namespace doh {
     txt(guiTextVolatile::create()),
     txtData({ { -1, -1, 1, 1 } })
   {
-    txt.setTextMesh(fontMeshBuffer());
     txt.setStyle(textOnlySmall().textBuf);
     guiTextFormat(txtContent, "%s", "FPS: XX");
     txt.writeIndirectBuffer(txtContent);
