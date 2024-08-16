@@ -12,20 +12,11 @@
   Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
-#version 450
+//if a shader wants only the transform then use cameraTransform.partial.glsl directly. Camera data only would mean it is at binding 0 so the below declaration is not reusable in that case so cameraDataOnly.partial.glsl exists to fill that need.
 
-#include spaceSkybox.partial.glsl
+#include cameraTransform.partial.glsl
 
-layout(location = 0) out vec4 outColor;
-
-layout(early_fragment_tests) in;
-layout(depth_unchanged) out float gl_FragDepth;
-
-void main() {
-  // outColor = vec4((gl_PrimitiveID >> 16) & 0xFF, (gl_PrimitiveID >> 8) & 0xFF, gl_PrimitiveID & 0xFF, 1) / 255.0f;
-  // outColor = (1).xxxx;
-  const uint pack = starData.starTypes[gl_PrimitiveID / 4][gl_PrimitiveID % 4];
-  const uvec4 upack = ((pack).xxxx >> uvec4(24, 16, 8, 0)) & 0xFF;
-  outColor = vec4(clamp(upack.xyz / 256.0f, 0, 1) * (1-gl_FragCoord.z), 1);
-}
-
+layout(std140, set = 1, binding = 1) uniform cameraData_t {
+  vec4 geometry;//xy = size pixels, zw = cotan(fov.xy/2)
+  uvec4 renderDistances;
+} cameraData;

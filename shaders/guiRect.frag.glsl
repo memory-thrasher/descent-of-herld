@@ -26,12 +26,13 @@ layout(std140, set = 0, binding = 1) uniform style_t {
   vec4 fillColor;//a=0|1 to turn fill on or off
 } rectStyle;
 
-layout(std140, set = 1, binding = 0) uniform cameraData_t {
-  vec4 geometry;//xy = surface size in pixels
-} cameraData;
+#include cameraDataOnly.partial.glsl
 
 layout(location = 0) in vec2 screenSnormPos;
 layout(location = 0) out vec4 outColor;
+
+layout(early_fragment_tests) in;
+layout(depth_unchanged) out float gl_FragDepth;
 
 void main() {
   const float aspect = cameraData.geometry.x / cameraData.geometry.y;

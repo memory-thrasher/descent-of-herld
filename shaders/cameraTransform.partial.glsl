@@ -12,20 +12,8 @@
   Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
-#version 450
-
-#include spaceSkybox.partial.glsl
-
-layout(location = 0) out vec4 outColor;
-
-layout(early_fragment_tests) in;
-layout(depth_unchanged) out float gl_FragDepth;
-
-void main() {
-  // outColor = vec4((gl_PrimitiveID >> 16) & 0xFF, (gl_PrimitiveID >> 8) & 0xFF, gl_PrimitiveID & 0xFF, 1) / 255.0f;
-  // outColor = (1).xxxx;
-  const uint pack = starData.starTypes[gl_PrimitiveID / 4][gl_PrimitiveID % 4];
-  const uvec4 upack = ((pack).xxxx >> uvec4(24, 16, 8, 0)) & 0xFF;
-  outColor = vec4(clamp(upack.xyz / 256.0f, 0, 1) * (1-gl_FragCoord.z), 1);
-}
-
+layout(std140, set = 1, binding = 0) uniform cameraTransform_t {
+  layout(row_major) mat4x3 transform;
+  uvec4 chunk;
+  uvec4 sector;
+} cameraTransform;

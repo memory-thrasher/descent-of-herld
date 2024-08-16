@@ -20,6 +20,9 @@ layout(std140, set = 0, binding = 0) uniform color_t {
 
 layout(location = 0) out vec4 outColor;
 
+layout(early_fragment_tests) in;
+layout(depth_unchanged) out float gl_FragDepth;
+
 void main() {
   outColor = color.color;
 }

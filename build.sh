@@ -37,7 +37,7 @@ fi;
 
 cp -u $WITEBUILD/shared/font.hpp generated/
 
-mkdir build build/shaders build/debug build/release build/windows build/dependmap 2>/dev/null
+mkdir build build/shaders build/debug build/release build/windows build/dependmap generated/shaders 2>/dev/null
 
 #delete any obj files that no longer have a corresponding cpp file
 find build -type f -iname '*.o' -print0 |
@@ -49,14 +49,17 @@ find build -type f -iname '*.o' -print0 |
 ALLDSTFILES=
 
 while IFS= read -d '' SRCFILE; do
+    if [[ $SRCFILE =~ .*\.partial\.glsl ]]; then continue; fi;
     DSTFILE="build/shaders/$(basename "${SRCFILE%.*}.spv.h")"
+    TMPFILE="generated/shaders/$(basename "${SRCFILE}")"
     ALLDSTFILES="$DSTFILE $ALLDSTFILES"
     VARNAME="$(basename "${SRCFILE}" | sed -r 's,/,_,g;s/\.([^.]*)\.glsl$/_\1/')"
     if ! [ -f "${DSTFILE}" ] || [ "${SRCFILE}" -nt "${DSTFILE}" ] || [ "$0" -nt "${DSTFILE}" ]; then
 	rm "${DSTFILE}" 2>/dev/null
 	(
-	    #echo building
-	    $WORKNICE $GLCOMPILER -V --target-env vulkan1.3 -Os "${SRCFILE}" -o "${DSTFILE}" --vn "${VARNAME}" || rm "${DSTFILE}" 2>/dev/null
+	    cp "$SRCFILE" "$TMPFILE"
+	    generator/preprocessShader.sh "$TMPFILE"
+	    $WORKNICE $GLCOMPILER -V --target-env vulkan1.3 -Os "${TMPFILE}" -o "${DSTFILE}" --vn "${VARNAME}" || rm "${DSTFILE}" 2>/dev/null
 	) 2>&1 | grep -v "^${SRCFILE}$" &
     fi
 done < <(find shaders -iname '*.glsl' -type f -print0)

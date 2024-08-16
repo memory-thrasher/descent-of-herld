@@ -20,16 +20,7 @@ const uint meshWorkgroupOutput = 256;//should match max_vertices in mesh shader
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-layout(std140, set = 1, binding = 0) uniform cameraTransform_t {
-  layout(row_major) mat4x3 transform;
-  uvec4 chunk;
-  uvec4 sector;
-} cameraTransform;
-
-layout(std140, set = 1, binding = 1) uniform cameraData_t {
-  vec4 geometry;//xy = size pixels, zw = cotan(fov.xy/2)
-  uvec4 renderDistances;
-} cameraData;
+#include spaceSkybox.partial.glsl
 
 taskPayloadSharedEXT uvec4 planeData;//xyz = bbox min, w = packed uint16 bbox size xy
 
