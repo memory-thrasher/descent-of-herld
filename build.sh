@@ -23,7 +23,6 @@ WITEBUILD="$WITEBASE/build"
 BOTHOPTS="-DVK_NO_PROTOTYPES -DVULKAN_HPP_NO_EXCEPTIONS -I$WITEBASE"
 COMPILER=clang++
 WORKNICE="nice -n10"
-GLCOMPILER=glslangValidator
 TESTOPTIONS="nogpuid=1,2 extent=3840,0,3840,2160 presentmode=fifo" #skips llvme pipe on my test system, renders to center monitor
 if [ -z "${VK_SDK_PATH}" ]; then
     VK_SDK_PATH="${VULKAN_SDK}"
@@ -53,20 +52,15 @@ while IFS= read -d '' SRCFILE; do
     DSTFILE="build/shaders/$(basename "${SRCFILE%.*}.spv.h")"
     TMPFILE="generated/shaders/$(basename "${SRCFILE}")"
     ALLDSTFILES="$DSTFILE $ALLDSTFILES"
-    VARNAME="$(basename "${SRCFILE}" | sed -r 's,/,_,g;s/\.([^.]*)\.glsl$/_\1/')"
     if ! [ -f "${DSTFILE}" ] || [ "${SRCFILE}" -nt "${DSTFILE}" ] || [ "$0" -nt "${DSTFILE}" ]; then
 	rm "${DSTFILE}" 2>/dev/null
-	(
-	    cp "$SRCFILE" "$TMPFILE"
-	    generator/preprocessShader.sh "$TMPFILE"
-	    $WORKNICE $GLCOMPILER -V --target-env vulkan1.3 -Os "${TMPFILE}" -o "${DSTFILE}" --vn "${VARNAME}" || rm "${DSTFILE}" 2>/dev/null
-	) 2>&1 | grep -v "^${SRCFILE}$" &
+	$WORKNICE generator/preprocessShader.sh "$SRCFILE" "$TMPFILE" "$DSTFILE" &
     fi
 done < <(find shaders -iname '*.glsl' -type f -print0)
 
 sleep 0.1s
 #wait for compile to finish
-while pgrep $GLCOMPILER &>/dev/null; do sleep 0.05s; done
+while pgrep -lfa preprocessShader &>/dev/null; do sleep 0.05s; done
 while IFS=$'\n' read -d ' ' DSTFILE; do
     if [ -n "$DSTFILE" -a ! -e "$DSTFILE" ]; then
 	echo "File does not exist. Build failed? $DSTFILE"

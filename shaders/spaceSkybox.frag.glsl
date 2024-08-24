@@ -19,7 +19,6 @@
 layout(location = 0) out vec4 outColor;
 
 layout(early_fragment_tests) in;
-layout(depth_unchanged) out float gl_FragDepth;
 
 void main() {
   // outColor = vec4((gl_PrimitiveID >> 16) & 0xFF, (gl_PrimitiveID >> 8) & 0xFF, gl_PrimitiveID & 0xFF, 1) / 255.0f;

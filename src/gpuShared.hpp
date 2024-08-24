@@ -74,26 +74,59 @@ namespace doh {
   //!!append BR_all BR_cameraData
   //!!append BR_all BR_S_cameraData
 
-  constexpr WITE::copyStep CP_transform = {
+  constexpr WITE::copyStep CP_warmup_transform = {
     .id = FLID,
     .src = FLID,
     .dst = FLID,
-  }, CP_data {
+  }, CP_warmup_data {
     .id = FLID,
     .src = FLID,
     .dst = FLID,
   };
-  //!!append CS_all CP_transform
-  //!!append CS_all CP_data
+  //!!append CS_all CP_warmup_transform
+  //!!append CS_all CP_warmup_data
+  //!!append IDL_CP_L_warmup CP_warmup_transform.id
+  //!!append IDL_CP_L_warmup CP_warmup_data.id
 
-  constexpr uint64_t RC_ID_RP_skybox_color = FLID,
-	      RC_ID_RP_skybox_depth = FLID;
+  constexpr uint64_t RC_ID_RP_gui_depth = FLID,
+	      RC_ID_RP_gui_color = FLID,
+	      RC_ID_RP_prenear_depth = FLID,
+	      RC_ID_RP_prenear_color = FLID,
+	      RC_ID_RP_near_depth = FLID,
+	      RC_ID_RP_near_color = FLID,
+	      RC_ID_RP_premid_depth = FLID,
+	      RC_ID_RP_premid_color = FLID,
+	      RC_ID_RP_mid_depth = FLID,
+	      RC_ID_RP_mid_color = FLID,
+	      RC_ID_RP_prefar_depth = FLID,
+	      RC_ID_RP_prefar_color = FLID,
+	      RC_ID_RP_far_depth = FLID,
+	      RC_ID_RP_far_color = FLID,
+	      RC_ID_RP_preskybox_depth = FLID,
+	      RC_ID_RP_preskybox_color = FLID,
+	      RC_ID_RP_preskybox_depth_input_DS = FLID,
+	      RC_ID_RP_preskybox_depth_input = FLID,
+	      RC_ID_RP_skybox_depth = FLID,
+	      RC_ID_RP_skybox_color = FLID,
+	      RC_ID_RP_prepost_depth = FLID,
+	      RC_ID_RP_prepost_color = FLID,
+	      RC_ID_RP_postH_depth = FLID,
+	      RC_ID_RP_postH_color = FLID,
+	      RC_ID_RP_postV_depth = FLID,
+	      RC_ID_RP_postV_color = FLID,
+	      RC_ID_RP_postFinal_depth = FLID,
+	      RC_ID_RP_postFinal_color = FLID;
 
   //this IR is the final target of reflection cube maps, getting resambled by future renders, and also the pre-bloom attachment for the screen target, which is resambled by the bloom shader.
   constexpr WITE::imageRequirements IR_intermediateColor = WITE::intermediateColor<gpuId, FLID, WITE::Format::RGBA32float>::value;
   //!!append IR_all IR_intermediateColor
 
-  constexpr WITE::imageRequirements IR_depth = WITE::simpleDepth<gpuId, FLID>::value;//depth are pretty much all the same
+  constexpr WITE::imageRequirements IR_depth = {
+    .deviceId = gpuId,
+    .id = FLID,
+    .format = WITE::Format::D16unorm,
+    .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eInputAttachment,
+  };
   //!!append IR_all IR_depth
 
 #undef FILE_ID

@@ -34,9 +34,6 @@ namespace doh {
   //!!genObjGlobalCollection
   //!!genObjGetWindow
 
-  constexpr uint64_t RC_ID_RP_gui_color = FLID,
-	      RC_ID_RP_gui_depth = FLID;
-
   constexpr WITE::imageRequirements IR_color = WITE::simpleColor<gpuId, FLID>::value;
   //!!append IR_all IR_color
 
@@ -78,18 +75,39 @@ namespace doh {
   //!!genObjWrite RS_S_primaryCamera_cameraData writeCameraData cameraData_t
   //!!genObjWrite RS_S_primaryCamera_transform writeCameraTransform compoundTransform_packed_t
 
-  //!!append IDL_CP_L_gui CP_transform.id
-  //!!append IDL_CP_L_gui CP_data.id
-
   constexpr WITE::resourceReference RR_L_primaryCamera_invariant[] = {
-    { CP_transform.src, RS_S_primaryCamera_transform.id },
-    { CP_transform.dst, RS_primaryCamera_transform.id },
-    { CP_data.src, RS_S_primaryCamera_cameraData.id },
-    { CP_data.dst, RS_primaryCamera_cameraData.id },
-    { RC_ID_RP_gui_color, RS_primaryCamera_color.id },
+    { CP_warmup_transform.src, RS_S_primaryCamera_transform.id },
+    { CP_warmup_transform.dst, RS_primaryCamera_transform.id },
+    { CP_warmup_data.src, RS_S_primaryCamera_cameraData.id },
+    { CP_warmup_data.dst, RS_primaryCamera_cameraData.id },
     { RC_ID_RP_gui_depth, RS_primaryCamera_depth.id },
-    { RC_ID_RP_skybox_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_gui_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_prenear_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_prenear_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_near_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_near_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_premid_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_premid_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_mid_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_mid_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_prefar_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_prefar_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_far_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_far_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_preskybox_depth, RS_primaryCamera_depth.id },
+    { RC_ID_RP_preskybox_depth_input, RS_primaryCamera_depth.id },
+    { RC_ID_RP_preskybox_depth_input_DS, RS_primaryCamera_depth.id },
+    { RC_ID_RP_preskybox_color, RS_primaryCamera_color.id },
     { RC_ID_RP_skybox_depth, RS_primaryCamera_depth.id },
+    { RC_ID_RP_skybox_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_prepost_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_prepost_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_postH_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_postH_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_postV_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_postV_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_postFinal_depth, RS_primaryCamera_depth.id },
+    // { RC_ID_RP_postFinal_color, RS_primaryCamera_color.id },
     { RC_ID_primaryCamera_present, RS_primaryCamera_color.id },
   };
   //!!append RR_L_primaryCamera RR_L_primaryCamera_invariant

@@ -91,10 +91,10 @@ namespace doh {
     { RC_S_guiText_style.id, RS_guiTextVolatileStyle.id },
     { RC_S_guiText_instance.id, RS_guiTextVolatileInstance.id },
     { fontMesh.resourceConsumer_v.id, RS_guiTextVolatileMesh.id },
-    { CP_transform.src, RS_S_guiTextVolatileInstance.id },
-    { CP_transform.dst, RS_guiTextVolatileInstance.id },
-    { CP_data.src, RS_S_guiTextVolatileIndirect.id },
-    { CP_data.dst, RS_guiTextVolatileIndirect.id },
+    { CP_warmup_transform.src, RS_S_guiTextVolatileInstance.id },
+    { CP_warmup_transform.dst, RS_guiTextVolatileInstance.id },
+    { CP_warmup_data.src, RS_S_guiTextVolatileIndirect.id },
+    { CP_warmup_data.dst, RS_guiTextVolatileIndirect.id },
   };
 
   constexpr WITE::sourceLayout SL_guiTextVolatile = {
