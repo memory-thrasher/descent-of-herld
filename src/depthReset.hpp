@@ -22,63 +22,63 @@
 #define FILE_ID 10004000
 
 /*
-  There are five rendering stages that correlate with five rendering distances (including gui). These can correlate to LoD, as many objects use very different paradigms at different distances. Many objects can only exist or are only visible at close range. In each case, the entire bit range of the depth map is used. Shaders that are visible at close range are rendered first. Between stages, the below shader resets the depth map so that only unoccupied (depth 1) pixels will be rendered in future stages (still at depth 1) by setting the depth value of all other pixels to 0. A whole-screen triangle at depth 1 in combination with the eGreater compare op and explicit early fragment testing are used to distinguish which pixels should be changed. This might eventually be expanded to include some form of depth of field, particularly when the camera is in a dust cloud or nebula.
+  There are five rendering stages that correlate with five rendering distances (including gui). These can correlate to LoD, as many objects use very different paradigms at different distances. Many objects can only exist or are only visible at close range. In each case, the entire bit range of the depth map is used. Shaders that are visible at close range are rendered first. Between stages, the below shader resets the depth map so that only unoccupied (depth 1) pixels will be rendered in future stages (still at depth 1) by setting the depth value of all other pixels to 0.
+
+  Each rendering stage gets its own depth map. Between stages, a whole-screen triangle is drawn, and the prior stage's depth map is an input attachment, feeding a simple ternary fragment shader that populates the initial state of the new stage's depth map.
  */
-//TODO update that ^^
 
 namespace doh {
-
-  constexpr vk::SpecializationMapEntry SPEC_single32_SME { 0, 0, 4 };
-  constexpr float SPEC_zero_data = 0.0f;
 
 #include "wholeViewport.vert.spv.h"
 #include "depthReset.frag.spv.h"
 
   constexpr WITE::shaderModule SM_L_depthReset[] = {
-    {
-      .data = wholeViewport_vert,
-      .size = sizeof(wholeViewport_vert),
-      .stage = vk::ShaderStageFlagBits::eVertex,
-      .specializations = SPEC_single32_SME,
-      .specializationData = &SPEC_zero_data,
-      .specializationDataSize = 4,
-    },
+    { wholeViewport_vert, sizeof(wholeViewport_vert), vk::ShaderStageFlagBits::eVertex },
     { depthReset_frag, sizeof(depthReset_frag), vk::ShaderStageFlagBits::eFragment },
   };
 
-  // constexpr WITE::graphicsShaderRequirements S_depthReset_prenear {
-  //   .id = FLID,
-  //   .modules = SM_L_depthReset,
-  //   .cullMode = vk::CullModeFlagBits::eNone,
-  //   .vertexCountOverride = 3,
-  //   .depthCompareMode = vk::CompareOp::eAlways,
-  // };
-  // //! !append S_RP_prenear S_depthReset_prenear
+  constexpr auto RC_RP_prenear_depth_input = WITE::consumerForInputAttachment(RC_ID_RP_prenear_depth_input_DS),
+	      RC_RP_premid_depth_input = WITE::consumerForInputAttachment(RC_ID_RP_premid_depth_input_DS),
+	      RC_RP_prefar_depth_input = WITE::consumerForInputAttachment(RC_ID_RP_prefar_depth_input_DS),
+	      RC_RP_preskybox_depth_input = WITE::consumerForInputAttachment(RC_ID_RP_preskybox_depth_input_DS);
 
-  // constexpr WITE::graphicsShaderRequirements S_depthReset_premid {
-  //   .id = FLID,
-  //   .modules = SM_L_depthReset,
-  //   .cullMode = vk::CullModeFlagBits::eNone,
-  //   .vertexCountOverride = 3,
-  //   .depthCompareMode = vk::CompareOp::eAlways,
-  // };
-  // //! !append S_RP_premid S_depthReset_premid
 
-  // constexpr WITE::graphicsShaderRequirements S_depthReset_prefar {
-  //   .id = FLID,
-  //   .modules = SM_L_depthReset,
-  //   .cullMode = vk::CullModeFlagBits::eNone,
-  //   .vertexCountOverride = 3,
-  //   .depthCompareMode = vk::CompareOp::eAlways,
-  // };
-  // //! !append S_RP_prefar S_depthReset_prefar
+  constexpr WITE::graphicsShaderRequirements S_depthReset_prenear {
+    .id = FLID,
+    .modules = SM_L_depthReset,
+    .targetProvidedResources = RC_RP_prenear_depth_input,
+    .cullMode = vk::CullModeFlagBits::eNone,
+    .vertexCountOverride = 3,
+    .depthCompareMode = vk::CompareOp::eAlways,
+  };
+  //!!append S_RP_prenear S_depthReset_prenear
 
-  // constexpr auto RC_RP_preskybox_depth_input = WITE::consumerForInputAttachment(RC_ID_RP_preskybox_depth_input_DS);
+
+  constexpr WITE::graphicsShaderRequirements S_depthReset_premid {
+    .id = FLID,
+    .modules = SM_L_depthReset,
+    .targetProvidedResources = RC_RP_premid_depth_input,
+    .cullMode = vk::CullModeFlagBits::eNone,
+    .vertexCountOverride = 3,
+    .depthCompareMode = vk::CompareOp::eAlways,
+  };
+  //!!append S_RP_premid S_depthReset_premid
+
+
+  constexpr WITE::graphicsShaderRequirements S_depthReset_prefar {
+    .id = FLID,
+    .modules = SM_L_depthReset,
+    .targetProvidedResources = RC_RP_prefar_depth_input,
+    .cullMode = vk::CullModeFlagBits::eNone,
+    .vertexCountOverride = 3,
+    .depthCompareMode = vk::CompareOp::eAlways,
+  };
+  //!!append S_RP_prefar S_depthReset_prefar
 
   constexpr WITE::graphicsShaderRequirements S_depthReset_preskybox {
     .id = FLID,
     .modules = SM_L_depthReset,
-    // .targetProvidedResources = RC_RP_preskybox_depth_input,
+    .targetProvidedResources = RC_RP_preskybox_depth_input,
     .cullMode = vk::CullModeFlagBits::eNone,
     .vertexCountOverride = 3,
     .depthCompareMode = vk::CompareOp::eAlways,

@@ -14,9 +14,10 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #version 450
 
-layout(early_fragment_tests) in;
-layout(depth_less) out float gl_FragDepth;
+layout(depth_any) out float gl_FragDepth;
+
+layout(input_attachment_index=0, set=0, binding=0) uniform subpassInput oldDepth;
 
 void main() {
-  gl_FragDepth = 0;
+  gl_FragDepth = subpassLoad(oldDepth).x < 1 ? 0 : 1;
 }

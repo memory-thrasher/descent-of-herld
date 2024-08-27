@@ -50,95 +50,94 @@ namespace doh {
   };
   //!!append LR_all L_gui
 
-  // expand_S_RP_prenear(WITE::graphicsShaderRequirements);
-  // constexpr WITE::renderPassRequirements RP_prenear = {
-  //   .id = FLID,
-  //   .depth = RC_ID_RP_prenear_depth,
-  //   .color = RC_ID_RP_prenear_color,
-  //   .shaders = S_RP_prenear,
-  // };
-  // //! !append RPR_all RP_prenear
+  expand_S_RP_prenear(WITE::graphicsShaderRequirements);
+  constexpr WITE::renderPassRequirements RP_prenear = {
+    .id = FLID,
+    .depth = RC_ID_RP_prenear_depth,
+    .input = RC_ID_RP_prenear_depth_input,
+    .shaders = S_RP_prenear,
+  };
+  //!!append RPR_all RP_prenear
 
-  // constexpr WITE::layerRequirements L_prenear = {
-  //   .renders = RP_prenear.id,
-  // };
-  // //! !append LR_all L_prenear
+  constexpr WITE::layerRequirements L_prenear = {
+    .renders = RP_prenear.id,
+  };
+  //!!append LR_all L_prenear
 
   // expand_S_RP_near(WITE::graphicsShaderRequirements);
-  // constexpr WITE::renderPassRequirements RP_near = {
-  //   .id = FLID,
-  //   .depth = RC_ID_RP_near_depth,
-  //   .color = RC_ID_RP_near_color,
-  //   .shaders = S_RP_near,
-  // };
-  // //! !append RPR_all RP_near
+  constexpr WITE::renderPassRequirements RP_near = {
+    .id = FLID,
+    .depth = RC_ID_RP_near_depth,
+    .color = RC_ID_RP_near_color,
+    // .shaders = S_RP_near,
+  };
+  //!!append RPR_all RP_near
 
-  // constexpr WITE::layerRequirements L_near = {
-  //   .renders = RP_near.id,
-  // };
-  // //! !append LR_all L_near
+  constexpr WITE::layerRequirements L_near = {
+    .renders = RP_near.id,
+  };
+  //!!append LR_all L_near
 
-  // expand_S_RP_premid(WITE::graphicsShaderRequirements);
-  // constexpr WITE::renderPassRequirements RP_premid = {
-  //   .id = FLID,
-  //   .depth = RC_ID_RP_premid_depth,
-  //   .color = RC_ID_RP_premid_color,
-  //   .shaders = S_RP_premid,
-  // };
-  // //! !append RPR_all RP_premid
+  expand_S_RP_premid(WITE::graphicsShaderRequirements);
+  constexpr WITE::renderPassRequirements RP_premid = {
+    .id = FLID,
+    .depth = RC_ID_RP_premid_depth,
+    .input = RC_ID_RP_premid_depth_input,
+    .shaders = S_RP_premid,
+  };
+  //!!append RPR_all RP_premid
 
-  // constexpr WITE::layerRequirements L_premid = {
-  //   .renders = RP_premid.id,
-  // };
-  // //! !append LR_all L_premid
+  constexpr WITE::layerRequirements L_premid = {
+    .renders = RP_premid.id,
+  };
+  //!!append LR_all L_premid
 
   // expand_S_RP_mid(WITE::graphicsShaderRequirements);
-  // constexpr WITE::renderPassRequirements RP_mid = {
-  //   .id = FLID,
-  //   .depth = RC_ID_RP_mid_depth,
-  //   .color = RC_ID_RP_mid_color,
-  //   .shaders = S_RP_mid,
-  // };
-  // //! !append RPR_all RP_mid
+  constexpr WITE::renderPassRequirements RP_mid = {
+    .id = FLID,
+    .depth = RC_ID_RP_mid_depth,
+    .color = RC_ID_RP_mid_color,
+    // .shaders = S_RP_mid,
+  };
+  //!!append RPR_all RP_mid
 
-  // constexpr WITE::layerRequirements L_mid = {
-  //   .renders = RP_mid.id,
-  // };
-  // //! !append LR_all L_mid
+  constexpr WITE::layerRequirements L_mid = {
+    .renders = RP_mid.id,
+  };
+  //!!append LR_all L_mid
 
-  // expand_S_RP_prefar(WITE::graphicsShaderRequirements);
-  // constexpr WITE::renderPassRequirements RP_prefar = {
-  //   .id = FLID,
-  //   .depth = RC_ID_RP_prefar_depth,
-  //   .color = RC_ID_RP_prefar_color,
-  //   .shaders = S_RP_prefar,
-  // };
-  // //! !append RPR_all RP_prefar
+  expand_S_RP_prefar(WITE::graphicsShaderRequirements);
+  constexpr WITE::renderPassRequirements RP_prefar = {
+    .id = FLID,
+    .depth = RC_ID_RP_prefar_depth,
+    .input = RC_ID_RP_prefar_depth_input,
+    .shaders = S_RP_prefar,
+  };
+  //!!append RPR_all RP_prefar
 
-  // constexpr WITE::layerRequirements L_prefar = {
-  //   .renders = RP_prefar.id,
-  // };
-  // //! !append LR_all L_prefar
+  constexpr WITE::layerRequirements L_prefar = {
+    .renders = RP_prefar.id,
+  };
+  //!!append LR_all L_prefar
 
   // expand_S_RP_far(WITE::graphicsShaderRequirements);
-  // constexpr WITE::renderPassRequirements RP_far = {
-  //   .id = FLID,
-  //   .depth = RC_ID_RP_far_depth,
-  //   .color = RC_ID_RP_far_color,
-  //   .shaders = S_RP_far,
-  // };
-  // //! !append RPR_all RP_far
+  constexpr WITE::renderPassRequirements RP_far = {
+    .id = FLID,
+    .depth = RC_ID_RP_far_depth,
+    .color = RC_ID_RP_far_color,
+    // .shaders = S_RP_far,
+  };
+  //!!append RPR_all RP_far
 
-  // constexpr WITE::layerRequirements L_far = {
-  //   .renders = RP_far.id,
-  // };
-  // //! !append LR_all L_far
+  constexpr WITE::layerRequirements L_far = {
+    .renders = RP_far.id,
+  };
+  //!!append LR_all L_far
 
   expand_S_RP_preskybox(WITE::graphicsShaderRequirements);
   constexpr WITE::renderPassRequirements RP_preskybox = {
     .id = FLID,
     .depth = RC_ID_RP_preskybox_depth,
-    .color = RC_ID_RP_preskybox_color,
     .input = RC_ID_RP_preskybox_depth_input,
     .shaders = S_RP_preskybox,
   };
