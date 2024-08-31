@@ -117,6 +117,8 @@ namespace doh {
     .topology = vk::PrimitiveTopology::ePointList,
     .cullMode = vk::CullModeFlagBits::eNone,
     .meshGroupCountX = 700,
+    .blend = additiveBlend,
+    .depthWrite = false,//keep depth of skybox visible pixels to 1 for additive shaders
   };
   //!!append S_RP_skybox S_spaceSkybox
 

@@ -14,7 +14,62 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include "gpuShared.hpp"
 
+//ostream overloads belong in global namespace
+std::ostream& operator<<(std::ostream& s, const doh::compoundTransform_t& ct) {
+  return s << "{ [" << ct.orientation << "] (" << ct.meters << ") (" << ct.chunk << ") (" << ct.sector << ") }";
+};
+
+glm::uvec3 operator/(const glm::uvec3& l, uint32_t r) {
+  return { l.x / r, l.y / r, l.z / r };
+};
+
 namespace doh {
+
+  compoundTransform_t::compoundTransform_t() : orientation(1), meters(), chunk(), sector() {};
+
+  compoundTransform_t::compoundTransform_t(const glm::mat3& orientation) :
+    orientation(orientation), meters(), chunk(), sector() {};
+
+  compoundTransform_t::compoundTransform_t(const glm::vec3& meters, const glm::ivec3& chunk, const glm::ivec3& sector) :
+    orientation(1), meters(meters), chunk(chunk), sector(sector) {};
+
+  compoundTransform_t::compoundTransform_t(const glm::mat3& orientation, const glm::vec3& meters, const glm::ivec3& chunk, const glm::ivec3& sector) : orientation(orientation), meters(meters), chunk(chunk), sector(sector) {};
+
+  void compoundTransform_t::moveSectors(const glm::ivec3& delta) {
+    move({}, {}, delta);
+  };
+
+  void compoundTransform_t::moveSectors(const glm::vec3& delta) {
+    glm::vec3 whole,
+      fract = glm::modf(delta, whole);
+    for(int i = 0;i < 3;i++)
+      if(glm::abs(fract[i]) >= 0.5f) {
+	float sign = glm::sign(fract[i]);
+	fract[i] -= sign;
+	whole[i] += sign;
+      }
+    move({}, glm::ivec3(fract * 65536.0f) * 65536, glm::ivec3(whole));
+  };
+
+  glm::vec3 compoundTransform_t::approxSector() {//note: for debugging only, will cause precision issues in most of the universe
+    return glm::vec3(sector) + glm::vec3(chunk / 65536) / 65536.0f;
+  };
+
+  void compoundTransform_t::moveChunks(const glm::ivec3& delta) {
+    move({}, delta);
+  };
+
+  void compoundTransform_t::moveChunks(const glm::vec3& delta) {
+    glm::vec3 whole,
+      fract = glm::modf(delta, whole);
+    for(int i = 0;i < 3;i++)
+      if(glm::abs(fract[i]) >= 0.5f) {
+	float sign = glm::sign(fract[i]);
+	fract[i] -= sign;
+	whole[i] += sign;
+      }
+    move(fract * chunkMeters, glm::ivec3(whole + glm::vec3(0.5f, 0.5f, 0.5f)));
+  };
 
   void compoundTransform_t::pack(compoundTransform_packed_t* out) {
     for(int i = 0;i < 3;i++)
@@ -34,35 +89,37 @@ namespace doh {
 
   void compoundTransform_t::stabilize() {
     glm::vec3 forward = glm::normalize(glm::column(orientation, 0));
-    glm::vec3 right = glm::normalize(glm::cross(glm::column(orientation, 1), forward));
-    ASSERT_TRAP(glm::dot(right, glm::column(orientation, 2)) > 0.5f, "hand-reversal detected");
-    orientation = glm::mat3(forward, glm::normalize(glm::cross(forward, right)), right);
+    glm::vec3 right = glm::normalize(glm::cross(forward, glm::column(orientation, 1)));
+    orientation = glm::mat3(forward, glm::normalize(glm::cross(right, forward)), right);
   };
 
   void compoundTransform_t::move(const glm::vec3& deltaMeters, const glm::ivec3& deltaChunk, const glm::ivec3& deltaSector) {
     for(int i = 0;i < 3;i++) {
-      int chunkCarry = glm::abs(meters[i] + deltaMeters[i]) <= chunkMeters ? 0 : meters[i] > 0 ? 1 : -1;
+      int chunkCarry = glm::abs(meters[i] + deltaMeters[i]) <= chunkMeters/2 ? 0 : meters[i] + deltaMeters[i] > 0 ? 1 : -1;
       meters[i] += deltaMeters[i] - chunkMeters * chunkCarry;
       int64_t newChunk = static_cast<int64_t>(chunk[i]) + deltaChunk[i] + chunkCarry;
-      chunk[i] = (chunksPerSector + newChunk) % chunksPerSector;
-      sector[i] += newChunk / chunksPerSector + deltaSector[i];
+      chunk[i] = static_cast<uint32_t>((static_cast<int64_t>(chunksPerSector*10) + newChunk) % chunksPerSector);
+      sector[i] += newChunk / static_cast<int64_t>(chunksPerSector) + (newChunk < 0 ? -1 : 0) + deltaSector[i];
     }
   };
 
   void compoundTransform_t::rotate(const glm::vec3& axis, float angle) {
+    rotateLocal(axis * orientation, angle);
+  };
+
+  void compoundTransform_t::rotateLocal(const glm::vec3& axis, float angle) {
     float const cosA = glm::cos(angle);
     float const sinA = glm::sin(angle);
-    glm::vec norm(normalize(axis));
-    glm::vec cosAxis((1.0f - cosA) * norm);
-    orientation *= glm::mat3(cosA + cosAxis[0] * norm[0],
-			     cosAxis[0] * norm[1] + sinA * norm[2],
-			     cosAxis[0] * norm[2] - sinA * norm[1],
-			     cosAxis[1] * norm[0] - sinA * norm[2],
-			     cosA + cosAxis[1] * norm[1],
-			     cosAxis[1] * norm[2] + sinA * norm[0],
-			     cosAxis[2] * norm[0] + sinA * norm[1],
-			     cosAxis[2] * norm[1] - sinA * norm[0],
-			     cosA + cosAxis[2] * norm[2]);
+    glm::vec cosAxis((1.0f - cosA) * axis);
+    orientation *= glm::mat3(cosA + cosAxis[0] * axis[0],
+			     cosAxis[0] * axis[1] + sinA * axis[2],
+			     cosAxis[0] * axis[2] - sinA * axis[1],
+			     cosAxis[1] * axis[0] - sinA * axis[2],
+			     cosA + cosAxis[1] * axis[1],
+			     cosAxis[1] * axis[2] + sinA * axis[0],
+			     cosAxis[2] * axis[0] + sinA * axis[1],
+			     cosAxis[2] * axis[1] - sinA * axis[0],
+			     cosA + cosAxis[2] * axis[2]);
   };
 
 }

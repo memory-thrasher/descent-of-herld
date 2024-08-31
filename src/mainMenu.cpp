@@ -20,11 +20,14 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "uiStyle.hpp"
 #include "../generated/targetPrimary_stub.hpp"
 #include "../generated/spaceSkybox_stub.hpp"
+// #include "../generated/nebulae_stub.hpp"
 #include "math.hpp"
 #include "guiButton.hpp"
 #include "fpsCounter.hpp"
 
 namespace doh {
+
+  constexpr glm::uvec3 focalSector { 204887, 20487, 2348 };
 
   struct transients_t {
     targetPrimary camera = targetPrimary::create();
@@ -40,6 +43,7 @@ namespace doh {
       { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
 	guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
     };
+    // nebulae testNeb = nebulae::create();
     spaceSkybox space = spaceSkybox::create();
     fpsCounter fps;
   };
@@ -60,11 +64,11 @@ namespace doh {
       { 10, 1000, 100000, 250 },//chunks, chunks, chunks, sectors
     };
     mm.cameraTrans = {
-      glm::mat3(1),
       { 0, 0, 0 },
       { 0, 0, 100000 },
       { 204887, 20487, 2348 },
     };
+    mm.cameraTrans.rotate({ 0, 1, 0 }, -std::numbers::pi_v<float>/4);
     mm.fov = 1/std::tan(glm::radians(WITE::configuration::getOption("fov", 90.0f)/2));
     db->write(oid, &mm);
   };
@@ -84,8 +88,12 @@ namespace doh {
     db->readCommitted<mainMenu>(oid, &mm);
     mm.cameraData.geometry = { size, mm.fov*size.x/size.y, mm.fov };
     transients->camera.writeCameraData(mm.cameraData);
-    // mm.cameraTrans.rotate({ 0, 1, 0 }, 0.0001f);
-    mm.cameraTrans.move({}, { 0, 0, 1 << 28 }, {});
+    mm.cameraTrans.rotate({ 1, 0, 0 }, -0.001f);
+    mm.cameraTrans.sector = focalSector;
+    mm.cameraTrans.chunk = {};
+    mm.cameraTrans.meters = {};
+    mm.cameraTrans.moveSectors(mm.cameraTrans.orientation[2] * -100.0f);
+    mm.cameraTrans.stabilize();
     compoundTransform_packed_t cameraTransPacked;
     mm.cameraTrans.pack(&cameraTransPacked);
     transients->camera.writeCameraTransform(cameraTransPacked);
@@ -99,6 +107,7 @@ namespace doh {
     auto* transients = new transients_t();
     mm.transients = reinterpret_cast<void*>(transients);
     db->write<mainMenu>(oid, &mm);
+    // testNeb.writeInstanceData(focalSector);
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {

@@ -51,10 +51,20 @@ namespace doh {
     glm::mat3 orientation; //stable rotation-only transform, and therefore trivially reversible
     glm::vec3 meters;
     glm::uvec3 chunk, sector;
+    compoundTransform_t();
+    explicit compoundTransform_t(const glm::mat3& orientation);
+    compoundTransform_t(const glm::vec3& meters, const glm::ivec3& chunk = {}, const glm::ivec3& sector = {});
+    compoundTransform_t(const glm::mat3& orientation, const glm::vec3& meters, const glm::ivec3& chunk = {}, const glm::ivec3& sector = {});
     void pack(compoundTransform_packed_t* out);
     void stabilize();//ensure axes are perpendicular and vector columns and rows are normal
-    void move(const glm::vec3& deltaMeters, const glm::ivec3& deltaChunk = glm::ivec3(), const glm::ivec3& deltaSector = glm::ivec3());
-    void rotate(const glm::vec3& axis, float angle);
+    void move(const glm::vec3& deltaMeters, const glm::ivec3& deltaChunk = {}, const glm::ivec3& deltaSector = {});
+    void rotate(const glm::vec3& axis, float angle);//axis must be normal
+    void rotateLocal(const glm::vec3& axis, float angle);//axis must be normal
+    void moveSectors(const glm::ivec3& delta);
+    void moveSectors(const glm::vec3& delta);
+    void moveChunks(const glm::ivec3& delta);
+    void moveChunks(const glm::vec3& delta);
+    glm::vec3 approxSector();//note: for debugging only, will cause precision issues in most of the universe
   };
 
   //because std140 doesn't like non-256-bit-multiple objects.
@@ -135,6 +145,13 @@ namespace doh {
   };
   //!!append IR_all IR_depth
 
+  constexpr vk::PipelineColorBlendAttachmentState additiveBlend = { true, vk::BlendFactor::eOne, vk::BlendFactor::eOne, vk::BlendOp::eAdd, vk::BlendFactor::eOne, vk::BlendFactor::eOne, vk::BlendOp::eAdd, vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA };
+
 #undef FILE_ID
 
 }
+
+//std::ostream overloads belong in the global namespace
+std::ostream& operator<<(std::ostream&, const doh::compoundTransform_t& ct);
+
+glm::uvec3 operator/(const glm::uvec3& l, uint32_t r);
