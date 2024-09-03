@@ -79,6 +79,11 @@ namespace doh {
   //!!append BR_all BR_compoundTransform
   //!!append BR_all BR_S_compoundTransform
 
+  constexpr WITE::bufferRequirements BR_gvec4 = WITE::simpleUB<gpuId, FLID, sizeof(glm::vec4)>::value,
+	      BR_S_gvec4 = WITE::withId(WITE::stagingRequirementsFor(BR_gvec4, 2), FLID);
+  //!!append BR_all BR_gvec4
+  //!!append BR_all BR_S_gvec4
+
   constexpr WITE::bufferRequirements BR_cameraData = WITE::simpleUB<gpuId, FLID, sizeof(cameraData_t)>::value,
 	      BR_S_cameraData = WITE::withId(WITE::stagingRequirementsFor(BR_cameraData, 2), FLID);
   //!!append BR_all BR_cameraData

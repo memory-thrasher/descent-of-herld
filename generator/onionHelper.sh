@@ -88,6 +88,13 @@ while IFS= read -d $'\0' file; do
 	    echo "  void ${fileRaw}::${fnName}(const ${dataName}& data) {" >> $genImplNew
 	    echo "    castOnionObj->template get<${rs}.id>().template slowOutOfBandSet<${dataName}>(data);" >> $genImplNew
 	    echo "  };" >> $genImplNew
+	elif [[ "$line" =~ \!\!genObjStepControl\ (.*?)\ (.*?) ]]; then
+	    stepId="${BASH_REMATCH[1]}"
+	    fnName="${BASH_REMATCH[2]}"
+	    echo "    void ${fnName}(bool data);" >> $genStubNew
+	    echo "  void ${fileRaw}::${fnName}(bool data) {" >> $genImplNew
+	    echo "    castOnionObj->template stepEnabled<${stepId}>() = data;" >> $genImplNew
+	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!include\ me ]]; then
 	    echo "#include \"../$file\""
 	else
