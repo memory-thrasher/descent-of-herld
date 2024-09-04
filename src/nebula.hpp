@@ -15,6 +15,7 @@
 #pragma once
 
 #include "gpuShared.hpp"
+#include "targetPrimary.hpp"
 
 //!!include me
 //!!onion all
@@ -31,7 +32,7 @@ namespace doh {
   //mipmap required support levels: 16 (2^4) so smallest mip is 8^3
   //support of mip for 3D is not obviously confirmed or denied anywhere, needs an experiment
 
-  constexpr size_t nebulaSize = 128,
+  constexpr size_t nebulaSize = 128,//sync with nebula.vert.glsl
     nebulaVolume = nebulaSize*nebulaSize*nebulaSize;
 
   typedef WITE::copyableArray<uint32_t, nebulaVolume> nebulaMap_t;
@@ -39,8 +40,8 @@ namespace doh {
   void generateNebula(const glm::uvec3& location, nebulaMap_t& out);
 
   constexpr WITE::objectLayout OL_nebula = { .id = FLID };
-  //!!append OL_all OL_guiRect
-  //!!genObj OL_guiRect
+  //!!append OL_all OL_nebula
+  //!!genObj OL_nebula
 
   constexpr WITE::imageRequirements IR_nebula_map = {
     .deviceId = gpuId,
@@ -50,17 +51,22 @@ namespace doh {
     .dimensions = 3,
     .frameswapCount = 1,
     .mipLevels = 1,//for now
+    .defaultW = nebulaSize,
+    .defaultH = nebulaSize,
+    .defaultD = nebulaSize,
   }, IR_S_nebula_map = WITE::withId(WITE::stagingRequirementsFor(IR_nebula_map, 1), FLID);
+  //!!append IR_all IR_S_nebula_map
+  //!!append IR_all IR_nebula_map
 
   constexpr WITE::resourceSlot RS_nebula_instance = {//just the sector for now, w = unused
     .id = FLID,
     .requirementId = BR_gvec4.id,
     .objectLayoutId = OL_nebula.id,
-  }, RS_nebula_map = {//just the sector for now, w = unused
+  }, RS_nebula_map = {
     .id = FLID,
     .requirementId = IR_nebula_map.id,
     .objectLayoutId = OL_nebula.id,
-  }, RS_S_nebula_map = {//just the sector for now, w = unused
+  }, RS_S_nebula_map = {
     .id = FLID,
     .requirementId = IR_S_nebula_map.id,
     .objectLayoutId = OL_nebula.id,
@@ -71,8 +77,8 @@ namespace doh {
   };
   //!!append RS_all RS_nebula_all
   //!!genObjSlowWrite RS_nebula_instance writeInstanceData glm::uvec4
-  //!!genObjWrite RS_S_nebula_map writeMap, nebulaMap_t
-  //!!genObjStepControl CP_warmup_data.id, mapCopySetEnabled
+  //!!genObjWrite RS_S_nebula_map writeMap nebulaMap_t
+  //!!genObjStepControl CP_warmup_data.id mapCopySetEnabled
 
   constexpr WITE::resourceConsumer RC_S_nebula_instance = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex>::value,
 	      RC_S_nebula_map = {
@@ -85,7 +91,12 @@ namespace doh {
     RC_S_nebula_map,
   };
 
-  constexpr WITE::resourceConsumer RC_S_nebula_target = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex>::value;
+  constexpr WITE::resourceConsumer RC_S_nebula_targetTransform = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex>::value,
+	      RC_S_nebula_targetData = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex>::value,
+	      RC_S_nebula_targetAll[] = {
+		RC_S_nebula_targetTransform,
+		RC_S_nebula_targetData,
+	      };
 
 #include "nebula.vert.spv.h"
 #include "nebula.frag.spv.h"
@@ -98,7 +109,7 @@ namespace doh {
   constexpr WITE::graphicsShaderRequirements S_nebula {
     .id = FLID,
     .modules = SM_L_nebula,
-    .targetProvidedResources = RC_S_nebula_target,
+    .targetProvidedResources = RC_S_nebula_targetAll,
     .sourceProvidedResources = RC_S_nebula_sourceAll,
     .cullMode = vk::CullModeFlagBits::eNone,
     .vertexCountOverride = nebulaSize * 3 * 6,//one square per layer per axis
@@ -108,8 +119,14 @@ namespace doh {
   //!!append S_RP_skybox S_nebula
 
   constexpr WITE::resourceReference RR_L_nebula[] = {
+    { CP_warmup_data.src, RS_S_nebula_map.id },
+    { CP_warmup_data.dst, RS_nebula_map.id },
     { RC_S_nebula_instance.id, RS_nebula_instance.id },
-    { RC_S_nebula_map.id, RS_nebula_map.id },
+    {
+      .resourceConsumerId = RC_S_nebula_map.id,
+      .resourceSlotId = RS_nebula_map.id,
+      .subresource = { WITE::getAllInclusiveSubresource(IR_nebula_map), vk::ImageViewType::e3D },
+    },
   };
 
   constexpr WITE::sourceLayout SL_nebula = {
@@ -120,7 +137,8 @@ namespace doh {
   //!!append SL_all SL_nebula
 
   constexpr WITE::resourceReference RR_L_primaryCamera_nebula[] = {
-    { RC_S_nebula_target.id, RS_primaryCamera_cameraData.id },
+    { RC_S_nebula_targetData.id, RS_primaryCamera_cameraData.id },
+    { RC_S_nebula_targetTransform.id, RS_primaryCamera_transform.id },
   };
   //!!append RR_L_primaryCamera RR_L_primaryCamera_nebula
 

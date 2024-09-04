@@ -12,18 +12,28 @@
   Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
-//if a shader wants only the transform then use cameraTransform.partial.glsl directly. Camera data only would mean it is at binding 0 so the below declaration is not reusable in that case so cameraDataOnly.partial.glsl exists to fill that need.
+#version 450
 
-#include cameraTransform.partial.glsl
+const float nebulaSize = 128;
 
-layout(std140, set = 1, binding = 1) uniform cameraData_t {
-  vec4 geometry;//xy = size pixels, zw = cotan(fov.xy/2)
-  uvec4 renderDistances;//x = near in chunks, y = mid in chunks, z = far in chunks, w = skybox in sectors
-} cameraData;
+layout(std140, set = 0, binding = 0) uniform data_t {
+  uvec4 origin;//bbox min corner, w=unused
+} instance;
 
-vec4 projectSector(uvec3 worldPnt) {
-    const vec3 pnt = vec3(((vec3(ivec3(worldPnt - cameraTransform.sector.xyz)) - (cameraTransform.chunk.xyz >> 16) / 65536.0f) * cameraTransform.transform).xyz);
-    return vec4(pnt.xy / (abs(pnt.z) * cameraData.geometry.zw), pnt.z / cameraData.renderDistances.w, 1);
+#include cameraStuff.partial.glsl
+
+layout(location = 0) out vec3 texLoc;
+
+void main() {
+  const uvec3 vpa = gl_VertexIndex.xxx / uvec3(1, 6, nebulaSize * 6) % uvec3(6, nebulaSize, 4096);
+  const uvec3 axisLocalPos = uvec3(uvec2(vpa.x & 1, vpa.x > 1 && vpa.x < 5) * nebulaSize, vpa.y);
+  //would use u/imat3 if it existed
+  const uvec3 axisSelector = uvec3(equal(uvec3(0, 1, 2), vpa.zzz));
+  const uvec3 localPos =
+    axisLocalPos.xxx * axisSelector.zxy +
+    axisLocalPos.yyy * axisSelector.yzx +
+    axisLocalPos.zzz * axisSelector.xyz;
+  texLoc = localPos;
+  gl_Position = projectSector(localPos + instance.origin.xyz);
 }
 
-//TODO projectChunk and projectNear similarly as needed
