@@ -32,10 +32,10 @@ namespace doh {
   //mipmap required support levels: 16 (2^4) so smallest mip is 8^3
   //support of mip for 3D is not obviously confirmed or denied anywhere, needs an experiment
 
-  constexpr size_t nebulaSize = 128,//sync with nebula.vert.glsl
+  constexpr size_t nebulaSize = 32,//sync with nebula.vert.glsl
     nebulaVolume = nebulaSize*nebulaSize*nebulaSize;
 
-  typedef WITE::copyableArray<uint32_t, nebulaVolume> nebulaMap_t;
+  typedef std::array<uint32_t, nebulaVolume> nebulaMap_t;
 
   void generateNebula(const glm::uvec3& location, nebulaMap_t& out);
 
@@ -54,9 +54,11 @@ namespace doh {
     .defaultW = nebulaSize,
     .defaultH = nebulaSize,
     .defaultD = nebulaSize,
-  }, IR_S_nebula_map = WITE::withId(WITE::stagingRequirementsFor(IR_nebula_map, 1), FLID);
-  //!!append IR_all IR_S_nebula_map
+  };
   //!!append IR_all IR_nebula_map
+
+  constexpr WITE::bufferRequirements BR_S_nebula_map = WITE::withId(WITE::stagingRequirementsFor<IR_nebula_map>(1), FLID);
+  //!!append BR_all BR_S_nebula_map
 
   constexpr WITE::resourceSlot RS_nebula_instance = {//just the sector for now, w = unused
     .id = FLID,
@@ -68,7 +70,7 @@ namespace doh {
     .objectLayoutId = OL_nebula.id,
   }, RS_S_nebula_map = {
     .id = FLID,
-    .requirementId = IR_S_nebula_map.id,
+    .requirementId = BR_S_nebula_map.id,
     .objectLayoutId = OL_nebula.id,
   }, RS_nebula_all[] = {
     RS_nebula_instance,
@@ -85,7 +87,7 @@ namespace doh {
 		.id = FLID,
 		.stages = vk::ShaderStageFlagBits::eFragment,
 		.access = vk::AccessFlagBits2::eShaderSampledRead,
-		.usage = { vk::DescriptorType::eCombinedImageSampler, { {}, vk::Filter::eLinear, vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear } }
+		.usage = { vk::DescriptorType::eCombinedImageSampler, { {}, vk::Filter::eLinear, vk::Filter::eNearest, vk::SamplerMipmapMode::eNearest } }
 	      }, RC_S_nebula_sourceAll[] = {
     RC_S_nebula_instance,
     RC_S_nebula_map,
@@ -112,7 +114,7 @@ namespace doh {
     .targetProvidedResources = RC_S_nebula_targetAll,
     .sourceProvidedResources = RC_S_nebula_sourceAll,
     .cullMode = vk::CullModeFlagBits::eNone,
-    .vertexCountOverride = nebulaSize * 3 * 6,//one square per layer per axis
+    .vertexCountOverride = (nebulaSize + 1) * 3 * 6,//one square per layer per axis
     .blend = additiveBlend,
     .depthWrite = false,//keep depth of skybox visible pixels to 1 for additive shaders
   };

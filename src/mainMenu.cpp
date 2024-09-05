@@ -93,7 +93,7 @@ namespace doh {
     mm.cameraTrans.sector = focalSector;
     mm.cameraTrans.chunk = {};
     mm.cameraTrans.meters = {};
-    mm.cameraTrans.moveSectors(mm.cameraTrans.orientation[2] * -100.0f);
+    mm.cameraTrans.moveSectors(mm.cameraTrans.orientation[2] * -48.0f);
     mm.cameraTrans.stabilize();
     compoundTransform_packed_t cameraTransPacked;
     mm.cameraTrans.pack(&cameraTransPacked);

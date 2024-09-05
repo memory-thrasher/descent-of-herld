@@ -16,10 +16,10 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 layout(set = 0, binding = 1) uniform sampler3D tex;
 
-layout(location = 0) in vec3 texLoc;
+layout(location = 0) in vec4 texLoc;//w = strength
 
 layout(location = 0) out vec4 outColor;
 
 void main() {
-  outColor = texture(tex, texLoc);
+  outColor = texture(tex, texLoc.xyz) * texLoc.w;
 }

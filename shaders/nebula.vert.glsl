@@ -14,7 +14,7 @@
 
 #version 450
 
-const float nebulaSize = 128;
+const float nebulaSize = 32;
 
 layout(std140, set = 0, binding = 0) uniform data_t {
   uvec4 origin;//bbox min corner, w=unused
@@ -22,18 +22,22 @@ layout(std140, set = 0, binding = 0) uniform data_t {
 
 #include cameraStuff.partial.glsl
 
-layout(location = 0) out vec3 texLoc;
+layout(location = 0) out vec4 texLoc;//w = strength (calculated from distance and normal similarity
 
 void main() {
-  const uvec3 vpa = gl_VertexIndex.xxx / uvec3(1, 6, nebulaSize * 6) % uvec3(6, nebulaSize, 4096);
+  const uvec3 vpa = gl_VertexIndex.xxx / uvec3(1, 6, (nebulaSize + 1) * 6) % uvec3(6, nebulaSize + 1, 4096);
   const uvec3 axisLocalPos = uvec3(uvec2(vpa.x & 1, vpa.x > 1 && vpa.x < 5) * nebulaSize, vpa.y);
   //would use u/imat3 if it existed
-  const uvec3 axisSelector = uvec3(equal(uvec3(0, 1, 2), vpa.zzz));
+  const uvec3 axisSelector = uvec3(equal(uvec3(0, 1, 2), vpa.zzz));//is also the plane's normal
   const uvec3 localPos =
     axisLocalPos.xxx * axisSelector.zxy +
     axisLocalPos.yyy * axisSelector.yzx +
     axisLocalPos.zzz * axisSelector.xyz;
-  texLoc = localPos;
-  gl_Position = projectSector(localPos + instance.origin.xyz);
+  const uvec3 worldPos = localPos + instance.origin.xyz;
+  float facingness = abs(dot(vec3(axisSelector), cameraTransform.transform[2]));
+  if(facingness < sqrt(2)/2)
+    facingness = 0;
+  texLoc = vec4(vec3(localPos) / nebulaSize, cameraData.renderDistances.w * facingness / pow(length(ivec3(worldPos - cameraTransform.sector.xyz)), 2));
+  gl_Position = projectSector(worldPos);
 }
 
