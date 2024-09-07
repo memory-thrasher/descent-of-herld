@@ -27,15 +27,12 @@ namespace doh {
   //max nebula size = 128 sectors (half max render distance)
   //max image size then is: 128^3 = 2mb per byte-channel (3d support >= 256 required)
   //note: mipmap required support is bound to the VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT flag
-  //VK_FORMAT_B10G11R11_UFLOAT_PACK32 supports sampling but must be host-generated (no attach or storage)
-  //VK_FORMAT_R16G16B16A16_SFLOAT is twice as big but supports more ops and higher precision
   //mipmap required support levels: 16 (2^4) so smallest mip is 8^3
-  //support of mip for 3D is not obviously confirmed or denied anywhere, needs an experiment
 
-  constexpr size_t nebulaSize = 32,//sync with nebula.vert.glsl
+  constexpr size_t nebulaSize = 128,//sync with nebula.vert.glsl
     nebulaVolume = nebulaSize*nebulaSize*nebulaSize;
 
-  typedef std::array<uint32_t, nebulaVolume> nebulaMap_t;
+  typedef std::array<uint16_t, nebulaVolume> nebulaMap_t;
 
   void generateNebula(const glm::uvec3& location, nebulaMap_t& out);
 
@@ -46,11 +43,11 @@ namespace doh {
   constexpr WITE::imageRequirements IR_nebula_map = {
     .deviceId = gpuId,
     .id = FLID,
-    .format = vk::Format::eB10G11R11UfloatPack32,
+    .format = vk::Format::eR16Sfloat,
     .usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
     .dimensions = 3,
     .frameswapCount = 1,
-    .mipLevels = 1,//for now
+    .mipLevels = 4,
     .defaultW = nebulaSize,
     .defaultH = nebulaSize,
     .defaultD = nebulaSize,
@@ -93,8 +90,8 @@ namespace doh {
     RC_S_nebula_map,
   };
 
-  constexpr WITE::resourceConsumer RC_S_nebula_targetTransform = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex>::value,
-	      RC_S_nebula_targetData = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eVertex>::value,
+  constexpr WITE::resourceConsumer RC_S_nebula_targetTransform = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex>::value,
+	      RC_S_nebula_targetData = WITE::simpleUBConsumer<FLID, vk::ShaderStageFlagBits::eFragment | vk::ShaderStageFlagBits::eVertex>::value,
 	      RC_S_nebula_targetAll[] = {
 		RC_S_nebula_targetTransform,
 		RC_S_nebula_targetData,

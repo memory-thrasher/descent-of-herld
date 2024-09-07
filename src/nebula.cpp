@@ -20,16 +20,12 @@ namespace doh {
   void generateNebula(const glm::uvec3& location, nebulaMap_t& out) {
     //TODO prettier
     //TODO query for nearby/within star locations to emulate reflectivity/diffusion
-    constexpr glm::vec3 center { nebulaSize/2, nebulaSize/2, nebulaSize/2 };
-    const float maxDst = nebulaSize/2;
     for(int32_t z = 0;z < nebulaSize;z++)
       for(int32_t y = 0;y < nebulaSize;y++)
 	for(int32_t x = 0;x < nebulaSize;x++) {
-	  glm::vec3 pnt { x, y, z },
-	    delta = pnt - center;
-	  float dst = glm::length(delta),
-	    strength = WITE::max(0.0f, 1 - dst / maxDst);
-	  out[(z * nebulaSize + y) * nebulaSize + x] = glm::packF2x11_1x10({ strength/3, strength, strength/2 });
+	  out[(z * nebulaSize + y) * nebulaSize + x] = 0x7800;//1.0
+	  // if(x == 0 && z == 0 && y == 0)
+	  //   WARN(std::hex, out[(z * nebulaSize + y) * nebulaSize + x], std::dec);//note: order in BGR with no endian change
 	}
   };
 

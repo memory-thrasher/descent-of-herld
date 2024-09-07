@@ -14,12 +14,20 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #version 450
 
+const float nebulaSize = 128;
+
 layout(set = 0, binding = 1) uniform sampler3D tex;
 
 layout(location = 0) in vec4 texLoc;//w = strength
 
 layout(location = 0) out vec4 outColor;
 
+#include cameraStuff.partial.glsl
+
 void main() {
-  outColor = texture(tex, texLoc.xyz) * texLoc.w;
+  vec3 camToFNorm = normalize((vec3((gl_FragCoord.xy * 2 / cameraData.geometry.xy - (1).xx) * cameraData.geometry.zw, 1) *
+			       cameraTransform.transform).xyz);
+  vec3 planeNorm = vec3(equal(uvec3(0, 1, 2), (gl_PrimitiveID / ((nebulaSize + 1) * 2)).xxx));
+  outColor = vec4(// texture(tex, texLoc.xyz).x *
+		  pow(dot(planeNorm, camToFNorm), 2) * texLoc.w * vec3(1, 1, 1), 1);
 }

@@ -32,7 +32,7 @@ layout(location = 0) in vec2 screenSnormPos;
 layout(location = 0) out vec4 outColor;
 
 layout(early_fragment_tests) in;
-layout(depth_unchanged) out float gl_FragDepth;
+layout(depth_greater) out float gl_FragDepth;
 
 void main() {
   const float aspect = cameraData.geometry.x / cameraData.geometry.y;

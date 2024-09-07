@@ -14,10 +14,10 @@
 
 #version 450
 
-const float nebulaSize = 32;
+const float nebulaSize = 128;
 
 layout(std140, set = 0, binding = 0) uniform data_t {
-  uvec4 origin;//bbox min corner, w=unused
+  uvec4 origin;//bbox min corner, w=renderDistance
 } instance;
 
 #include cameraStuff.partial.glsl
@@ -34,10 +34,8 @@ void main() {
     axisLocalPos.yyy * axisSelector.yzx +
     axisLocalPos.zzz * axisSelector.xyz;
   const uvec3 worldPos = localPos + instance.origin.xyz;
-  float facingness = abs(dot(vec3(axisSelector), cameraTransform.transform[2]));
-  if(facingness < sqrt(2)/2)
-    facingness = 0;
-  texLoc = vec4(vec3(localPos) / nebulaSize, cameraData.renderDistances.w * facingness / pow(length(ivec3(worldPos - cameraTransform.sector.xyz)), 2));
+  texLoc = vec4(localPos, (1 - pow(length(ivec3(worldPos - cameraTransform.sector.xyz)) / instance.origin.w, 2))) / nebulaSize;
+  
   gl_Position = projectSector(worldPos);
 }
 

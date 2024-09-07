@@ -93,7 +93,7 @@ namespace doh {
     mm.cameraTrans.sector = focalSector;
     mm.cameraTrans.chunk = {};
     mm.cameraTrans.meters = {};
-    mm.cameraTrans.moveSectors(mm.cameraTrans.orientation[2] * -48.0f);
+    mm.cameraTrans.moveSectors(mm.cameraTrans.orientation[2] * -150.0f);
     mm.cameraTrans.stabilize();
     compoundTransform_packed_t cameraTransPacked;
     mm.cameraTrans.pack(&cameraTransPacked);
@@ -109,7 +109,7 @@ namespace doh {
     auto* transients = new transients_t();
     mm.transients = reinterpret_cast<void*>(transients);
     db->write<mainMenu>(oid, &mm);
-    transients->testNeb.writeInstanceData(glm::vec4(focalSector, 0));
+    transients->testNeb.writeInstanceData(glm::vec4(focalSector, 2500));
     generateNebula(focalSector, transients->testNebMap);
     transients->testNeb.writeMap(transients->testNebMap);
     transients->testNeb.mapCopySetEnabled(true);
