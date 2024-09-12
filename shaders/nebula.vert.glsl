@@ -14,7 +14,7 @@
 
 #version 450
 
-const float nebulaSize = 128;
+const uint nebulaSize = 128;
 
 layout(std140, set = 0, binding = 0) uniform data_t {
   uvec4 origin;//bbox min corner, w=renderDistance
@@ -22,20 +22,20 @@ layout(std140, set = 0, binding = 0) uniform data_t {
 
 #include cameraStuff.partial.glsl
 
-layout(location = 0) out vec4 texLoc;//w = strength (calculated from distance and normal similarity
+layout(location = 0) out vec4 texLoc;//w = strength
 
 void main() {
-  const uvec3 vpa = gl_VertexIndex.xxx / uvec3(1, 6, (nebulaSize + 1) * 6) % uvec3(6, nebulaSize + 1, 4096);
-  const uvec3 axisLocalPos = uvec3(uvec2(vpa.x & 1, vpa.x > 1 && vpa.x < 5) * nebulaSize, vpa.y);
+  const uvec3 vpa = gl_VertexIndex.xxx / uvec3(1, 6, nebulaSize * 6) % uvec3(6, nebulaSize, 4096);
   //would use u/imat3 if it existed
   const uvec3 axisSelector = uvec3(equal(uvec3(0, 1, 2), vpa.zzz));//is also the plane's normal
-  const uvec3 localPos =
-    axisLocalPos.xxx * axisSelector.zxy +
-    axisLocalPos.yyy * axisSelector.yzx +
-    axisLocalPos.zzz * axisSelector.xyz;
-  const uvec3 worldPos = localPos + instance.origin.xyz;
-  texLoc = vec4(localPos, (1 - pow(length(ivec3(worldPos - cameraTransform.sector.xyz)) / instance.origin.w, 2))) / nebulaSize;
-  
-  gl_Position = projectSector(worldPos);
+  const uvec3 worldPos = instance.origin.xyz + //this needs to happen twice, once as float and once as uint
+    axisSelector.zxy * (uint(vpa.x & 1) * nebulaSize).xxx +
+    axisSelector.yzx * (uint(vpa.x > 1 && vpa.x < 5) * nebulaSize).xxx +
+    axisSelector.xyz * vpa.yyy;
+  texLoc = vec4(vec3(axisSelector.zxy * (uint(vpa.x & 1) * nebulaSize).xxx +
+		     axisSelector.yzx * (uint(vpa.x > 1 && vpa.x < 5) * nebulaSize).xxx +
+		     axisSelector.xyz * (vpa.y + 0.5f).xxx) / nebulaSize,
+		(1 - pow(length(ivec3(worldPos - cameraTransform.sector.xyz)) / instance.origin.w, 2)) / nebulaSize);
+  gl_Position = projectSectorDivW(worldPos, uint(0x80000000) * axisSelector);
 }
 

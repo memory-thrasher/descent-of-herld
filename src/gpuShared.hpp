@@ -97,11 +97,17 @@ namespace doh {
     .id = FLID,
     .src = FLID,
     .dst = FLID,
+  }, CP_postFinal {
+    .id = FLID,
+    .src = FLID,
+    .dst = FLID,
   };
   //!!append CS_all CP_warmup_transform
   //!!append CS_all CP_warmup_data
+  //!!append CS_all CP_postFinal
   //!!append IDL_CP_L_warmup CP_warmup_transform.id
   //!!append IDL_CP_L_warmup CP_warmup_data.id
+  //!!append IDL_CP_L_postFinal CP_postFinal.id
 
   constexpr uint64_t RC_ID_RP_gui_depth = FLID,
 	      RC_ID_RP_gui_color = FLID,
@@ -139,8 +145,21 @@ namespace doh {
 	      RC_ID_RP_postFinal_color = FLID;
 
   //this IR is the final target of reflection cube maps, getting resambled by future renders, and also the pre-bloom attachment for the screen target, which is resambled by the bloom shader.
-  constexpr WITE::imageRequirements IR_intermediateColor = WITE::intermediateColor<gpuId, FLID, WITE::Format::RGBA32float>::value;
+  constexpr WITE::imageRequirements IR_intermediateColor {
+    .deviceId = gpuId,
+    .id = FLID,
+    // .format = WITE::Format::RGBA32float,
+    // .format = WITE::Format::RGBA8unorm,
+    .format = WITE::Format::RGBA16unorm,
+    // .format = WITE::Format::RGBA16float,
+    .usage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferSrc,
+    .frameswapCount = 1
+  };//TODO when implementing bloom, keep the copy but disable it, or disable the bloom steps, depending on bloom setting
   //!!append IR_all IR_intermediateColor
+
+  //the final color only needs to be attachable copyable as the source. There's also no point in having precision higher than byte channels
+  constexpr WITE::imageRequirements IR_finalColor = WITE::simpleColor<gpuId, FLID>::value;
+  //!!append IR_all IR_finalColor
 
   constexpr WITE::imageRequirements IR_depth = {
     .deviceId = gpuId,

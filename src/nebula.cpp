@@ -13,6 +13,7 @@
 */
 
 #include "nebula.hpp"
+#include "f16.hpp"
 
 namespace doh {
 
@@ -23,7 +24,7 @@ namespace doh {
     for(int32_t z = 0;z < nebulaSize;z++)
       for(int32_t y = 0;y < nebulaSize;y++)
 	for(int32_t x = 0;x < nebulaSize;x++) {
-	  out[(z * nebulaSize + y) * nebulaSize + x] = 0x7800;//1.0
+	  out[(z * nebulaSize + y) * nebulaSize + x] = f16Encode(1);
 	  // if(x == 0 && z == 0 && y == 0)
 	  //   WARN(std::hex, out[(z * nebulaSize + y) * nebulaSize + x], std::dec);//note: order in BGR with no endian change
 	}

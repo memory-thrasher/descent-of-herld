@@ -213,10 +213,12 @@ namespace doh {
   // };
   // //! !append RPR_all RP_postFinal
 
-  // constexpr WITE::layerRequirements L_postFinal = {
-  //   .renders = RP_postFinal.id,
-  // };
-  // //! !append LR_all L_postFinal
+  expand_IDL_CP_L_postFinal(uint64_t);
+  constexpr WITE::layerRequirements L_postFinal = {
+    // .renders = RP_postFinal.id,
+    .copies = IDL_CP_L_postFinal,
+  };
+  //!!append LR_all L_postFinal
 
   expand_IR_all(WITE::imageRequirements);
   expand_BR_all(WITE::bufferRequirements);

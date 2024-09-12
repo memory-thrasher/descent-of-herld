@@ -22,8 +22,15 @@ layout(std140, set = 1, binding = 1) uniform cameraData_t {
 } cameraData;
 
 vec4 projectSector(uvec3 worldPnt) {
-    const vec3 pnt = vec3(((vec3(ivec3(worldPnt - cameraTransform.sector.xyz)) - (cameraTransform.chunk.xyz >> 16) / 65536.0f) * cameraTransform.transform).xyz);
-    return vec4(pnt.xy / (abs(pnt.z) * cameraData.geometry.zw), pnt.z / cameraData.renderDistances.w, 1);
+  const vec3 pnt = vec3(((vec3(ivec3(worldPnt - cameraTransform.sector.xyz)) - (cameraTransform.chunk.xyz >> 16) / 65536.0f) * cameraTransform.transform).xyz);
+  return vec4(pnt.xy / (abs(pnt.z) * cameraData.geometry.zw), pnt.z / cameraData.renderDistances.w, 1);
+}
+
+vec4 projectSectorDivW(uvec3 worldPnt, uvec3 chunkOffset) {
+  uvec3 chunkBorrow;
+  const uvec3 chunkDelta = usubBorrow(chunkOffset, cameraTransform.chunk.xyz, chunkBorrow);
+  const vec3 pnt = vec3(((vec3(ivec3(worldPnt - cameraTransform.sector.xyz - chunkBorrow)) + (chunkDelta >> 16) / 65536.0f) * cameraTransform.transform).xyz);
+  return vec4(pnt.xy / cameraData.geometry.zw, abs(pnt.z) * pnt.z / cameraData.renderDistances.w, abs(pnt.z));
 }
 
 //TODO projectChunk and projectNear similarly as needed

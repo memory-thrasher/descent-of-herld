@@ -34,9 +34,6 @@ namespace doh {
   //!!genObjGlobalCollection
   //!!genObjGetWindow
 
-  constexpr WITE::imageRequirements IR_color = WITE::simpleColor<gpuId, FLID>::value;
-  //!!append IR_all IR_color
-
   constexpr WITE::resourceSlot RS_primaryCamera_cameraData = {
     .id = FLID,
     .requirementId = BR_cameraData.id,
@@ -53,9 +50,14 @@ namespace doh {
     .id = FLID,
     .requirementId = BR_S_compoundTransform.id,
     .objectLayoutId = OL_primaryCamera.id,
-  }, RS_primaryCamera_color = {
+  }, RS_primaryCamera_intermediateColor = {
     .id = FLID,
-    .requirementId = IR_color.id,
+    .requirementId = IR_intermediateColor.id,
+    .objectLayoutId = OL_primaryCamera.id,
+    .resizeBehavior = WITE::resize_trackWindow_discard,
+  }, RS_primaryCamera_finalColor = {
+    .id = FLID,
+    .requirementId = IR_finalColor.id,
     .objectLayoutId = OL_primaryCamera.id,
     .resizeBehavior = WITE::resize_trackWindow_discard,
   }, RS_primaryCamera_depth_gui = {
@@ -88,7 +90,8 @@ namespace doh {
     RS_S_primaryCamera_cameraData,
     RS_primaryCamera_transform,
     RS_S_primaryCamera_transform,
-    RS_primaryCamera_color,
+    RS_primaryCamera_finalColor,
+    RS_primaryCamera_intermediateColor,
     RS_primaryCamera_depth_gui,
     RS_primaryCamera_depth_near,
     RS_primaryCamera_depth_mid,
@@ -105,36 +108,38 @@ namespace doh {
     { CP_warmup_data.src, RS_S_primaryCamera_cameraData.id },
     { CP_warmup_data.dst, RS_primaryCamera_cameraData.id },
     { RC_ID_RP_gui_depth, RS_primaryCamera_depth_gui.id },
-    { RC_ID_RP_gui_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_gui_color, RS_primaryCamera_intermediateColor.id },
     { RC_ID_RP_prenear_depth_input, RS_primaryCamera_depth_gui.id },
     { RC_ID_RP_prenear_depth_input_DS, RS_primaryCamera_depth_gui.id },
     { RC_ID_RP_prenear_depth, RS_primaryCamera_depth_near.id },
     { RC_ID_RP_near_depth, RS_primaryCamera_depth_near.id },
-    { RC_ID_RP_near_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_near_color, RS_primaryCamera_intermediateColor.id },
     { RC_ID_RP_premid_depth_input, RS_primaryCamera_depth_near.id },
     { RC_ID_RP_premid_depth_input_DS, RS_primaryCamera_depth_near.id },
     { RC_ID_RP_premid_depth, RS_primaryCamera_depth_mid.id },
     { RC_ID_RP_mid_depth, RS_primaryCamera_depth_mid.id },
-    { RC_ID_RP_mid_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_mid_color, RS_primaryCamera_intermediateColor.id },
     { RC_ID_RP_prefar_depth_input, RS_primaryCamera_depth_mid.id },
     { RC_ID_RP_prefar_depth_input_DS, RS_primaryCamera_depth_mid.id },
     { RC_ID_RP_prefar_depth, RS_primaryCamera_depth_far.id },
     { RC_ID_RP_far_depth, RS_primaryCamera_depth_far.id },
-    { RC_ID_RP_far_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_far_color, RS_primaryCamera_intermediateColor.id },
     { RC_ID_RP_preskybox_depth_input, RS_primaryCamera_depth_far.id },
     { RC_ID_RP_preskybox_depth_input_DS, RS_primaryCamera_depth_far.id },
     { RC_ID_RP_preskybox_depth, RS_primaryCamera_depth_skybox.id },
     { RC_ID_RP_skybox_depth, RS_primaryCamera_depth_skybox.id },
-    { RC_ID_RP_skybox_color, RS_primaryCamera_color.id },
+    { RC_ID_RP_skybox_color, RS_primaryCamera_intermediateColor.id },
     // { RC_ID_RP_prepost_depth, RS_primaryCamera_depth.id },
-    // { RC_ID_RP_prepost_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_prepost_color, RS_primaryCamera_intermediateColor.id },
     // { RC_ID_RP_postH_depth, RS_primaryCamera_depth.id },
-    // { RC_ID_RP_postH_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_postH_color, RS_primaryCamera_intermediateColor.id },
     // { RC_ID_RP_postV_depth, RS_primaryCamera_depth.id },
-    // { RC_ID_RP_postV_color, RS_primaryCamera_color.id },
+    // { RC_ID_RP_postV_color, RS_primaryCamera_intermediateColor.id },
     // { RC_ID_RP_postFinal_depth, RS_primaryCamera_depth.id },
-    // { RC_ID_RP_postFinal_color, RS_primaryCamera_color.id },
-    { RC_ID_primaryCamera_present, RS_primaryCamera_color.id },
+    // { RC_ID_RP_postFinal_color, RS_primaryCamera_finalColor.id },
+    { CP_postFinal.src, RS_primaryCamera_intermediateColor.id },
+    { CP_postFinal.dst, RS_primaryCamera_finalColor.id },
+    { RC_ID_primaryCamera_present, RS_primaryCamera_finalColor.id },
   };
   //!!append RR_L_primaryCamera RR_L_primaryCamera_invariant
 

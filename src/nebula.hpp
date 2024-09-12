@@ -111,7 +111,7 @@ namespace doh {
     .targetProvidedResources = RC_S_nebula_targetAll,
     .sourceProvidedResources = RC_S_nebula_sourceAll,
     .cullMode = vk::CullModeFlagBits::eNone,
-    .vertexCountOverride = (nebulaSize + 1) * 3 * 6,//one square per layer per axis
+    .vertexCountOverride = nebulaSize * 3 * 6,//one square per layer per axis
     .blend = additiveBlend,
     .depthWrite = false,//keep depth of skybox visible pixels to 1 for additive shaders
   };
