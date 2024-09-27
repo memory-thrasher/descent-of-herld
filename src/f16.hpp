@@ -68,4 +68,12 @@ namespace doh {
   static_assert(f16Less(f16Encode(1.5f), f16Encode(2)));
   static_assert(f16Less(f16Encode(1), f16Encode(1.5f)));
 
+  constexpr uint64_t pack16x4(uint16_t a, uint16_t b, uint16_t c, uint16_t d) {
+    return (a << 48) | (b << 32) | (c << 16) | d;
+  };
+
+  constexpr uint64_t f16Pack4(glm::vec4 v) {
+    return pack16x4(f16Encode(v.x), f16Encode(v.y), f16Encode(v.z), f16Encode(v.w));
+  };
+
 }

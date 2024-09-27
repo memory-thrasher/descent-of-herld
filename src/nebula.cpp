@@ -14,19 +14,20 @@
 
 #include "nebula.hpp"
 #include "f16.hpp"
+#include "elements.hpp"
 
 namespace doh {
 
+  void generateNebula(const glm::uvec3& location, nebula_data_t& out) {
+  };
+
   //this should probably be async
-  void generateNebula(const glm::uvec3& location, nebulaMap_t& out) {
-    //TODO prettier
-    //TODO query for nearby/within star locations to emulate reflectivity/diffusion
+  void updateNebula(const nebula_data_t& nebulaData, nebulaMap_t& out) {
     for(int32_t z = 0;z < nebulaSize;z++)
       for(int32_t y = 0;y < nebulaSize;y++)
 	for(int32_t x = 0;x < nebulaSize;x++) {
-	  out[(z * nebulaSize + y) * nebulaSize + x] = f16Encode(1);
-	  // if(x == 0 && z == 0 && y == 0)
-	  //   WARN(std::hex, out[(z * nebulaSize + y) * nebulaSize + x], std::dec);//note: order in BGR with no endian change
+	  uint32_t idx = (z * nebulaSize + y) * nebulaSize + x;
+	  out[idx] = f16Pack4(nebulaData.sectors[idx].exposure * nebulaData.sectors[idx].diffusion);
 	}
   };
 

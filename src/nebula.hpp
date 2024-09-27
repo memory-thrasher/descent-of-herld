@@ -32,9 +32,39 @@ namespace doh {
   constexpr size_t nebulaSize = 128,//sync with nebula.vert.glsl
     nebulaVolume = nebulaSize*nebulaSize*nebulaSize;
 
-  typedef std::array<uint16_t, nebulaVolume> nebulaMap_t;
+  /* nebula/cloud data:
+     cpu data:
+     db of elements, each element has:
+       diffusive color (mat3)
+       refractive scatter rate
+     per sector of cloud
+       encoded composition (list of compounds? Per sector? db model needed)
+         for now, make this just a vec3 for conentration of H O and S
+       calculated: (w = ir)
+         light color transparency (vec4)
+	 light color diffusion (mat4)
+	 light color exposure, propogated (vec4)
+     gpu data: (nebulaMap_t)
+     per sector:
+       apparent light emission (f16vec4 (w unused))
+   */
 
-  void generateNebula(const glm::uvec3& location, nebulaMap_t& out);
+  //note: total mass of reference nebula = 4.8M, with a volume of 700 cu ly so avg density = 0.006889275M/culy
+  struct nebula_sectordata_t {//cpu only, generated
+    compound_p composition;
+    glm::vec4 transparency, exposure;
+    glm::mat4 diffusion;
+  };
+
+  struct nebula_data_t {
+    nebula_sectordata_t sectors[nebulaVolume];
+  };
+
+  typedef std::array<uint64_t, nebulaVolume> nebulaMap_t;
+
+  void updateNebulaExposure(nebula_data_t& nebulaData);
+  void updateNebula(const nebula_data_t& nebulaData, nebulaMap_t& out);
+  void generateNebula(const glm::uvec3& location, nebula_data_t& out);
 
   constexpr WITE::objectLayout OL_nebula = { .id = FLID };
   //!!append OL_all OL_nebula
