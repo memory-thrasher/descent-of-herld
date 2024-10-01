@@ -51,7 +51,7 @@ namespace doh {
 
   //note: total mass of reference nebula = 4.8M, with a volume of 700 cu ly so avg density = 0.006889275M/culy
   struct nebula_sectordata_t {//cpu only, generated
-    compound_p composition;
+    compound_final<4> composition;
     glm::vec4 transparency, exposure;
     glm::mat4 diffusion;
   };
@@ -62,9 +62,9 @@ namespace doh {
 
   typedef std::array<uint64_t, nebulaVolume> nebulaMap_t;
 
+  void generateNebula(const glm::uvec3& location, nebula_data_t& out);
   void updateNebulaExposure(nebula_data_t& nebulaData);
   void updateNebula(const nebula_data_t& nebulaData, nebulaMap_t& out);
-  void generateNebula(const glm::uvec3& location, nebula_data_t& out);
 
   constexpr WITE::objectLayout OL_nebula = { .id = FLID };
   //!!append OL_all OL_nebula

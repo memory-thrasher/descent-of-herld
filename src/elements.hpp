@@ -52,8 +52,13 @@ namespace doh {
     float refractiveScatterRate;//visible light refractive index at STP
   };
 
+  struct element_t {
+    uint32_t atomicNumber, isotope;
+    int32_t netCharge;//TODO getter function using this, deriving where a sample doesn't exist
+  };
+
   struct compoundConstituent_t {
-    elementAttributes_t ea;
+    element_t element;
     double density;//kg/m^3
   };
 
@@ -132,6 +137,7 @@ namespace doh {
 
   //TODO finish filling in colors and scatter rates for other elements
   constexpr elementAttributes_t elementsByNumber[] = {
+    { 0,"V","Vacuum",0,0,"",0,0,0,0,0,0,{1},1 }, //mostly a placeholder so idx = atomic number
     { 1,"H","Hydrogen",1.008,0xFFFFFF,"1s1",120,13.598,0.754,13.81,20.28,0.00008988, {1}, 1.000132 },
     { 2,"He","Helium",4.0026,0xD9FFFF,"1s2",140,24.587,-0.5,0.95,4.22,0.0001785, {1}, 1.000036 },
     { 3,"Li","Lithium",7,0xCC80FF,"[He]2s1",182,5.392,0.618,453.65,1615,0.534 },
@@ -231,6 +237,11 @@ namespace doh {
     { 97,"Bk","Berkelium",247.07031,0x8A4FE3,"[Rn]7s2 5f9",244,6.23,-1.72,1323,2900,14 },
     { 98,"Cf","Californium",251.07959,0xA136D4,"[Rn]7s2 5f10",245,6.3,-1.01,1173,1743,15.1 },
     { 99,"Es","Einsteinium",252.083,0xB31FD4,"[Rn]7s2 5f11",245,6.42,-0.3,1133,1269,8.84 },
+  };
+
+  constexpr elementAttributes_t getAttributes(const element_t& e) {
+    //TODO elemental simulator for exotic ions or isotopes
+    return elementsByNumber[e.atomicNumber];
   };
 
 }

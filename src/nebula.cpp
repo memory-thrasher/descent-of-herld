@@ -18,7 +18,17 @@
 
 namespace doh {
 
+  //visualize a series of nested shells of different atoms, inflating from within from light pressure, until surface tension between shells is broken and the atoms spill out past each other. The heavier atoms are nearer the core, and receive more energy from the core collapse. Some of that energy is emparted onto the lighter atoms as they are pushed out of the way. Surface tension and the viscus effect can be observed within sub-clouds of atoms flowing away from the dying star. The heavier atoms are more prone to forming larger coherent masses in deep space.
   void generateNebula(const glm::uvec3& location, nebula_data_t& out) {
+    for(int32_t z = 0;z < nebulaSize;z++)
+      for(int32_t y = 0;y < nebulaSize;y++)
+	for(int32_t x = 0;x < nebulaSize;x++) {
+	  uint32_t idx = (z * nebulaSize + y) * nebulaSize + x;
+	  out.sectors[idx].composition.data[0] = { 
+	}
+  };
+
+  void updateNebulaExposure(nebula_data_t& nebulaData) {
   };
 
   //this should probably be async
