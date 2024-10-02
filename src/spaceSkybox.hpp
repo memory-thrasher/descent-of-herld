@@ -35,10 +35,10 @@ namespace doh {
   };
 
   struct alignas(4) starType_t {//note: packed
-    uint8_t r, g, b, p;//rgb = uint color; p = power (NYI)
+    uint8_t p, b, g, r;//rgb = uint color; p = power (NYI)
     constexpr starType_t(const starType_t&) = default;
-    constexpr starType_t(uint8_t r, uint8_t g, uint8_t b, uint8_t p) : r(r), g(g), b(b), p(p) {};
-    constexpr starType_t(float r, float g, float b, uint8_t p) : r(unormToUint(r)), g(unormToUint(g)), b(unormToUint(b)), p(p) {};
+    constexpr starType_t(uint8_t r, uint8_t g, uint8_t b, uint8_t p) : p(p), b(b), g(g), r(r) {};
+    constexpr starType_t(float r, float g, float b, uint8_t p) : p(p), b(unormToUint(b)), g(unormToUint(g)), r(unormToUint(r)) {};
   };
 
   constexpr starType_t starTypes[] = {
