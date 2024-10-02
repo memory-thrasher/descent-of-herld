@@ -16,4 +16,6 @@ layout(std140, set = 0, binding = 0) uniform starData_t {
   uvec4[5] starTypes;
 } starData;
 
+const uint starTypesCount = 5*4*4;
+
 #include cameraStuff.partial.glsl

@@ -20,7 +20,6 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "uiStyle.hpp"
 #include "../generated/targetPrimary_stub.hpp"
 #include "../generated/spaceSkybox_stub.hpp"
-#include "../generated/nebula_stub.hpp"
 #include "math.hpp"
 #include "guiButton.hpp"
 #include "fpsCounter.hpp"
@@ -43,8 +42,8 @@ namespace doh {
       { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
 	guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
     };
-    nebula testNeb = nebula::create();
-    nebulaMap_t testNebMap;
+    // nebula testNeb = nebula::create();
+    // nebulaMap_t testNebMap;
     spaceSkybox space = spaceSkybox::create();
     fpsCounter fps;
   };
@@ -98,7 +97,7 @@ namespace doh {
     compoundTransform_packed_t cameraTransPacked;
     mm.cameraTrans.pack(&cameraTransPacked);
     transients->camera.writeCameraTransform(cameraTransPacked);
-    transients->testNeb.mapCopySetEnabled(false);
+    // transients->testNeb.mapCopySetEnabled(false);
     db->write(oid, &mm);
   };
 
@@ -109,10 +108,10 @@ namespace doh {
     auto* transients = new transients_t();
     mm.transients = reinterpret_cast<void*>(transients);
     db->write<mainMenu>(oid, &mm);
-    transients->testNeb.writeInstanceData(glm::vec4(focalSector, 2500));
-    generateNebula(focalSector, transients->testNebMap);
-    transients->testNeb.writeMap(transients->testNebMap);
-    transients->testNeb.mapCopySetEnabled(true);
+    // transients->testNeb.writeInstanceData(glm::vec4(focalSector, 2500));
+    // generateNebula(focalSector, transients->testNebMap);
+    // transients->testNeb.writeMap(transients->testNebMap);
+    // transients->testNeb.mapCopySetEnabled(true);
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {

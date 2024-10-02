@@ -31,7 +31,7 @@ namespace doh {
   };
 
   constexpr uint8_t unormToUint(float unorm) {
-    return std::min<uint8_t>(static_cast<uint8_t>(unorm * 256), 255);
+    return static_cast<uint8_t>(std::min<uint16_t>(unorm * 256, 255));
   };
 
   struct alignas(4) starType_t {//note: packed
@@ -46,48 +46,55 @@ namespace doh {
     { 0.57f, 0.71f, 1.0f, 8 * 2 },
     { 0.667f, 0.749f, 1.0f, 6 * 2 },
     { 0.635f, 0.753f, 1.0f, 4 * 2 },
+
     { 0.792f, 0.843f, 1.0f, 3 * 2 },
     { 0.835f, 0.878f, 1.0f, 2 * 2 },
     { 0.973f, 0.969f, 1.0f, 2 * 2 },
     { 1.0f, 0.957f, 0.918f, 2 },
+
     { 1.0f, 0.929f, 0.89f, 2 },
     { 1.0f, 0.824f, 0.631f, 2 },
     { 1.0f, 0.855f, 0.71f, 2 },
     { 1.0f, 0.8f, 0.435f, 2 },
+
     { 1.0f, 0.71f, 0.424f, 2 },
     { 1.0f, 0.947f, 0.908f, 2 },
     { 1.0f, 0.859f, 0.76f, 2 },
     { 1.0f, 0.834f, 0.671f, 2 },
+
     { 1.0f, 0.825f, 0.661f, 2 },
     { 1.0f, 0.76f, 0.43f, 2 },
     { 1.0f, 0.61f, 0.344f, 2 },
     { 0.792f, 0.843f, 1.0f, 1 },
-    { 0.835f, 0.878f, 1.0f, 1 },
-    { 0.973f, 0.969f, 1.0f, 1 },
-    { 1.0f, 0.957f, 0.918f, 1 },
-    { 1.0f, 0.929f, 0.89f, 1 },
-    { 1.0f, 0.824f, 0.631f, 1 },
-    { 1.0f, 0.855f, 0.71f, 1 },
-    { 1.0f, 0.8f, 0.435f, 1 },
-    { 1.0f, 0.71f, 0.424f, 1 },
-    { 1.0f, 0.947f, 0.908f, 1 },
-    { 1.0f, 0.859f, 0.76f, 1 },
-    { 1.0f, 0.834f, 0.671f, 1 },
+
+    // { 0.835f, 0.878f, 1.0f, 1 },
+    // { 0.973f, 0.969f, 1.0f, 1 },
+    // { 1.0f, 0.957f, 0.918f, 1 },
+    // { 1.0f, 0.929f, 0.89f, 1 },
+
+    // { 1.0f, 0.824f, 0.631f, 1 },
+    // { 1.0f, 0.855f, 0.71f, 1 },
+    // { 1.0f, 0.8f, 0.435f, 1 },
+    // { 1.0f, 0.71f, 0.424f, 1 },
+
+    // { 1.0f, 0.947f, 0.908f, 1 },
+    // { 1.0f, 0.859f, 0.76f, 1 },
+    // { 1.0f, 0.834f, 0.671f, 1 },
   };
 
   static_assert(sizeof(starType_t) == 4);
   static_assert(sizeof(starTypes) == 4*4*5);//sync with spaceSkybox.partial.glsl
+  constexpr uint32_t starTypesCount = sizeof(starTypes) / sizeof(starTypes[0]);
 
   constexpr uint32_t dot(glm::uvec3 a, glm::uvec3 b) {//TODO move to math file?
     return a.x*b.x + a.y*b.y + a.z*b.z;
   }
 
-  constexpr starType_t* starTypeAt(glm::uvec3 worldPnt) {//sync with mesh shader
+  constexpr uint32_t starTypeAt(glm::uvec3 worldPnt) {//sync with mesh shader
     constexpr int modulus = 0x1FFF;
     constexpr glm::uvec3 seedA(37, 139, 199),
 		seedB(103, 53, 157);
-    uint32_t idx = dot(worldPnt, worldPnt * seedA) + dot(worldPnt, seedB) & modulus;
-    return idx < 20 ? &starTypes[idx] : NULL;
+    return dot(worldPnt, worldPnt * seedA) + dot(worldPnt, seedB) & modulus;
   };
 
   constexpr WITE::bufferRequirements BR_starTypes = WITE::simpleUB<gpuId, FLID, sizeof(starTypes)>::value;

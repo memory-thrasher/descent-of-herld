@@ -50,7 +50,7 @@ uint dot(uvec3 a, uvec3 b) {
 //     const vec4 pnt = vec4(((vec3(ivec3(worldPnt - cameraTransform.sector.xyz)) - (cameraTransform.chunk.xyz >> 16) / 65536.0f) * cameraTransform.transform).xyz, (dot(worldPnt, worldPnt * seedA) + dot(worldPnt, seedB)) & modulus);
 //     const vec2 screenPnt = pnt.xy / (abs(pnt.z) * cameraData.geometry.zw);
 //     const float dstSqrNorm = dot(pnt, pnt) / (cameraData.renderDistances.w * cameraData.renderDistances.w);
-//     if(dstSqrNorm <= 1 && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) && pnt.w < 20) {
+//     if(dstSqrNorm <= 1 && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) && pnt.w < starTypesCount) {
 //       localFound[localCnt++] = vec4(screenPnt.xy, dstSqrNorm, pnt.w);
 //     }
 //   }
@@ -79,7 +79,7 @@ void main() {
     const vec4 pnt = vec4(((vec3(ivec3(worldPnt - cameraTransform.sector.xyz)) - (cameraTransform.chunk.xyz >> 16) / 65536.0f) * cameraTransform.transform).xyz, (dot(worldPnt, worldPnt * seedA) + dot(worldPnt, seedB)) & modulus);
     const vec2 screenPnt = pnt.xy / (abs(pnt.z) * cameraData.geometry.zw);
     const float dstSqrNorm = dot(pnt, pnt) / (cameraData.renderDistances.w * cameraData.renderDistances.w);
-    if(dstSqrNorm <= 1 && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) && pnt.w < 20) {
+    if(dstSqrNorm <= 1 && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) && pnt.w < starTypesCount) {
       localCnt++;
       if(localMin == 0xFFFF)
 	localMin = i;
@@ -98,7 +98,7 @@ void main() {
     const int pid = int(dot(worldPnt, worldPnt * seedA) + dot(worldPnt, seedB)) & modulus;
     const vec2 screenPnt = pnt.xy / (abs(pnt.z) * cameraData.geometry.zw);
     const float dstSqrNorm = dot(pnt, pnt) / (cameraData.renderDistances.w * cameraData.renderDistances.w);
-    if(dstSqrNorm <= 1 && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) && pid < 20) {
+    if(dstSqrNorm <= 1 && pnt.z > 0 && all(lessThan(abs(screenPnt.xy), (1).xx)) && pid < starTypesCount) {
       gl_MeshVerticesEXT[dst].gl_Position = vec4(screenPnt.xy, dstSqrNorm, 1);
       gl_MeshVerticesEXT[dst].gl_PointSize = max(1, int(starData.starTypes[pid / 4][pid % 4] & 0xFF) * 2.466e-6 * cameraData.geometry.w * cameraData.geometry.y / length(pnt));
       gl_MeshPrimitivesEXT[dst].gl_PrimitiveID = pid;
