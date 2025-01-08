@@ -34,6 +34,6 @@ namespace doh {
     compoundTransform_t cameraTrans;
     float fov;
   };
-  //!!append DB_types mainMenu
+  //!!registerDbType mainMenu
 
 }

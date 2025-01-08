@@ -13,10 +13,10 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #include <WITE/WITE.hpp>
-#include "../generated/onionHelper.hpp"
+#include "../generated/dbHelper.hpp"
 
 namespace doh {
 
-  typedef WITE::database<expand_raw_DB_types> db_t;
+  typedef WITE::database<dbTypes> db_t;
 
 };

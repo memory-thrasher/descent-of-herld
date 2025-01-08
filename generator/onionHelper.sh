@@ -19,6 +19,7 @@
 
 #note: working directory is project root (executed from ../build.sh)
 allvars=
+dbTypes=
 echo > generated/allStubs.hpp_new
 echo '#include "allStubs.hpp"' > generated/allImpl.hpp_new
 echo '#include <set>' > generated/allStubs.hpp_new
@@ -49,6 +50,14 @@ while IFS= read -d $'\0' file; do
 		eval "$listName='$listNewVar'"
 	    else
 		eval "$listName=\"\$$listName, $listNewVar\""
+	    fi
+	elif [[ "$line" =~ \!\!registerDbType\ (.*?) ]]; then
+	    typeName="${BASH_REMATCH[1]}"
+	    echo "#include \"../${file}\"" >>generated/dbHelper.hpp_new
+	    if ! echo "$dbTypes" | grep -Fwq "$typeName"; then
+		dbTypes="$typeName"
+	    else
+		dbTypes="$dbTypes, $typeName"
 	    fi
 	elif [[ "$line" =~ \!\!genObj\ (.*?) ]]; then
 	    objId="${BASH_REMATCH[1]}.id" #actual factory generated later
@@ -159,6 +168,17 @@ while read -d' ' var; do
     echo -n "#define expand_raw_$var "
     eval echo \$$var
 done <<<$allvars >>generated/onionHelper.hpp_new
+
+if [ -n "$dbTypes" ]; then
+    echo '#include "dbHelper.hpp"' >>generated/allStubs.hpp_new
+    echo "#define dbTypes $dbTypes" >>generated/dbHelper.hpp_new
+fi
+
+if ! test -f generated/dbHelper.hpp || diff -q generated/dbHelper.hpp_new generated/dbHelper.hpp | grep -q .; then
+    mv generated/dbHelper.hpp_new generated/dbHelper.hpp
+else
+    rm generated/dbHelper.hpp_new
+fi
 
 #avoid updating the file if nothing changed to save build time
 if ! test -f generated/onionHelper.hpp || diff -q generated/onionHelper.hpp_new generated/onionHelper.hpp | grep -q .; then
