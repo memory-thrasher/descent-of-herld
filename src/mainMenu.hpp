@@ -21,7 +21,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  struct mainMenu {
+  struct mainMenu : WITE::db_singleton {
     static constexpr uint64_t typeId = 10001000;
     static constexpr std::string dbFileId = "mainMenu";
     static void update(uint64_t oid, void* db);

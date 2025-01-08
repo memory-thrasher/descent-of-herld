@@ -35,8 +35,16 @@ namespace doh {
   };
 
   void dbDestroyAll() {
-    if(db) [[likely]] db.reset();
-    if(nextDb.db) [[likely]] nextDb.db.reset();
+    if(db) [[likely]] {
+      db->gracefulShutdown();
+      if(dbIsTemp) db->deleteFiles();
+      db.reset();
+    }
+    if(nextDb.db) [[unlikely]] {
+      nextDb.db->gracefulShutdown();
+      if(nextDb.isTemp) nextDb.db->deleteFiles();
+      nextDb.db.reset();
+    }
   };
 
   void dbCycle() {
@@ -51,7 +59,7 @@ namespace doh {
   };
 
   void createMainMenu() {
-    nextDb.db = std::make_unique<db_t>(std::filesystem::temp_directory_path() / "descent-of-herld-main-menu", true, true);
+    nextDb.db = std::make_unique<db_t>(getSaveDir() / "main-menu", true, true);
     nextDb.isTemp = true;
     mainMenu m;
     nextDb.db->create<mainMenu>(&m);

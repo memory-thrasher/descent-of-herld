@@ -48,6 +48,9 @@ namespace doh {
     fpsCounter fps;
   };
 
+  static_assert(WITE::dbAllocationBatchSizeOf<mainMenu>::value == 1);
+  static_assert(WITE::dbLogAllocationBatchSizeOf<mainMenu>::value == 1);
+
   transients_t* getTransients(uint64_t oid, void* dbv) {
     auto db = reinterpret_cast<db_t*>(dbv);
     mainMenu mm;
