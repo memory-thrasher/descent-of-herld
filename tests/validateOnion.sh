@@ -3,7 +3,7 @@
 mkdir -p build/debug/tests 2>/dev/null
 
 #NOTE: I can use libc++ for test cases but not in the release builds bc I don't want to require the client have it installed
-clang++ -I "build/shaders" --std=c++20 -stdlib=libc++ -Wl,-rpath,/usr/local/lib/x86_64-unknown-linux-gnu -DDEBUG -g -DVK_NO_PROTOTYPES -DVULKAN_HPP_NO_EXCEPTIONS -I$WITEBASE -I$WITEBASE/shared -Wall tests/validateOnion.cpp -fuse-ld=lld -lvulkan -lrt -o build/debug/tests/validateOnion -Wno-unused-function || exit 1
+clang++ -I "build/shaders" "$VK_INCLUDE" --std=c++20 -stdlib=libc++ -Wl,-rpath,/usr/local/lib/x86_64-unknown-linux-gnu -DDEBUG -g -DVK_NO_PROTOTYPES -DVULKAN_HPP_NO_EXCEPTIONS -I$WITEBASE -I$WITEBASE/shared -Wall tests/validateOnion.cpp -fuse-ld=lld -L${VK_SDK_PATH}/lib -lvulkan -lrt -o build/debug/tests/validateOnion -Wno-unused-function || exit 1
 
 build/debug/tests/validateOnion
 validOnion=$?

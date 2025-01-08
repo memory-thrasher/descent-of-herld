@@ -88,7 +88,7 @@ namespace doh {
     db->readCommitted<mainMenu>(oid, &mm);
     mm.cameraData.geometry = { size, mm.fov*size.x/size.y, mm.fov };
     transients->camera.writeCameraData(mm.cameraData);
-    mm.cameraTrans.rotate({ 1, 0, 0 }, -0.001f);
+    mm.cameraTrans.rotate({ 1, 0, 0 }, -0.00002f);
     mm.cameraTrans.sector = focalSector;
     mm.cameraTrans.chunk = {};
     mm.cameraTrans.meters = {};

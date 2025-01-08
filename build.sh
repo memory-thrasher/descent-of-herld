@@ -25,14 +25,18 @@ COMPILER=clang++
 WORKNICE="nice -n10"
 TESTOPTIONS="nogpuid=1,2 extent=3840,0,3840,2160 presentmode=fifo" #skips llvme pipe on my test system, renders to center monitor
 if [ -z "${VK_SDK_PATH}" ]; then
-    VK_SDK_PATH="${VULKAN_SDK}"
+    export VK_SDK_PATH="${VULKAN_SDK}"
 fi
 if [ -z "$VK_INCLUDE" -a -n "$VK_SDK_PATH" ]; then
     export VK_INCLUDE="-I${VK_SDK_PATH}/include"
 fi
-if [ -n "$vk_lib_path" ]; then
-    PATH="$vk_lib_path:$PATH"
-fi;
+if [ -n "$VK_SDK_PATH" ]; then
+    export VK_ADD_LAYER_PATH="${VK_ADD_LAYER_PATH}${VK_ADD_LAYER_PATH:+:}${VK_SDK_PATH}/share/vulkan/explicit_layer.d"
+    #echo "VK_ADD_LAYER_PATH=$VK_ADD_LAYER_PATH"
+fi
+# if [ -n "$vk_lib_path" ]; then
+#     PATH="$vk_lib_path:$PATH"
+# fi;
 
 cp -u $WITEBUILD/shared/font.hpp generated/
 
@@ -99,12 +103,13 @@ while IFS= read -d '' SRCFILE; do
 	(if ! $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" --std=c++20 -fPIC -fdata-sections -ffunction-sections -fdata-sections -DDEBUG -g $BOTHOPTS -Werror -Wall "${SRCFILE}" -c -o "${DBGDSTFILE}" 2>&1 | dd bs=4096 status=none; then
 	     rm "${DBGDSTFILE}" 2>/dev/null
 	     echo "Failed Build: ${SRCFILE}"
+	     #echo -- $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" --std=c++20 -fPIC -fdata-sections -ffunction-sections -fdata-sections -DDEBUG -g $BOTHOPTS -Werror -Wall "${SRCFILE}" -c -o "${DBGDSTFILE}"
 	 fi)&
 	(if ! $WORKNICE $COMPILER $VK_INCLUDE -I "build/shaders" --std=c++20 -fPIC -ffunction-sections -fdata-sections -O3 $BOTHOPTS -Werror -Wall "${SRCFILE}" -c -o "${RELDSTFILE}" 2>&1 | dd bs=4096 status=none; then
 	     rm "${RELDSTFILE}" 2>/dev/null
 	     echo "[release build] Failed Build: ${SRCFILE}"
 	 fi)&
-	(if ! $WORKNICE $WIN_COMPILER /std:c++20 -Diswindows /O2 $VK_INCLUDE -I "build/shaders" $BOTHOPTS -c "${SRCFILE}" -o "${WINDSTFILE}" 2>&1 | dd bs=4096 status=none; then
+	(if ! $WORKNICE $WIN_COMPILER /std:c++20 -Diswindows /O2 $VK_INCLUDE -I "build/shaders" $BOTHOPTS -c "${SRCFILE}" -o "${WINDSTFILE}" -Wno-unused-result 2>&1 | dd bs=4096 status=none; then
 	     rm "${WINDSTFILE}" 2>/dev/null
 	     echo "[cross compile for windows] Failed Build: ${SRCFILE}"
 	 fi)&
@@ -124,11 +129,11 @@ ALLDSTFILES=
 
 $WORKNICE $WIN_LINKER /opt:icf=4 /subsystem:windows /entry:mainCRTStartup build/windows/*.o $WITEBUILD/windows/WITE/*.o /defaultlib:SDL2 /defaultlib:SHELL32.lib "/out:build/windows/descentOfHerld.exe" &
 
-$WORKNICE $COMPILER -Wl,--icf=all build/release/*.o $WITEBUILD/release/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/release/descentOfHerld" &
+$WORKNICE $COMPILER -Wl,--icf=all build/release/*.o $WITEBUILD/release/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -L${VK_SDK_PATH}/lib -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/release/descentOfHerld" &
 
-$WORKNICE $COMPILER -DDEBUG -Wl,--icf=all build/debug/*.o $WITEBUILD/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/debug/descentOfHerld" || exit 1
+$WORKNICE $COMPILER -DDEBUG -Wl,--icf=all build/debug/*.o $WITEBUILD/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -L${VK_SDK_PATH}/lib -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/debug/descentOfHerld" || exit 1
 
-./build/debug/descentOfHerld
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$VK_SDK_PATH/lib" ./build/debug/descentOfHerld
 
 while pgrep $WIN_COMPILER_RUNNING_TEST &>/dev/null || $COMPILER &>/dev/null; do sleep 0.05s; done
 
