@@ -20,6 +20,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
+  //TODO gui superclass?
   struct guiButton {
     typedefCB(clickAction, void, guiButton*);
     guiRect rect;
@@ -31,9 +32,11 @@ namespace doh {
     std::string labelStr;//for debugging
     clickAction onClick;
     bool isPressed = false;
+    uint64_t ownerId;
+    void* ownerDb;
     guiButton() = delete;
     guiButton(guiButton&&) = delete;
-    guiButton(buttonStyle_t& style, glm::vec2 location, std::string label, clickAction ca);
+    guiButton(buttonStyle_t& style, glm::vec2 location, std::string label, clickAction ca, uint64_t oid, void* dbv);
     ~guiButton();
     void resize(glm::vec4);
     void setLabel(std::string);

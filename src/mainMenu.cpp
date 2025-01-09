@@ -28,24 +28,57 @@ namespace doh {
 
   constexpr glm::uvec3 focalSector { 204887, 20487, 2348 };
 
+  static constexpr size_t saveSlots = 10;
+
+  std::vector<std::unique_ptr<guiButton>> buttons;
+
+  struct btn_t {
+    std::string label;
+    guiButton::clickAction action;
+  };
+
+  template<class T> void setButtons(uint64_t oid, void* dbv, const T& newButtons) {
+    #error concurrent modification of buttons bc this is called from update of old button
+    //TODO keep all buttons (in transient), disable most buttons
+    buttons.clear();
+    size_t i = 0;
+    for(const btn_t& btn : newButtons) {
+      buttons.emplace_back(std::make_unique<guiButton>(btnHuge(), glm::vec2{ -0.95f, -0.95f + btnHuge().height * 1.25f * i }, btn.label, btn.action, oid, dbv));
+      i++;
+    }
+  };
+
+  void gotoNewGame(guiButton* btn) {
+    btn_t btns[saveSlots];
+    for(size_t i = 0;i < saveSlots;i++)
+      btns[i] = { std::string("Slot ") + std::to_string(i), guiButton::clickAction_F::make([i](guiButton*){
+	WARN("clicked button ", i);
+      }) };
+    setButtons(btn->ownerId, btn->ownerDb, btns);
+  };
+
+  void gotoMain(uint64_t oid, void* dbv) {
+    const btn_t btns[] {
+      { "Continue", guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+      { "Load", guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+      { "New", guiButton::clickAction_F::make(gotoNewGame) },
+      { "Settings", guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+      { "Exit", guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
+    };
+    setButtons(oid, dbv, btns);
+  };
+
+  void gotoMain(guiButton* btn) {
+    gotoMain(btn->ownerId, btn->ownerDb);
+  };
+
   struct transients_t {
     targetPrimary camera = targetPrimary::create();
-    guiButton buttons[5] = {
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue",
-	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load",
-	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New",
-	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
-	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
-	guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
-    };
     // nebula testNeb = nebula::create();
     // nebulaMap_t testNebMap;
     spaceSkybox space = spaceSkybox::create();
     fpsCounter fps;
+    size_t viewId = 0;
   };
 
   static_assert(WITE::dbAllocationBatchSizeOf<mainMenu>::value == 1);
@@ -56,6 +89,10 @@ namespace doh {
     mainMenu mm;
     db->readCurrent<mainMenu>(oid, &mm);//current because old pointers don't help
     return reinterpret_cast<transients_t*>(mm.transients);
+  };
+
+  void switchView(size_t viewId, guiButton*) {
+    //?
   };
 
   void mainMenu::allocated(uint64_t oid, void* dbv) {
@@ -83,8 +120,8 @@ namespace doh {
   void mainMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     const auto size = transients->camera.getWindow().getVecSize();
-    for(auto& btn : transients->buttons)
-      btn.update();
+    for(auto& btn : buttons)
+      btn->update();
     transients->fps.update();
     auto db = reinterpret_cast<db_t*>(dbv);
     mainMenu mm;
@@ -111,6 +148,7 @@ namespace doh {
     auto* transients = new transients_t();
     mm.transients = reinterpret_cast<void*>(transients);
     db->write<mainMenu>(oid, &mm);
+    gotoMain(oid, dbv);
     // transients->testNeb.writeInstanceData(glm::vec4(focalSector, 2500));
     // generateNebula(focalSector, transients->testNebMap);
     // transients->testNeb.writeMap(transients->testNebMap);

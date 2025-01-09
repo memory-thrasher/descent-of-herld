@@ -22,14 +22,16 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  guiButton::guiButton(buttonStyle_t& style, glm::vec2 location, std::string labelStr, clickAction ca) :
+  guiButton::guiButton(buttonStyle_t& style, glm::vec2 location, std::string labelStr, clickAction ca, uint64_t oid, void* dbv) :
     rect(guiRect::create()),
     rectData({ location, location.x + style.width, location.y + style.height }),
     label(guiText::create()),
     labelData({ location, location.x + style.width, location.y + style.height }),
     style(style),
     labelStr(labelStr),
-    onClick(ca)
+    onClick(ca),
+    ownerId(oid),
+    ownerDb(dbv)
   {
     rect.setStyle(style.rectNormalBuf);
     rect.writeInstanceData(rectData);
@@ -46,7 +48,7 @@ namespace doh {
 
   void guiButton::update() {
     WITE::winput::compositeInputData mouseLocation, lmbCid;
-    bool isHovered = false;
+    bool isHovered = false, isClicked = false;
     WITE::winput::getInput(WITE::winput::mouse, mouseLocation);
     {
       WITE::scopeLock lock(&targetPrimary::allInstances_mutex);
@@ -71,11 +73,12 @@ namespace doh {
       isHovered = false;
     else if(!lmb.isPressed()) {
       if(lmb.justClicked() || (isPressed && lmb.justReleased())) [[unlikely]]
-	onClick(this);
+	isClicked = true;
       isPressed = false;
     }
     rect.setStyle(isPressed ? style.rectPressBuf : isHovered ? style.rectHovBuf : style.rectNormalBuf);
     label.setStyle(isPressed ? style.textPressBuf : isHovered ? style.textHovBuf : style.textNormalBuf);
+    if(isClicked) [[unlikely]] onClick(this);
   };
 
   void guiButton::resize(glm::vec4) {
