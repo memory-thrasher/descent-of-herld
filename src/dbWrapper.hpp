@@ -27,5 +27,17 @@ namespace doh {
   void dbDestroyAll();
   void dbLoadGame(int slot);
   std::filesystem::path getSaveDir();
+  uint64_t getFrame();
+
+  struct dbWrapper {
+    void* dbptr;
+    dbWrapper(void* dbptr) : dbptr(dbptr) {};
+    dbWrapper(const dbWrapper&) = default;
+    uint64_t getFrame();
+    inline operator void*() { return dbptr; };
+    //more as needed
+  };
+
+  dbWrapper getDb();
 
 }

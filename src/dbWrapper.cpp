@@ -93,4 +93,16 @@ namespace doh {
     return ret;
   };
 
+  uint64_t getFrame() {
+    return db->getFrame();
+  };
+
+  dbWrapper getDb() {
+    return { reinterpret_cast<void*>(db.get()) };
+  };
+
+  uint64_t dbWrapper::getFrame() {
+    return reinterpret_cast<db_t*>(dbptr)->getFrame();
+  };
+
 }

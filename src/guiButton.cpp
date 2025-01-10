@@ -22,16 +22,14 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  guiButton::guiButton(buttonStyle_t& style, glm::vec2 location, std::string labelStr, clickAction ca, uint64_t oid, void* dbv) :
+  guiButton::guiButton(buttonStyle_t& style, glm::vec2 location, std::string labelStr, clickAction ca) :
     rect(guiRect::create()),
     rectData({ location, location.x + style.width, location.y + style.height }),
     label(guiText::create()),
     labelData({ location, location.x + style.width, location.y + style.height }),
     style(style),
     labelStr(labelStr),
-    onClick(ca),
-    ownerId(oid),
-    ownerDb(dbv)
+    onClick(ca)
   {
     rect.setStyle(style.rectNormalBuf);
     rect.writeInstanceData(rectData);

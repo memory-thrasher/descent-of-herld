@@ -53,8 +53,12 @@ while IFS= read -d $'\0' file; do
 	    fi
 	elif [[ "$line" =~ \!\!registerDbType\ (.*?) ]]; then
 	    typeName="${BASH_REMATCH[1]}"
+	    #note: possible duplicate includes if one header contains multiple types, theoretically harmless
+	    echo "#include \"../${file}\"" >>generated/dbTypeInstances.hpp_new
 	    echo "#include \"../${file}\"" >>generated/dbHelper.hpp_new
-	    if ! echo "$dbTypes" | grep -Fwq "$typeName"; then
+	    echo "template struct doh::dbType<doh::$typeName>;" >>generated/dbTypeInstances.hpp_new
+	    echo "template struct doh::dbTypeFactory<doh::$typeName>;" >>generated/dbTypeInstances.hpp_new
+	    if [ -z "$dbTypes" ]; then
 		dbTypes="$typeName"
 	    else
 		dbTypes="$dbTypes, $typeName"
@@ -170,7 +174,7 @@ while read -d' ' var; do
 done <<<$allvars >>generated/onionHelper.hpp_new
 
 if [ -n "$dbTypes" ]; then
-    echo '#include "dbHelper.hpp"' >>generated/allStubs.hpp_new
+    # echo '#include "dbHelper.hpp"' >>generated/allStubs.hpp_new
     echo "#define dbTypes $dbTypes" >>generated/dbHelper.hpp_new
 fi
 
@@ -178,6 +182,12 @@ if ! test -f generated/dbHelper.hpp || diff -q generated/dbHelper.hpp_new genera
     mv generated/dbHelper.hpp_new generated/dbHelper.hpp
 else
     rm generated/dbHelper.hpp_new
+fi
+
+if ! test -f generated/dbTypeInstances.hpp || diff -q generated/dbTypeInstances.hpp_new generated/dbTypeInstances.hpp | grep -q .; then
+    mv generated/dbTypeInstances.hpp_new generated/dbTypeInstances.hpp
+else
+    rm generated/dbTypeInstances.hpp_new
 fi
 
 #avoid updating the file if nothing changed to save build time
