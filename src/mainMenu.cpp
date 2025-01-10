@@ -29,18 +29,21 @@ namespace doh {
   namespace mainMenu_internals {
 
     struct transients_t {
-      guiButton buttons[5] = {
-	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue",
-	  guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load",
-	  guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New",
-	  guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
-	  guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
-	  guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
-      };
+      guiButton continueBtn, loadBtn, newBtn, settingsBtn, exitBtn;
+      guiButton*buttons[5];
+      bool deleteMe = false;
+      transients_t() :
+	continueBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue",
+		    guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ })),
+	loadBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load",
+		guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ })),
+	newBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New",
+	       guiButton::clickAction_F::make([this](guiButton*){ this->deleteMe = true; })),
+	settingsBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
+		    guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ })),
+	exitBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
+		guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); })),
+	buttons(&continueBtn, &loadBtn, &newBtn, &settingsBtn, &exitBtn) {};
     };
 
     static_assert(WITE::dbAllocationBatchSizeOf<mainMenu>::value == 1);
@@ -66,8 +69,10 @@ namespace doh {
   static_assert(WITE::has_update<mainMenu>::value);
   void mainMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    for(auto& btn : transients->buttons)
-      btn.update();
+    for(auto* btn : transients->buttons)
+      btn->update();
+    if(transients->deleteMe) [[unlikely]]
+      dbType<mainMenu>(oid, dbv).destroy();
   };
 
   void mainMenu::spunUp(uint64_t oid, void* dbv) {
