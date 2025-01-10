@@ -61,8 +61,8 @@ namespace doh {
   void createMainMenu() {
     nextDb.db = std::make_unique<db_t>(getSaveDir() / "main-menu", true, true);
     nextDb.isTemp = true;
-    mainMenu m;
-    nextDb.db->create<mainMenu>(&m);
+    nextDb.db->create<mainMenu>();
+    nextDb.db->create<menuBG>();
   };
 
   void createNewGame(int slot) {

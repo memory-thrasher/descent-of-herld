@@ -26,102 +26,61 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  constexpr glm::uvec3 focalSector { 204887, 20487, 2348 };
+  namespace mainMenu_internals {
 
-  struct transients_t {
-    targetPrimary camera = targetPrimary::create();
-    guiButton buttons[5] = {
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue",
-	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load",
-	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New",
-	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
-	guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
-      { btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
-	guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
+    struct transients_t {
+      guiButton buttons[5] = {
+	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue",
+	  guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load",
+	  guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New",
+	  guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
+	  guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ }) },
+	{ btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
+	  guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); }) },
+      };
     };
-    // nebula testNeb = nebula::create();
-    // nebulaMap_t testNebMap;
-    spaceSkybox space = spaceSkybox::create();
-    fpsCounter fps;
-  };
 
-  static_assert(WITE::dbAllocationBatchSizeOf<mainMenu>::value == 1);
-  static_assert(WITE::dbLogAllocationBatchSizeOf<mainMenu>::value == 1);
+    static_assert(WITE::dbAllocationBatchSizeOf<mainMenu>::value == 1);
+    static_assert(WITE::dbLogAllocationBatchSizeOf<mainMenu>::value == 1);
 
-  transients_t* getTransients(uint64_t oid, void* dbv) {
-    dbType<mainMenu> dbmm(oid, dbv);
-    mainMenu mm;
-    dbmm.readCurrent(&mm);//current because old pointers don't help
-    return reinterpret_cast<transients_t*>(mm.transients);
-  };
-
-  void mainMenu::allocated(uint64_t oid, void* dbv) {
-    dbType<mainMenu> dbmm(oid, dbv);
-    mainMenu mm;
-    dbmm.readCurrent(&mm);//current because old pointers don't help
-    mm.cameraData = {
-      { 0, 0, 0, 0 },
-      { 10, 1000, 100000, 250 },//chunks, chunks, chunks, sectors
+    transients_t* getTransients(uint64_t oid, void* dbv) {
+      dbType<mainMenu> dbmm(oid, dbv);
+      mainMenu mm;
+      dbmm.readCurrent(&mm);//current because old pointers don't help
+      return reinterpret_cast<transients_t*>(mm.transients);
     };
-    mm.cameraTrans = {
-      { 0, 0, 0 },
-      { 0, 0, 100000 },
-      { 204887, 20487, 2348 },
-    };
-    mm.cameraTrans.rotate({ 0, 1, 0 }, -std::numbers::pi_v<float>/4);
-    mm.fov = 1/std::tan(glm::radians(WITE::configuration::getOption("fov", 90.0f)/2));
-    dbmm.write(&mm);
-  };
 
-  void mainMenu::freed(uint64_t oid, void* dbv) {
-  };
+  }
+
+  using namespace mainMenu_internals;//I know that's kinda lazy
+
+  // void mainMenu::allocated(uint64_t oid, void* dbv) {
+  // };
+
+  // void mainMenu::freed(uint64_t oid, void* dbv) {
+  // };
 
   static_assert(WITE::has_update<mainMenu>::value);
   void mainMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    const auto size = transients->camera.getWindow().getVecSize();
     for(auto& btn : transients->buttons)
       btn.update();
-    transients->fps.update();
-    // auto db = reinterpret_cast<db_t*>(dbv);
-    dbType<mainMenu> dbmm(oid, dbv);
-    mainMenu mm;
-    dbmm.readCommitted(&mm);
-    mm.cameraData.geometry = { size, mm.fov*size.x/size.y, mm.fov };
-    transients->camera.writeCameraData(mm.cameraData);
-    mm.cameraTrans.rotate({ 1, 0, 0 }, -0.00002f);
-    mm.cameraTrans.sector = focalSector;
-    mm.cameraTrans.chunk = {};
-    mm.cameraTrans.meters = {};
-    mm.cameraTrans.moveSectors(mm.cameraTrans.orientation[2] * -150.0f);
-    mm.cameraTrans.stabilize();
-    compoundTransform_packed_t cameraTransPacked;
-    mm.cameraTrans.pack(&cameraTransPacked);
-    transients->camera.writeCameraTransform(cameraTransPacked);
-    // transients->testNeb.mapCopySetEnabled(false);
-    dbmm.write(&mm);
   };
 
   void mainMenu::spunUp(uint64_t oid, void* dbv) {
-    // auto db = reinterpret_cast<db_t*>(dbv);
     dbType<mainMenu> dbmm(oid, dbv);
     mainMenu mm;
     dbmm.readCurrent(&mm);
     auto* transients = new transients_t();
     mm.transients = reinterpret_cast<void*>(transients);
     dbmm.write(&mm);
-    // transients->testNeb.writeInstanceData(glm::vec4(focalSector, 2500));
-    // generateNebula(focalSector, transients->testNebMap);
-    // transients->testNeb.writeMap(transients->testNebMap);
-    // transients->testNeb.mapCopySetEnabled(true);
   };
 
   void mainMenu::spunDown(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    transients->camera.destroy();
     delete transients;
   };
 
