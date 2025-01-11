@@ -13,29 +13,24 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #pragma once
+//!!include me
 
-#include "uiStyle.hpp"
-#include "../generated/guiRect_stub.hpp"
-#include "../generated/guiText_stub.hpp"
+#include <WITE/WITE.hpp>
+
+#include "gpuShared.hpp"
 
 namespace doh {
 
-  struct guiButton {
-    typedefCB(clickAction, void, guiButton*);
-    guiRect rect;
-    guiRectInstance_t rectData;
-    guiText label;
-    guiTextInstance_t labelData;
-    guiTextIndirectBuffer_t labelContent;
-    buttonStyle_t& style;
-    std::string labelStr;
-    clickAction onClick;
-    bool isPressed = false;
-    guiButton() = delete;
-    guiButton(const guiButton&);
-    guiButton(buttonStyle_t& style, glm::vec2 location, std::string label, clickAction ca);
-    ~guiButton();
-    void update();
+  struct newGameMenu : WITE::db_singleton {
+    static constexpr uint64_t typeId = 10001002;
+    static constexpr std::string dbFileId = "newGameMenu";
+    static void update(uint64_t oid, void* db);
+    // static void allocated(uint64_t oid, void* db);
+    // static void freed(uint64_t oid, void* db);
+    static void spunUp(uint64_t oid, void* db);
+    static void spunDown(uint64_t oid, void* db);
+    void* transients;
   };
+  //!!registerDbType newGameMenu
 
 }

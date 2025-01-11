@@ -44,6 +44,8 @@ namespace doh {
     label.destroy();
   };
 
+  guiButton::guiButton(const guiButton& o) : guiButton(o.style, glm::vec2(o.rectData.extents), o.labelStr, o.onClick) {};
+
   void guiButton::update() {
     WITE::winput::compositeInputData mouseLocation, lmbCid;
     bool isHovered = false, isClicked = false;
@@ -78,14 +80,5 @@ namespace doh {
     label.setStyle(isPressed ? style.textPressBuf : isHovered ? style.textHovBuf : style.textNormalBuf);
     if(isClicked) [[unlikely]] onClick(this);
   };
-
-  void guiButton::resize(glm::vec4) {
-    //
-  };
-
-  void guiButton::setLabel(std::string) {
-    //
-  };
-
 
 }

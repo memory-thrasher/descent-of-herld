@@ -58,6 +58,10 @@ namespace doh {
     virtual ~dbTypeFactory() = default;
     virtual dbTypeBase* create(void*) override;//caller responsible for freeing returned (lightweight) obj
     dbType<A> createTyped(A*);//preferred
+    template<class... Args> dbType<A> construct(Args... args) {
+      A a(std::forward<Args>()...);
+      return createTyped(&a);
+    };
   };
 
 }
