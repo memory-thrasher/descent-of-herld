@@ -12,63 +12,37 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#include <set>
+#include <iostream>
+
+#include "guiLabel.hpp"
+#include "../generated/targetPrimary_stub.hpp"
+#include "math.hpp"
 #include "uiStyle.hpp"
 
 namespace doh {
 
-  void buttonStyle_t::pushToBuffers() {
-    textHovBuf.slowOutOfBandSet(textHov);
-    textNormalBuf.slowOutOfBandSet(textNormal);
-    textPressBuf.slowOutOfBandSet(textPress);
-    rectHovBuf.slowOutOfBandSet(rectHov);
-    rectNormalBuf.slowOutOfBandSet(rectNormal);
-    rectPressBuf.slowOutOfBandSet(rectPress);
+  guiLabel::guiLabel(textOnlyStyle_t& style, glm::vec4 bbox, std::string labelStr) :
+    rect(guiRect::create()),
+    rectData(bbox),
+    label(guiText::create()),
+    labelData(bbox),
+    style(style),
+    labelStr(labelStr)
+  {
+    guiTextFormat(labelContent, "%s", labelStr.c_str());
+    rect.writeInstanceData(rectData);
+    rect.setStyle(style.rectBuf);
+    label.writeIndirectBuffer(labelContent);
+    label.writeInstanceData(labelData);
+    label.setStyle(style.textBuf);
   };
 
-  buttonStyle_t& btnBig() {
-    static buttonStyle_t ret;
-    return ret;
+  guiLabel::~guiLabel() {
+    rect.destroy();
+    label.destroy();
   };
 
-  buttonStyle_t& btnHuge() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  buttonStyle_t& btnNormal() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  buttonStyle_t& btnSmall() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  void textOnlyStyle_t::pushToBuffers() {
-    textBuf.slowOutOfBandSet(text);
-    rectBuf.slowOutOfBandSet(rect);
-  };
-
-  textOnlyStyle_t& textOnlyHuge() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
-
-  textOnlyStyle_t& textOnlyBig() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
-
-  textOnlyStyle_t& textOnlyNormal() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
-
-  textOnlyStyle_t& textOnlySmall() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
+  guiLabel::guiLabel(const guiLabel& o) : guiLabel(o.style, glm::vec4(o.rectData.extents), o.labelStr) {};
 
 }
-

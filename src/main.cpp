@@ -35,6 +35,7 @@ int main(int argc, const char** argv) {
     dbUpdate();
     render();
     dbEndFrame();
+    //TODO call onion between frame process
     dbCycle();
   }
   dbDestroyAll();

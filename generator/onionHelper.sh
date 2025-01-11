@@ -34,6 +34,7 @@ while IFS= read -d $'\0' file; do
     hasGlobalCollection=false
     singletons=
     echo "#include \"../${file}\"" > $genStubNew
+    echo "#pragma once" >> $genStubNew
     echo 'namespace doh {' >> $genStubNew
     echo "  struct ${fileRaw} {" >> $genStubNew
     echo "    void* onionObj;" >> $genStubNew

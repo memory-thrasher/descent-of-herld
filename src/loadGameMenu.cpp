@@ -14,7 +14,6 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <set>
 
-#include "newGameMenu.hpp"
 #include "loadGameMenu.hpp"
 #include "mainMenu.hpp"
 #include "dbType.hpp"
@@ -27,73 +26,73 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  namespace mainMenu_internals {
+  namespace loadGameMenu_internals {
+
+    constexpr size_t saveSlots = 10;
 
     struct transients_t {
       dbWrapper owner;
-      guiButton continueBtn, loadBtn, newBtn, settingsBtn, exitBtn;
-      guiButton*buttons[5];
+      std::vector<guiButton> buttons;
       bool deleteMe = false;
       transients_t(dbWrapper owner) :
-	owner(owner),
-	continueBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue",
-		    guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ })),
-	loadBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load",
-		guiButton::clickAction_F::make([this](guiButton*){
-		 this->deleteMe = true;
-		 dbTypeFactory<loadGameMenu>(this->owner).construct();
-	       })),
-	newBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New",
-	       guiButton::clickAction_F::make([this](guiButton*){
-		 this->deleteMe = true;
-		 dbTypeFactory<newGameMenu>(this->owner).construct();
-	       })),
-	settingsBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
-		    guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ })),
-	exitBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
-		guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); })),
-	buttons(&continueBtn, &loadBtn, &newBtn, &settingsBtn, &exitBtn) {};
+	owner(owner) {
+	for(size_t i = 0;i < saveSlots;i++) {
+	  //TODO harvest date and other data to add to button label
+	  buttons.emplace_back(btnHuge(), glm::vec2(-0.95f, -0.95f + btnHuge().height * 1.25f * i),
+			       "Slot " + std::to_string(i),
+			       guiButton::clickAction_F::make([this, i](guiButton*) {
+				 this->deleteMe = true;
+				 WARN("TODO load game ", i);
+				 dbTypeFactory<mainMenu>(this->owner).construct();
+			       }));
+	}
+	buttons.emplace_back(btnHuge(), glm::vec2(-0.95f, -0.95f + btnHuge().height * 1.25f * (saveSlots + 1)), "Back",
+			     guiButton::clickAction_F::make([this](guiButton*){
+			       this->deleteMe = true;
+			       dbTypeFactory<mainMenu>(this->owner).construct();
+			     }));
+      };
     };
 
-    static_assert(WITE::dbAllocationBatchSizeOf<mainMenu>::value == 1);
-    static_assert(WITE::dbLogAllocationBatchSizeOf<mainMenu>::value == 1);
+    static_assert(WITE::dbAllocationBatchSizeOf<loadGameMenu>::value == 1);
+    static_assert(WITE::dbLogAllocationBatchSizeOf<loadGameMenu>::value == 1);
 
     transients_t* getTransients(uint64_t oid, void* dbv) {
-      dbType<mainMenu> dbmm(oid, dbv);
-      mainMenu mm;
+      dbType<loadGameMenu> dbmm(oid, dbv);
+      loadGameMenu mm;
       dbmm.readCurrent(&mm);//current because old pointers don't help
       return reinterpret_cast<transients_t*>(mm.transients);
     };
 
   }
 
-  using namespace mainMenu_internals;//I know that's kinda lazy
+  using namespace loadGameMenu_internals;//I know that's kinda lazy
 
-  // void mainMenu::allocated(uint64_t oid, void* dbv) {
+  // void loadGameMenu::allocated(uint64_t oid, void* dbv) {
   // };
 
-  // void mainMenu::freed(uint64_t oid, void* dbv) {
+  // void loadGameMenu::freed(uint64_t oid, void* dbv) {
   // };
 
-  static_assert(WITE::has_update<mainMenu>::value);
-  void mainMenu::update(uint64_t oid, void* dbv) {
+  static_assert(WITE::has_update<loadGameMenu>::value);
+  void loadGameMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
-    for(auto* btn : transients->buttons)
-      btn->update();
+    for(guiButton& btn : transients->buttons)
+      btn.update();
     if(transients->deleteMe) [[unlikely]]
-      dbType<mainMenu>(oid, dbv).destroy();
+      dbType<loadGameMenu>(oid, dbv).destroy();
   };
 
-  void mainMenu::spunUp(uint64_t oid, void* dbv) {
-    dbType<mainMenu> dbmm(oid, dbv);
-    mainMenu mm;
+  void loadGameMenu::spunUp(uint64_t oid, void* dbv) {
+    dbType<loadGameMenu> dbmm(oid, dbv);
+    loadGameMenu mm;
     dbmm.readCurrent(&mm);
     auto* transients = new transients_t(dbv);
     mm.transients = reinterpret_cast<void*>(transients);
     dbmm.write(&mm);
   };
 
-  void mainMenu::spunDown(uint64_t oid, void* dbv) {
+  void loadGameMenu::spunDown(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     delete transients;
   };

@@ -13,39 +13,24 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #pragma once
+//!!include me
 
-#include <filesystem>
-#include <chrono>
+#include <WITE/WITE.hpp>
+
+#include "gpuShared.hpp"
 
 namespace doh {
 
-  struct gameSlotInfo_t {
-    bool exists, usable = true;
-    std::string label, details;
-    std::chrono::zoned_time<std::chrono::file_clock::duration> lastWrite;
+  struct loadGameMenu : WITE::db_singleton {
+    static constexpr uint64_t typeId = 10001003;
+    static constexpr std::string dbFileId = "loadGameMenu";
+    static void update(uint64_t oid, void* db);
+    // static void allocated(uint64_t oid, void* db);
+    // static void freed(uint64_t oid, void* db);
+    static void spunUp(uint64_t oid, void* db);
+    static void spunDown(uint64_t oid, void* db);
+    void* transients;
   };
-
-  void createMainMenu();
-  void createNewGame(int slot);
-  void dbUpdate();
-  void dbEndFrame();
-  void dbCycle();//destroys the current db only if a new one is waiting (from a prior create or load call).
-  void dbDestroy();//not thread safe, only call when the db is not in use
-  void dbDestroyAll();
-  void dbLoadGame(int slot);
-  std::filesystem::path getSaveDir();
-  uint64_t getFrame();
-  void getSlotInfo(size_t slotId, gameSlotInfo_t& out);
-
-  struct dbWrapper {
-    void* dbptr;
-    dbWrapper(void* dbptr) : dbptr(dbptr) {};
-    dbWrapper(const dbWrapper&) = default;
-    uint64_t getFrame();
-    inline operator void*() { return dbptr; };
-    //more as needed
-  };
-
-  dbWrapper getDb();
+  //!!registerDbType loadGameMenu
 
 }

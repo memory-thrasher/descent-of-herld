@@ -43,6 +43,9 @@ namespace doh {
     glm::vec4 pressBorder = getOptionColor("btn-press-border-color", { 0.9f, 0.75f, 0, 1 });
     glm::vec4 pressFill = getOptionColor("btn-press-fill-color", { 0.5f, 0.4f, 0, 1 });
     glm::vec4 pressTextColor = getOptionColor("btn-press-text-color", { 1, 1, 1, 1 });
+    glm::vec4 textBorder = getOptionColor("txt-border-color", { 0, 0.75f, 0.9f, 1 });
+    glm::vec4 textFill = getOptionColor("txt-fill-color", { 0, 0.4f, 0.5f, 1 });
+    glm::vec4 textTextColor = getOptionColor("txt-text-color", { 1, 1, 1, 1 });
     {
       float clip = WITE::configuration::getOption("btn-huge-corner", 0.01f);//x&y relative to screen width
       float borderWidth = WITE::configuration::getOption("btn-huge-border-width", 0.005f);//x&y relative to screen width
@@ -128,25 +131,48 @@ namespace doh {
       btn.pushToBuffers();
     }
     {
-      float textWidth = WITE::configuration::getOption("txt-big-text-width", 0.025f);//48pt on 1080p
-      float textHeight = WITE::configuration::getOption("txt-big-text-height", 0.05f);
+      float clip = WITE::configuration::getOption("txt-huge-corner", 0.01f);
+      float borderWidth = WITE::configuration::getOption("txt-huge-border-width", 0.005f);
+      float textWidth = WITE::configuration::getOption("txt-huge-text-width", 0.025f);//48pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-huge-text-height", 0.05f);
+      auto& txt = textOnlyHuge();
+      txt.text = { textTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
+      txt.rect = { { clip, clip, clip, clip }, textBorder,
+		   { borderWidth, borderWidth, borderWidth, borderWidth }, textFill };
+      txt.pushToBuffers();
+    }
+    {
+      float clip = WITE::configuration::getOption("txt-big-corner", 0.0075f);
+      float borderWidth = WITE::configuration::getOption("txt-big-border-width", 0.003f);
+      float textWidth = WITE::configuration::getOption("txt-big-text-width", 0.0125f);//24pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-big-text-height", 0.025f);
       auto& txt = textOnlyBig();
-      txt.text = { normalTextColor, { textWidth, textHeight, 0, 0 } };
-      txt.pushToBuffer();
+      txt.text = { textTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
+      txt.rect = { { clip, clip, clip, clip }, textBorder,
+		   { borderWidth, borderWidth, borderWidth, borderWidth }, textFill };
+      txt.pushToBuffers();
     }
     {
-      float textWidth = WITE::configuration::getOption("txt-normal-text-width", 0.0125f);//24pt on 1080p
-      float textHeight = WITE::configuration::getOption("txt-normal-text-height", 0.025f);
+      float clip = WITE::configuration::getOption("txt-normal-corner", 0.005f);
+      float borderWidth = WITE::configuration::getOption("txt-normal-border-width", 0.002f);
+      float textWidth = WITE::configuration::getOption("txt-normal-text-width", 0.007292f);//14pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-normal-text-height", 0.014584f);
       auto& txt = textOnlyNormal();
-      txt.text = { normalTextColor, { textWidth, textHeight, 0, 0 } };
-      txt.pushToBuffer();
+      txt.text = { normalTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
+      txt.rect = { { clip, clip, clip, clip }, textBorder,
+		   { borderWidth, borderWidth, borderWidth, borderWidth }, textFill };
+      txt.pushToBuffers();
     }
     {
+      float clip = WITE::configuration::getOption("txt-small-corner", 0);
+      float borderWidth = WITE::configuration::getOption("txt-small-border-width", 0);
       float textWidth = WITE::configuration::getOption("txt-small-text-width", 0.007292f);//14pt on 1080p
       float textHeight = WITE::configuration::getOption("txt-small-text-height", 0.014584f);
       auto& txt = textOnlySmall();
-      txt.text = { normalTextColor, { textWidth, textHeight, 0, 0 } };
-      txt.pushToBuffer();
+      txt.text = { normalTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
+      txt.rect = { { clip, clip, clip, clip }, textBorder,
+		   { borderWidth, borderWidth, borderWidth, borderWidth }, textFill };
+      txt.pushToBuffers();
     }
   };
 

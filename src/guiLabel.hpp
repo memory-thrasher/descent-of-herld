@@ -12,63 +12,27 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#pragma once
+
 #include "uiStyle.hpp"
+#include "../generated/guiRect_stub.hpp"
+#include "../generated/guiText_stub.hpp"
 
 namespace doh {
 
-  void buttonStyle_t::pushToBuffers() {
-    textHovBuf.slowOutOfBandSet(textHov);
-    textNormalBuf.slowOutOfBandSet(textNormal);
-    textPressBuf.slowOutOfBandSet(textPress);
-    rectHovBuf.slowOutOfBandSet(rectHov);
-    rectNormalBuf.slowOutOfBandSet(rectNormal);
-    rectPressBuf.slowOutOfBandSet(rectPress);
-  };
-
-  buttonStyle_t& btnBig() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  buttonStyle_t& btnHuge() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  buttonStyle_t& btnNormal() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  buttonStyle_t& btnSmall() {
-    static buttonStyle_t ret;
-    return ret;
-  };
-
-  void textOnlyStyle_t::pushToBuffers() {
-    textBuf.slowOutOfBandSet(text);
-    rectBuf.slowOutOfBandSet(rect);
-  };
-
-  textOnlyStyle_t& textOnlyHuge() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
-
-  textOnlyStyle_t& textOnlyBig() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
-
-  textOnlyStyle_t& textOnlyNormal() {
-    static textOnlyStyle_t ret;
-    return ret;
-  };
-
-  textOnlyStyle_t& textOnlySmall() {
-    static textOnlyStyle_t ret;
-    return ret;
+  //TODO volatile version if needed
+  struct guiLabel {
+    guiRect rect;
+    guiRectInstance_t rectData;
+    guiText label;
+    guiTextInstance_t labelData;
+    guiTextIndirectBuffer_t labelContent;
+    textOnlyStyle_t& style;
+    std::string labelStr;
+    guiLabel() = delete;
+    guiLabel(const guiLabel&);
+    guiLabel(textOnlyStyle_t& style, glm::vec4 bounds, std::string label);
+    ~guiLabel();
   };
 
 }
-

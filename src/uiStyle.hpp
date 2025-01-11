@@ -36,11 +36,14 @@ namespace doh {
   buttonStyle_t& btnSmall();
 
   struct textOnlyStyle_t {
+    WITE::buffer<BR_guiRectStyle> rectBuf;
     WITE::buffer<BR_guiTextStyle> textBuf;
+    guiRectStyle_t rect;
     guiTextStyle_t text;
-    void pushToBuffer();
+    void pushToBuffers();
   };
 
+  textOnlyStyle_t& textOnlyHuge();
   textOnlyStyle_t& textOnlyBig();
   textOnlyStyle_t& textOnlyNormal();
   textOnlyStyle_t& textOnlySmall();

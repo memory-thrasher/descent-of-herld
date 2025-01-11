@@ -13,6 +13,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #include <memory>
+#include <chrono>
 
 #include "dbWrapper.hpp"
 #include "dbFull.hpp"
@@ -69,6 +70,22 @@ namespace doh {
     nextDb.db = std::make_unique<db_t>(getSaveDir() / std::to_string(slot), true, true);
     nextDb.isTemp = false;
     //TODO
+  };
+
+  void getSlotInfo(size_t slotId, gameSlotInfo_t& out) {
+    std::filesystem::path slotDir = getSaveDir() / std::to_string(slotId);
+    if(!std::filesystem::exists(slotDir)) [[unlikely]] {
+      out = { false };
+      out.label = std::format("Slot {}: [empty]", slotId);
+      return;
+    }
+    out = { true };
+    out.lastWrite = { std::chrono::current_zone(), std::chrono::clock_cast<std::chrono::system_clock>(std::filesystem::last_write_time(slotDir)) };
+    out.label = std::format("Slot {}: {:%c}", slotId, out.lastWrite.get_local_time());
+    if(!std::filesystem::is_directory(slotDir)) {
+      out.usable = false;
+      return;
+    }
   };
 
   void loadGame(int slot) {

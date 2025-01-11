@@ -127,9 +127,9 @@ while read -d ' ' DSTFILE; do
 done <<< "$ALLDSTFILES"
 ALLDSTFILES=
 
-$WORKNICE $WIN_LINKER /opt:icf=4 /subsystem:windows /entry:mainCRTStartup build/windows/*.o $WITEBUILD/windows/WITE/*.o /defaultlib:SDL2 /defaultlib:SHELL32.lib "/out:build/windows/descentOfHerld.exe" &
+$WORKNICE $WIN_LINKER /opt:icf=4 /subsystem:windows /entry:mainCRTStartup build/windows/*.o $WITEBUILD/windows/WITE/*.o /defaultlib:SDL2 /defaultlib:SHELL32.lib "/out:build/windows/descentOfHerld.exe" || echo 'windows link failed' &
 
-$WORKNICE $COMPILER -Wl,--icf=all build/release/*.o $WITEBUILD/release/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -L${VK_SDK_PATH}/lib -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/release/descentOfHerld" &
+$WORKNICE $COMPILER -Wl,--icf=all build/release/*.o $WITEBUILD/release/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -L${VK_SDK_PATH}/lib -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/release/descentOfHerld" || echo 'release link failed' &
 
 $WORKNICE $COMPILER -DDEBUG -Wl,--icf=all build/debug/*.o $WITEBUILD/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -L${VK_SDK_PATH}/lib -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/debug/descentOfHerld" || exit 1
 

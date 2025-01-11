@@ -31,10 +31,12 @@ namespace doh {
     labelStr(labelStr),
     onClick(ca)
   {
+    guiTextFormat(labelContent, "%s", labelStr.c_str());
+    float width = std::max(style.width, labelStr.length() * style.textNormal.charMetric.x + style.textNormal.charMetric.z * 2);
+    rectData.extents.z = labelData.bbox.z = location.x + width;
     rect.setStyle(style.rectNormalBuf);
     rect.writeInstanceData(rectData);
     label.setStyle(style.textNormalBuf);
-    guiTextFormat(labelContent, "%s", labelStr.c_str());
     label.writeIndirectBuffer(labelContent);
     label.writeInstanceData(labelData);
   };
