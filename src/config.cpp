@@ -131,8 +131,8 @@ namespace doh {
       btn.pushToBuffers();
     }
     {
-      float clip = WITE::configuration::getOption("txt-huge-corner", 0.01f);
-      float borderWidth = WITE::configuration::getOption("txt-huge-border-width", 0.005f);
+      float clip = WITE::configuration::getOption("txt-huge-corner", 0.005f);
+      float borderWidth = WITE::configuration::getOption("txt-huge-border-width", 0.002f);
       float textWidth = WITE::configuration::getOption("txt-huge-text-width", 0.025f);//48pt on 1080p
       float textHeight = WITE::configuration::getOption("txt-huge-text-height", 0.05f);
       auto& txt = textOnlyHuge();
@@ -142,8 +142,8 @@ namespace doh {
       txt.pushToBuffers();
     }
     {
-      float clip = WITE::configuration::getOption("txt-big-corner", 0.0075f);
-      float borderWidth = WITE::configuration::getOption("txt-big-border-width", 0.003f);
+      float clip = WITE::configuration::getOption("txt-big-corner", 0.005f);
+      float borderWidth = WITE::configuration::getOption("txt-big-border-width", 0.002f);
       float textWidth = WITE::configuration::getOption("txt-big-text-width", 0.0125f);//24pt on 1080p
       float textHeight = WITE::configuration::getOption("txt-big-text-height", 0.025f);
       auto& txt = textOnlyBig();
