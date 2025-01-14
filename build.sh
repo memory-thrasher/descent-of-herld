@@ -23,7 +23,6 @@ WITEBUILD="$WITEBASE/build"
 BOTHOPTS="-DVK_NO_PROTOTYPES -DVULKAN_HPP_NO_EXCEPTIONS -I$WITEBASE"
 COMPILER=clang++
 WORKNICE="nice -n10"
-TESTOPTIONS="nogpuid=1,2 extent=3840,0,3840,2160 presentmode=fifo" #skips llvme pipe on my test system, renders to center monitor
 if [ -z "${VK_SDK_PATH}" ]; then
     export VK_SDK_PATH="${VULKAN_SDK}"
 fi
@@ -37,8 +36,11 @@ fi
 # if [ -n "$vk_lib_path" ]; then
 #     PATH="$vk_lib_path:$PATH"
 # fi;
+export BOTHOPTS
+export COMPILER
+export WORKNICE
+export WITEBUILD
 
-cp -u $WITEBUILD/shared/font.hpp generated/
 
 mkdir build build/shaders build/debug build/release build/windows build/dependmap generated/shaders 2>/dev/null
 

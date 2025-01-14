@@ -155,8 +155,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("txt-normal-corner", 0.005f);
       float borderWidth = WITE::configuration::getOption("txt-normal-border-width", 0.002f);
-      float textWidth = WITE::configuration::getOption("txt-normal-text-width", 0.007292f);//14pt on 1080p
-      float textHeight = WITE::configuration::getOption("txt-normal-text-height", 0.014584f);
+      float textWidth = WITE::configuration::getOption("txt-normal-text-width", 16.0f/1920);//14pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-normal-text-height", 28.0f/1080);
       auto& txt = textOnlyNormal();
       txt.text = { normalTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
       txt.rect = { { clip, clip, clip, clip }, textBorder,
@@ -166,8 +166,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("txt-small-corner", 0);
       float borderWidth = WITE::configuration::getOption("txt-small-border-width", 0);
-      float textWidth = WITE::configuration::getOption("txt-small-text-width", 0.007292f);//14pt on 1080p
-      float textHeight = WITE::configuration::getOption("txt-small-text-height", 0.014584f);
+      float textWidth = WITE::configuration::getOption("txt-small-text-width", 1.0f/1920);//14pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-small-text-height", 1.0f/1080);
       auto& txt = textOnlySmall();
       txt.text = { normalTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
       txt.rect = { { clip, clip, clip, clip }, textBorder,

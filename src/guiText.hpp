@@ -28,7 +28,7 @@
 // This is for static text. There should eventually be a dynamic text renderable that has staging areas and a compute shader to render strings into direct buffers (like the WITE test).
 namespace doh {
 
-  constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::RG8uint, sizeof(font_triangles)/2, FLID> fontMesh = font_triangles;
+  constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::R8uint, sizeof(font_lines)/2, FLID> fontMesh = font_lines;
   constexpr size_t guiText_maxCharsPerString = 128;
   //!!append BR_all fontMesh.bufferRequirements_v
 
@@ -58,7 +58,7 @@ namespace doh {
 		.deviceId = gpuId,
 		.id = FLID,
 		.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndirectBuffer,
-		.size = 16 + guiText_maxCharsPerString * sizeof(vk::DrawIndirectCommand),
+		.size = sizeof(guiTextIndirectBuffer_t),
 		.frameswapCount = 2,
 		.hostVisible = false,
 	      };
@@ -121,6 +121,7 @@ namespace doh {
     .id = FLID,
     .modules = SM_L_guiText,
     .sourceProvidedResources = RC_S_guiText_sourceAll,
+    .topology = vk::PrimitiveTopology::eLineList,
     .cullMode = vk::CullModeFlagBits::eNone,
   };
   //!!append S_RP_gui S_guiText

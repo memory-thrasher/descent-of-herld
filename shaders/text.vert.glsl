@@ -23,11 +23,12 @@ layout(std140, set = 0, binding = 0) uniform style_t {
   vec4 charMetric;//xy = size of each character in signed normalized screen coords; zw = xy origin within that space
 } style;
 
-layout(location = 0) in uvec2 coords;
+layout(location = 0) in uint coords_packed;
 
 void main() {
-  const float widthChars = floor((instance.bbox.z - instance.bbox.x)/style.charMetric.x);
+  const uvec2 coords = uvec2(coords_packed % 8, coords_packed / 8);
+  const float widthChars = floor((instance.bbox.z - instance.bbox.x - style.charMetric.z*2)/style.charMetric.x);
   const uvec2 charPos = uvec2(mod(gl_InstanceIndex, widthChars), gl_InstanceIndex / widthChars);
   //TODO truncate at height?
-  gl_Position = vec4(instance.bbox.xy + style.charMetric.zw + style.charMetric.xy * (charPos + coords * 0.0714f), 0, 1);
+  gl_Position = vec4(instance.bbox.xy + style.charMetric.zw + style.charMetric.xy * (charPos + coords), 0, 1);
 }
