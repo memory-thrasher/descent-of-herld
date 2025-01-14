@@ -28,7 +28,7 @@
 // This is for static text. There should eventually be a dynamic text renderable that has staging areas and a compute shader to render strings into direct buffers (like the WITE test).
 namespace doh {
 
-  constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::R8uint, sizeof(font_lines)/2, FLID> fontMesh = font_lines;
+  constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::R8uint, sizeof(font_lines), FLID> fontMesh = font_lines;
   constexpr size_t guiText_maxCharsPerString = 128;
   //!!append BR_all fontMesh.bufferRequirements_v
 

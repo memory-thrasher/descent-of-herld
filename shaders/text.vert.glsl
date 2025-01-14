@@ -15,20 +15,22 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #version 450
 
 layout(std140, set = 0, binding = 1) uniform instance_t {
-  vec4 bbox;//LTRB
+  vec4 bbox;//LTRB in screen space
 } instance;
 
 layout(std140, set = 0, binding = 0) uniform style_t {
   vec4 color;
-  vec4 charMetric;//xy = size of each character in signed normalized screen coords; zw = xy origin within that space
+  vec4 charMetric;//xy = size of each character in signed normalized screen coords; zw = xy padding within bbox in the same units
 } style;
 
-layout(location = 0) in uint coords_packed;
+layout(location = 0) in uint coords_packed;//vertex location by point idx
+
+const vec2 fontNativeSize = vec2(8, 14);//bbox of character in obj units
 
 void main() {
-  const uvec2 coords = uvec2(coords_packed % 8, coords_packed / 8);
-  const float widthChars = floor((instance.bbox.z - instance.bbox.x - style.charMetric.z*2)/style.charMetric.x);
-  const uvec2 charPos = uvec2(mod(gl_InstanceIndex, widthChars), gl_InstanceIndex / widthChars);
+  const uvec2 coords = uvec2(coords_packed % 8, coords_packed / 8);//location of vert in obj units
+  const float widthChars = floor((instance.bbox.z - instance.bbox.x - style.charMetric.z*2)/style.charMetric.x);//usable area width in chars
+  const uvec2 charPos = uvec2(mod(gl_InstanceIndex, widthChars), gl_InstanceIndex / widthChars);//location of char relative to first char, in units of chars
   //TODO truncate at height?
-  gl_Position = vec4(instance.bbox.xy + style.charMetric.zw + style.charMetric.xy * (charPos + coords), 0, 1);
+  gl_Position = vec4(instance.bbox.xy + style.charMetric.zw + style.charMetric.xy * (charPos + coords / fontNativeSize), 0, 1);
 }

@@ -16,6 +16,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include "newGameMenu.hpp"
 #include "loadGameMenu.hpp"
+#include "guiLabel.hpp"
 #include "mainMenu.hpp"
 #include "dbType.hpp"
 #include "cameraStuff.hpp"
@@ -30,6 +31,7 @@ namespace doh {
   namespace mainMenu_internals {
 
     struct transients_t {
+      guiLabel title = { textOnlyHuge(), glm::vec4(-0.25f, -0.95f, 0.25f, -1), "Descent of Herld" };
       dbWrapper owner;
       guiButton continueBtn, loadBtn, newBtn, settingsBtn, exitBtn;
       guiButton*buttons[5];

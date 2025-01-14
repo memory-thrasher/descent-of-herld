@@ -49,8 +49,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("btn-huge-corner", 0.01f);//x&y relative to screen width
       float borderWidth = WITE::configuration::getOption("btn-huge-border-width", 0.005f);//x&y relative to screen width
-      float textWidth = WITE::configuration::getOption("btn-huge-text-width", 0.025f);//48pt on 1080p
-      float textHeight = WITE::configuration::getOption("btn-huge-text-height", 0.05f);
+      float textWidth = WITE::configuration::getOption("btn-huge-text-width", 48.0f*(8.0f/14)*2/1920);//48pt on 1080p
+      float textHeight = WITE::configuration::getOption("btn-huge-text-height", 48.0f*2/1080);
       float width = WITE::configuration::getOption("btn-huge-width", 0.3f);
       float height = WITE::configuration::getOption("btn-huge-height", 0.1f);
       auto& btn = btnHuge();
@@ -70,8 +70,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("btn-big-corner", 0.01f);//x&y relative to screen width
       float borderWidth = WITE::configuration::getOption("btn-big-border-width", 0.003f);//x&y relative to screen width
-      float textWidth = WITE::configuration::getOption("btn-big-text-width", 0.0125f);//24pt on 1080p
-      float textHeight = WITE::configuration::getOption("btn-big-text-height", 0.025f);
+      float textWidth = WITE::configuration::getOption("btn-big-text-width", 24.0f*(8.0f/14)*2/1920);//24pt on 1080p
+      float textHeight = WITE::configuration::getOption("btn-big-text-height", 24.0f*2/1080);
       float width = WITE::configuration::getOption("btn-big-width", 0.15f);
       float height = WITE::configuration::getOption("btn-big-height", 0.05f);
       auto& btn = btnBig();
@@ -91,8 +91,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("btn-normal-corner", 0.005f);//x&y relative to screen width
       float borderWidth = WITE::configuration::getOption("btn-normal-border-width", 0.002f);//x&y relative to screen width
-      float textWidth = WITE::configuration::getOption("btn-normal-text-width", 0.007292f);//14pt on 1080p
-      float textHeight = WITE::configuration::getOption("btn-normal-text-height", 0.014584f);
+      float textWidth = WITE::configuration::getOption("btn-normal-text-width", 18.0f*(8.0f/14)*2/1920);//14pt on 1080p
+      float textHeight = WITE::configuration::getOption("btn-normal-text-height", 18.0f*2/1080);
       float width = WITE::configuration::getOption("btn-normal-width", 0.15f);
       float height = WITE::configuration::getOption("btn-normal-height", 0.05f);
       auto& btn = btnNormal();
@@ -112,8 +112,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("btn-small-corner", 0);//x&y relative to screen width
       float borderWidth = WITE::configuration::getOption("btn-small-border-width", 0);//x&y relative to screen width
-      float textWidth = WITE::configuration::getOption("btn-small-text-width", 0.007292f);
-      float textHeight = WITE::configuration::getOption("btn-small-text-height", 0.014584f);
+      float textWidth = WITE::configuration::getOption("btn-small-text-width", 8.0f*2/1920);
+      float textHeight = WITE::configuration::getOption("btn-small-text-height", 14.0f*2/1080);
       float width = WITE::configuration::getOption("btn-small-width", 0.075f);
       float height = WITE::configuration::getOption("btn-small-height", 0.03f);
       auto& btn = btnSmall();
@@ -133,8 +133,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("txt-huge-corner", 0.005f);
       float borderWidth = WITE::configuration::getOption("txt-huge-border-width", 0.002f);
-      float textWidth = WITE::configuration::getOption("txt-huge-text-width", 0.025f);//48pt on 1080p
-      float textHeight = WITE::configuration::getOption("txt-huge-text-height", 0.05f);
+      float textWidth = WITE::configuration::getOption("txt-huge-text-width", 48.0f*(8.0f/14)*2/1920);//48pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-huge-text-height", 48.0f*2/1080);
       auto& txt = textOnlyHuge();
       txt.text = { textTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
       txt.rect = { { clip, clip, clip, clip }, textBorder,
@@ -144,8 +144,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("txt-big-corner", 0.005f);
       float borderWidth = WITE::configuration::getOption("txt-big-border-width", 0.002f);
-      float textWidth = WITE::configuration::getOption("txt-big-text-width", 0.0125f);//24pt on 1080p
-      float textHeight = WITE::configuration::getOption("txt-big-text-height", 0.025f);
+      float textWidth = WITE::configuration::getOption("txt-big-text-width", 24.0f*(8.0f/14)*2/1920);//24pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-big-text-height", 24.0f*2/1080);
       auto& txt = textOnlyBig();
       txt.text = { textTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
       txt.rect = { { clip, clip, clip, clip }, textBorder,
@@ -155,8 +155,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("txt-normal-corner", 0.005f);
       float borderWidth = WITE::configuration::getOption("txt-normal-border-width", 0.002f);
-      float textWidth = WITE::configuration::getOption("txt-normal-text-width", 16.0f/1920);//14pt on 1080p
-      float textHeight = WITE::configuration::getOption("txt-normal-text-height", 28.0f/1080);
+      float textWidth = WITE::configuration::getOption("txt-normal-text-width", 18.0f*(8.0f/14)*2/1920);//14pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-normal-text-height", 18.0f*2/1080);
       auto& txt = textOnlyNormal();
       txt.text = { normalTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
       txt.rect = { { clip, clip, clip, clip }, textBorder,
@@ -166,8 +166,8 @@ namespace doh {
     {
       float clip = WITE::configuration::getOption("txt-small-corner", 0);
       float borderWidth = WITE::configuration::getOption("txt-small-border-width", 0);
-      float textWidth = WITE::configuration::getOption("txt-small-text-width", 1.0f/1920);//14pt on 1080p
-      float textHeight = WITE::configuration::getOption("txt-small-text-height", 1.0f/1080);
+      float textWidth = WITE::configuration::getOption("txt-small-text-width", 8.0f*2/1920);//14pt on 1080p
+      float textHeight = WITE::configuration::getOption("txt-small-text-height", 14.0f*2/1080);
       auto& txt = textOnlySmall();
       txt.text = { normalTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, clip/2 + borderWidth + 0.005f } };
       txt.rect = { { clip, clip, clip, clip }, textBorder,

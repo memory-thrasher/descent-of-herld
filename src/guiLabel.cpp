@@ -30,6 +30,12 @@ namespace doh {
     style(style),
     labelStr(labelStr)
   {
+    if(bbox.w < bbox.y) [[unlikely]] {
+      //setting negative height (usually w = -1) means "make it one line high using style info"
+      bbox.w = bbox.y + style.text.charMetric.y + 2*style.text.charMetric.w;
+      rectData.extents = bbox;
+      labelData.bbox = bbox;
+    }
     guiTextFormat(labelContent, "%s", labelStr.c_str());
     rect.writeInstanceData(rectData);
     rect.setStyle(style.rectBuf);

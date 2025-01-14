@@ -32,7 +32,7 @@ namespace doh {
     onClick(ca)
   {
     guiTextFormat(labelContent, "%s", labelStr.c_str());
-    float width = std::max(style.width, labelStr.length() * style.textNormal.charMetric.x + style.textNormal.charMetric.z * 2);
+    float width = std::max(style.width, labelStr.length() * style.textHov.charMetric.x + style.textHov.charMetric.z * 2);
     rectData.extents.z = labelData.bbox.z = location.x + width;
     rect.setStyle(style.rectNormalBuf);
     rect.writeInstanceData(rectData);
