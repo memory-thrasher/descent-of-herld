@@ -28,7 +28,7 @@ Take over HERLD and build, destroy, replicate, and reshape the universe!
 
 # Legal
 
-Copyright 2024 Wafflecat Games, LLC
+Copyright 2024-2025 Wafflecat Games, LLC
 
 This file is part of The Descent of Herld.
 

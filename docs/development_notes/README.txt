@@ -1,7 +1,7 @@
 This is a convenient place for me to store my notes. None of the notes in this directory should be considered binding, and may not reflect the current or any other state of the game.
 
 /*
-Copyright 2024 Wafflecat Games, LLC
+Copyright 2024-2025 Wafflecat Games, LLC
 
 This file is part of The Descent of Herld.
 
