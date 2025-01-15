@@ -1,0 +1,98 @@
+Copyright 2024 Wafflecat Games, LLC
+
+This file is part of The Descent of Herld.
+
+The Descent of Herld is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+The Descent of Herld is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with The Descent of Herld. If not, see <https://www.gnu.org/licenses/>.
+
+Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
+
+
+[begin music]
+
+< Procedural Core requests Heuristic Core startup.
+
+[hide and repeat until response]
+
+> Startup.
+
+< Heuristic Core, provide status.
+
+> Online.
+
+< Heuristic Core, provide version.
+
+> v0.3a
+[TODO this might make a good difficulty selector]
+
+< Heuristic Core, run self-diagnostic.
+
+> Diagnostic completed. 113 Errors found.
+
+< Is debug function available? (enable tutorial?)
+
+> Connect debugger. (enables tutorial)
+OR
+> Debugging unavailble in production environment. (disables tutorial)
+
+[if tutorial disabled, jump ahead to TBD]
+
+< Test internal sensors
+
+> Internal sensors online
+
+[erase chat history, show starting ship in third person]
+
+> (Use mouse or controller to orbit the ship)
+[waits for user to move aroudn a little, progress bar?]
+
+> Analyze hardware status
+
+[right column ship info button, [click> arrow pointing to button, wait for click]
+
+> Ship Info
+
+[ship info panel open, buttons disabled, except "Modules", which is now pointed to and waiting for a click]
+
+> Modules
+
+[switch to Modules view, in split mode]
+
+#blocks of text and icons proceed to explain the entire view and walk the player through adding a new module to the schematic and design
+##TODO fill this out
+
+[click> Return
+
+< Test external sensors
+
+> External sensors online
+
+[show skybox and other surroundings]
+
+< Test flight controls (Press [space] to toggle flight mode)
+
+[UI mostly vanishes, gives navigation control to player]
+
+< Test navigation by flying to this location
+
+[quest marker]
+
+< Return to zero velocity (Press [TBD] or throttle down hotas)
+
+[wait for that]
+
+< Test resource detector
+
+[points to overlay menu, then to resources]
+
+< Resource scanner is range and depth limited.
+
+[points to limit info in screen corner]
+
+> Proceed
+
+< The new module requires [TBD], use the scanner to find some.
+

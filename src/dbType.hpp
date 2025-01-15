@@ -64,4 +64,24 @@ namespace doh {
     };
   };
 
+  template<class A> struct dbRef {
+    uint64_t oid;
+    template<class... Args> dbType<A> spawn(dbWrapper db, Args... args) {
+      return dbTypeFactory<A>(db)::construct(std::forward<Args>()...);
+    };
+  };
+
+  template<class A> struct dbData : public A {
+    dbWrapper db;
+    uint64_t oid;
+    dbData(const dbData& o) = default;
+    dbData(uint64_t r, dbWrapper db, uint64_t latency = 1) : oid(r), db(db) {
+      dbType<A>(r, db).read(latency, this);
+    };
+    dbData(const dbRef<A>& r, dbWrapper db, uint64_t latency = 1) : dbData(r.oid, db, latency) {};
+    void write() {
+      dbType<A>(oid, db).write(this);
+    };
+  };
+
 }

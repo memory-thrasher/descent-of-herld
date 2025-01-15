@@ -1,0 +1,706 @@
+Pulsar Wind Nebulae: core collapse remnant (modeled on M1):
+
+realistic:
+core pulsar, sending out waves that travel at around 0.5c (via nasa), slowing and dispersing as they approach the nebula's extremities. EM field lines cause the whispy formation within the waves. Axis of spin IS NOT magnetic axis. Magnetic axis IS jet axis. Extremely fast rotational velocity, on the order of multiple complete rotatiosn per second (M1 is about 30hz, surface velocity at equator is approx 0.01c)
+
+not realistic:
+game nebulae do not expand or contract. The medium within the nebula but without the star is of constant average mass over a reasonable time sample. The medium flows back into the star at the same rate it is ejected. Medium returns at the angles between the plane of waves and the jets. The medium's mass is inconstant moment-to-moment because it is emitted in pulses and returns with a more steady flow.
+
+The pressure waves emitted from the pulsar's equator are composed of a large set of Fourier harmonics of decreasing amplitude so the waves can be observed at any distance less than the maxmium render distance. The amplitude of the pressure wave is highes on the plane of the pulsar's equator, and reach an approximately constant pressure gradient near 45 degrees off that plane.
+
+find density of point x,y,z (pulsar is at the origin, and its equator is the x,y plane, in units of half-sector [radius of nebula = 1])
+
+## function version 1: no spin
+A, B, S (static density), L (light), J1, J2 (jet shaping) are parameters, essentially constant, chosen per nebula instance. Note: choose A and B wisely; AB < 1+pi*3/2 to avoid making it undifferentiable (see the Weierstraas function)
+C = constant of integration: each instance may be a different value, generally chosen to keep the range positive for the entire positive domain
+p = point vector (xyz)
+t = time parameter (scaled externally)
+s = star size
+T = temporary substitution
+
+
+## new alg (v4):
+d1(p) = (|p.xy|/|p|)^2 * [𝚺i A^i*cos(B^i*pi*(|p|+t))] + 1/(1+e^(J1*(|p.xy|/|p|)^2-J2)) + S/|p|^2
+### start with the lerp:
+pd = lerped point = p1 * n + p2 * (1-n) = p2 + n * (p1 - p2)
+dpd/dn = p1 - p2  #whole vectors or individual components
+pds = pd.^2 = (p2 + n * (p1 - p2)).^2 = p2.^2 + n*2*p2*(p1 - p2) + n^2*(p1-p2)^2
+dpds/dn = 2*p2*(p1-p2) + n*2*(p1-p2)^2
+ϴ = absolute value of pd elevation = atan(|pd.z|/|pd.xy|)
+cos ϴ = |pd.xy|/|pd|
+cos ϴ` = (|pd.xy|`*|pd| - |pd.xy|*|pd|`)/(|pd|^2)
+= (|p1.xy - p2.xy|*|p2 + n * (p1 - p2)| - |p1 - p2|*|p2.xy + n * (p1 - p2).xy|)/(pd.x^2 + pd.y^2 + pd.z^2)
+= (|p1.xy - p2.xy|*sqrt((p2.x + n * (p1.x - p2.x))^2 + (p2.y + n * (p1.y - p2.y))^2 + (p2.z + n * (p1.z - p2.z))^2) - |p1 - p2|*sqrt(p2.x + n * (p1.x - p2.x))^2 + (p2.y + n * (p1.y - p2.y))^2)/((p2.x + n * (p1.x - p2.x))^2 + (p2.y + n * (p1.y - p2.y))^2 + (p2.z + n * (p1.z - p2.z))^2)
+= (|p1.xy - p2.xy|*sqrt(p2.x^2 + n*2*p2.x*(p1.x - p2.x) + n^2*(p1.x-p2.x)^2 + p2.y^2 + n*2*p2.y*(p1.y - p2.y) + n^2*(p1.y-p2.y)^2 + p2.z^2 + n*2*p2.z*(p1.z - p2.z) + n^2*(p1.z-p2.z)^2) - |p1 - p2|*sqrt(p2.x^2 + n*2*p2.x*(p1.x - p2.x) + n^2*(p1.x-p2.x)^2 + p2.y^2 + n*2*p2.y*(p1.y - p2.y) + n^2*(p1.y-p2.y)^2))/(p2.x^2 + n*2*p2.x*(p1.x - p2.x) + n^2*(p1.x-p2.x)^2 + p2.y^2 + n*2*p2.y*(p1.y - p2.y) + n^2*(p1.y-p2.y)^2 + p2.z^2 + n*2*p2.z*(p1.z - p2.z) + n^2*(p1.z-p2.z)^2)
+
+ϑ = cos^2 ϴ = |pd.xy|^2/|pd|^2 = (|pd.xy|/|pd|)^2 = |pds.xy|/|pds| = (pd.x^2 + pd.y^2)/(pd.x^2 + pd.y^2 + pd.z^2)
+dϑ/dn = (|pds.xy|`|pds| - |pds.xy||pds|`)/|pds|^2
+
+sqrt(a)/b = 1/b * sqrt(a) = sqrt(a/b^2)
+
+
+d1(p1, p2, n) = cos^2 ϴ * [𝚺i A^i*cos(B^i*pi*(|pd|+t))] + 1/(1+e^(J1*cos^2 ϴ-J2)) + S/(|pd|^2)
+∫ d
+
+
+
+e^(J1*(|pd.xy|/|pd|)^2-J2) = e^(J1*(|pd.xy|/|pd|)^2)*e^(-J2)
+
+e^(J1*(|pd.xy|/|pd|)^2) = e^(J1*(pd.x^2+pd.y^2/(pd.x^2+pd.y^2+pd.z^2)))
+
+∫ 1/(e^(J1*((pd(n).x^2+pd(n).y^2)/(pd(n).x^2+pd(n).y^2+pd(n).z^2)))*e^(-J2)) dn
+= e^(J2) * ∫ e^(-J1*((pd(n).x^2+pd(n).y^2)/(pd(n).x^2+pd(n).y^2+pd(n).z^2))) dn
+g(n) = -J1*((pd(n).x^2+pd(n).y^2)/(pd(n).x^2+pd(n).y^2+pd(n).z^2))
+= -J1*(([p2.x + n*(p1.x - p2.x)]^2 + pd(n).y^2) / (pd(n).x^2 + pd(n).y^2 + pd(n).z^2))
+= -J1*((p2.y^2+p2.x^2) + 2*(p2.x*(p1.x-p2.x)+p2.y*(p1.y-p2.y))*n + ((p1.x-p2.x)^2+(p1.y-p2.y)^2)*n^2) / (p2.x^2+p2.y^2+p2.z^2 + 2*(p2.x*(p1.x-p2.x)+p2.y*(p1.y-p2.y)+p2.z*(p1.z-p2.z))*n + ((p1.x-p2.x)^2+(p1.y-p2.y)^2+(p1.z-p2.z)^2)*n^2)
+∫ g`(n)*e^(g(n)) dn = e^(g(n)) //well known
+∫ e^(g(n)) dn
+
+g(n) = g1(n) + g2(n) + ...
+∫ e^(g(n)) dn
+= ∫ 𝚷j e^(gj(n)) dn
+
+
+(an^2 + bn + c) / (dn^2 + en + f)
+(an^2 + bn + c) = (a/d)(dn^2 + en + f) + (b - ae/d)n + c - af/d
+
+(an^2 + bn + c) / (dn^2 + en + f)
+= (a/d) + ((b - ae/d)n + c - af/d) / (dn^2 + en + f)
+
+e^((an^2 + bn + c) / (dn^2 + en + f))
+= e^(((a/d)(dn^2 + en + f) + (b - ae/d)n + c - af/d) / (dn^2 + en + f))
+= e^((a/d) + ((b - ae/d)n + c - af/d) / (dn^2 + en + f))
+= e^(a/d)e^(((b - ae/d)n + c - af/d) / (dn^2 + en + f))
+
+((p2.y^2+p2.x^2) + 2*(p2.x*(p1.x-p2.x)+p2.y*(p1.y-p2.y))*n + ((p1.x-p2.x)^2+(p1.y-p2.y)^2)*n^2) / (p2.x^2+p2.y^2+p2.z^2 + 2*(p2.x*(p1.x-p2.x)+p2.y*(p1.y-p2.y)+p2.z*(p1.z-p2.z))*n + ((p1.x-p2.x)^2+(p1.y-p2.y)^2+(p1.z-p2.z)^2)*n^2)
+
+((b - ae/d)n + c - af/d) / (dn^2 + en + f)
+= ((b - ae/d)n + c - af/d) / (dn^2 + en + f)
+
+∫ e^(a/d)e^(((b - ae/d)n + c - af/d) / (dn^2 + en + f)) dn
+= e^(a/d) * ∫ e^(((b - ae/d)n + c - af/d) / (dn^2 + en + f)) dn
+= e^(a/d) * ∫ e^((b - ae/d)n / (dn^2 + en + f))e^((c - af/d) / (dn^2 + en + f)) dn
+= e^(a/d) * ∫ e^((b - ae/d)n / (dn^2 + en + f))e^((c - af/d) / (dn^2 + en + f))(((c - af/d) / (dn^2 + en + f))`/((c - af/d) / (dn^2 + en + f))`) dn
+= e^(a/d) * ∫ e^((b - ae/d)n / (dn^2 + en + f))(dn^2 + en + f)^2/((c - af/d)(2dn + e)) * e^((c - af/d) / (dn^2 + en + f))((c - af/d) / (dn^2 + en + f))` dn
+= e^(a/d) * (e^((b - ae/d)n / (dn^2 + en + f))(dn^2 + en + f)^2/((c - af/d)(2dn + e))e^((c - af/d) / (dn^2 + en + f)) - ∫ (u`(x) * e^((c - af/d) / (dn^2 + en + f))) dx)
+
+(e^((b - ae/d)n / (dn^2 + en + f))(dn^2 + en + f)^2/((c - af/d)(2dn + e)))`
+= (((e^((b - ae/d)n / (dn^2 + en + f))(dn^2 + en + f)^2)`((c - af/d)(2dn + e)) - ((c - af/d)(2dn + e))`((e^((b - ae/d)n / (dn^2 + en + f))(dn^2 + en + f)^2)) / (((c - af/d)(2dn + e))^2)
+
+
+((c - af/d) / (dn^2 + en + f))`
+= (c - af/d)(dn^2 + en + f)` / (dn^2 + en + f)^2
+= (c - af/d)(2dn + e) / (dn^2 + en + f)^2
+
+((b - ae/d)n / (dn^2 + en + f))`
+= ((b - ae/d)(dn^2 + en + f) - (dn + e)(b - ae/d)n) / (dn^2 + en + f)^2
+
+
+
+
+
+
+
+
+= ∫ e^(g(n))*g`(n)/g`(n) dn
+= ∫ e^(g(n))*g`(n) * 1/g`(n) dn
+
+
+du/dn = 1/g`(n)
+u = ∫ 1/g`(n) dn
+= 
+
+
+
+
+        -J1((p2.y^2+p2.x^2) + (2p2.x(p1.x-p2.x)+2p2.y(p1.y-p2.y))n + ((p1.x-p2.x)^2+(p1.y-p2.y)^2)n^2)
+g(n) = ////////////////////////////////////////////////////////////////////////////////////////////////////
+        ((p2.x^2+p2.y^2+p2.z^2) + (2p2.x(p1.x-p2.x)+2p2.y(p1.y-p2.y)+2p2.z(p1.z-p2.z))n + ((p1.x-p2.x)^2+(p1.y-p2.y)^2+(p1.z-p2.z)^2)n^2)
+
+        -J1((p2.y^2+p2.x^2) + (2p1.xp2.x-2p2.x^2+2p1.yp2.y-p2.y^2)n + (p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2)n^2)
+g(n) = ////////////////////////////////////////////////////////////////////////////////////////////////////
+        ((p2.x^2+p2.y^2+p2.z^2) + (2p1.xp2.x-2p2.x^2+2p1.yp2.y-2p2.y^2+2p1.zp2.z-2p2.z^2)n + (p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2+p1.z^2-2p1.zp2.z+p2.z^2)n^2)
+
+
+
+d  a + bx + cx^2
+// ////////////////////////////////////////////////////////////////////////////////////////////////////
+dx d + ex + fx^2
+
+   (a + bx + cx^2)`(d + ex + fx^2) - (d + ex + fx^2)`(a + bx + cx^2)
+=  ////////////////////////////////////////////////////////////////////////////////////////////////////
+   (d + ex + fx^2)^2
+
+   (b + 2cx)(d + ex + fx^2) - (e + 2fx)(a + bx + cx^2)
+=  ////////////////////////////////////////////////////////////////////////////////////////////////////
+   d(d + ex + fx^2) + e(d + ex + fx^2)x + f(d + ex + fx^2)x^2
+
+   d(b + 2cx) + e(b + 2cx)x + f(b + 2cx)x^2 - (a(e + 2fx) + b(e + 2fx)x + c(e + 2fx)x^2)
+=  ////////////////////////////////////////////////////////////////////////////////////////////////////
+   d(d + ex + fx^2) + e(d + ex + fx^2)x + f(d + ex + fx^2)x^2
+
+   (db - ae) + (2cd + eb - 2af - be)x + (2ce + fb - 2bf - ce)x^2 + (2cf - 2cf)x^3
+=  ////////////////////////////////////////////////////////////////////////////////////////////////////
+   (d^2) + (de+de)x + (df + e^2 + df)x^2 + (fe + fe)x^3 + (f^2)x^4
+
+   (db - ae) + (2cd - 2af)x + (ce - bf)x^2
+=  ////////////////////////////////////////////////////////////////////////////////////////////////////
+   (d^2) + (2de)x + (2df + e^2)x^2 + (2fe)x^3 + (f^2)x^4
+
+   	 -J1*((bd - ae) + (2cd - 2af)n + (ce - bf)n^2)
+g`(n) = ////////////////////////////////////////////////////////////////////////////////////////////////////
+      	 (d^2) + (2de)n + (2df + e^2)n^2 + (2fe)n^3 + (f^2)n^4
+
+                (d^2) + (2de)n + (2df + e^2)n^2 + (2fe)n^3 + (f^2)n^4
+u = -1/J1 * ∫ ////////////////////////////////////////////////////////////////////////////////////////////////////  dn
+      	        (bd - ae) + (2cd - 2af)n + (ce - bf)n^2
+
+
+(f^2/(ce - bf))n^2
+(ce - bf)n^2 + (2cd - 2af)n + (bd - ae) ⟌ (f^2)n^4 + (2fe)n^3 + (2df + e^2)n^2 + (2de)n + (d^2)
+((f^2/(ce - bf))n^2)((ce - bf)n^2 + (2cd - 2af)n + (bd - ae)) = f^2n^4 + ((2cdf^2 - 2af^3)/(ce - bf))n^3 + (bd - ae)(f^2/(ce - bf))n^2
+(f^2)n^4 + (2fe)n^3 + (2df + e^2)n^2 + (2de)n + (d^2) - f^2n^4 - ((2cdf^2 - 2af^3)/(ce - bf))n^3 - (bd - ae)(f^2/(ce - bf))n^2
+= (2fe - ((2cdf^2 - 2af^3)/(ce - bf)))n^3 + (2df + e^2 - ((bd - ae)f^2/(ce - bf)))n^2 + (2de)n + (d^2)
+
+(f^2/(ce - bf))n^2 + (2fe/(ce - bf) - ((2cdf^2 - 2af^3)/((ce - bf)^2)))n
+(ce - bf)n^2 + (2cd - 2af)n + (bd - ae) ⟌ (2fe - ((2cdf^2 - 2af^3)/(ce - bf)))n^3 + (2df + e^2 - ((bd - ae)f^2/(ce - bf)))n^2 + (2de)n + (d^2)
+(2fe/(ce - bf) - ((2cdf^2 - 2af^3)/((ce - bf)^2)))n((ce - bf)n^2 + (2cd - 2af)n + (bd - ae))
+= 
+
+
+                               (d + en + fn^2)
+u = -1/J1 * ∫ (d + en + fn^2) ///////////////////////////////////////// dn
+      	                       (bd - ae) + (2cd - 2af)n + (ce - bf)n^2
+
+                              /             (e - (2cd - 2af)f/(ce-bf))n - (bd - ae)f/(ce-bf) + d   \
+u = -1/J1 * ∫ (d + en + fn^2)( f/(ce-bf) + //////////////////////////////////////////////////////// ) dn
+      	                      \             (bd - ae) + (2cd - 2af)n + (ce - bf)n^2                /
+
+
+
+f/(ce-bf)
+(ce - bf)n^2 + (2cd - 2af)n + (bd - ae) ⟌ (fn^2 + en + d)
+f/(ce-bf)((ce - bf)n^2 + (2cd - 2af)n + (bd - ae)) = fn^2 + (2cd - 2af)f/(ce-bf)n + (bd - ae)f/(ce-bf)
+(fn^2 + en + d) - fn^2 - (2cd - 2af)f/(ce-bf)n - (bd - ae)f/(ce-bf) = (e - (2cd - 2af)f/(ce-bf))n - (bd - ae)f/(ce-bf) + d
+
+
+(fn^2 + en + d) = ((ce - bf)n^2 + (2cd - 2af)n + (bd - ae))f/(ce-bf) + (e - (2cd - 2af)f/(ce-bf))n - (bd - ae)f/(ce-bf) + d
+= ((ce - bf)f/(ce-bf)n^2 + (2cd - 2af)f/(ce-bf)n + (bd - ae)f/(ce-bf)) + (e - (2cd - 2af)f/(ce-bf))n - (bd - ae)f/(ce-bf) + d
+= fn^2 + en + d
+
+
+
+
+
+
+
+   	 -J1*(((p2.x^2+p2.y^2+p2.z^2)(2p1.xp2.x-2p2.x^2+2p1.yp2.y-p2.y^2) - (p2.y^2+p2.x^2)(2p1.xp2.x-2p2.x^2+2p1.yp2.y-2p2.y^2+2p1.zp2.z-2p2.z^2)) + (2(p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2)(p2.x^2+p2.y^2+p2.z^2) - 2(p2.y^2+p2.x^2)(p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2+p1.z^2-2p1.zp2.z+p2.z^2))n + ((p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2)(2p1.xp2.x-2p2.x^2+2p1.yp2.y-2p2.y^2+2p1.zp2.z-2p2.z^2) - (2p1.xp2.x-2p2.x^2+2p1.yp2.y-p2.y^2)(p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2+p1.z^2-2p1.zp2.z+p2.z^2))n^2)
+g`(n) = ////////////////////////////////////////////////////////////////////////////////////////////////////
+      	 ((p2.x^2+p2.y^2+p2.z^2)^2) + (2(p2.x^2+p2.y^2+p2.z^2)(2p1.xp2.x-2p2.x^2+2p1.yp2.y-2p2.y^2+2p1.zp2.z-2p2.z^2))n + (2(p2.x^2+p2.y^2+p2.z^2)(p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2+p1.z^2-2p1.zp2.z+p2.z^2) + (2p1.xp2.x-2p2.x^2+2p1.yp2.y-2p2.y^2+2p1.zp2.z-2p2.z^2)^2)n^2 + (2(p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2+p1.z^2-2p1.zp2.z+p2.z^2)(2p1.xp2.x-2p2.x^2+2p1.yp2.y-2p2.y^2+2p1.zp2.z-2p2.z^2))n^3 + ((p1.x^2-2p1.xp2.x+p2.x^2+p1.y^2-2p1.yp2.y+p2.y^2+p1.z^2-2p1.zp2.z+p2.z^2)^2)n^4
+
+remapping for sanity: p1.x = x, p1.y = y, p1.z = z, p2.x = r, p2.y = s, p2.z = t
+
+   	 -J1*(((r^2+s^2+t^2)(2xr-2r^2+2ys-s^2) - (s^2+r^2)(2xr-2r^2+2ys-2s^2+2zt-2t^2)) + (2(x^2-2xr+r^2+y^2-2ys+s^2)(r^2+s^2+t^2) - 2(s^2+r^2)(x^2-2xr+r^2+y^2-2ys+s^2+z^2-2zt+t^2))n + ((x^2-2xr+r^2+y^2-2ys+s^2)(2xr-2r^2+2ys-2s^2+2zt-2t^2) - (2xr-2r^2+2ys-s^2)(x^2-2xr+r^2+y^2-2ys+s^2+z^2-2zt+t^2))n^2)
+g`(n) = ////////////////////////////////////////////////////////////////////////////////////////////////////
+      	 ((r^2+s^2+t^2)^2) + (2(r^2+s^2+t^2)(2xr-2r^2+2ys-2s^2+2zt-2t^2))n + (2(r^2+s^2+t^2)(x^2-2xr+r^2+y^2-2ys+s^2+z^2-2zt+t^2) + (2xr-2r^2+2ys-2s^2+2zt-2t^2)^2)n^2 + (2(x^2-2xr+r^2+y^2-2ys+s^2+z^2-2zt+t^2)(2xr-2r^2+2ys-2s^2+2zt-2t^2))n^3 + ((x^2-2xr+r^2+y^2-2ys+s^2+z^2-2zt+t^2)^2)n^4
+
+   	 -J1*((2r^3x-2r^4+2r^2sy-r^2s^2+2rs^2x-2r^2s^2+2s^3y-s^4+2rt^2x-2r^2t^2+2st^2y-s^2t^2-2rs^2x-2r^3x+2r^2s^2+2r^4-2s^3y-2r^2sy+2s^4+2r^2s^2-2s^2tz-2r^2tz+2s^2t^2+2r^2t^2) + (2r^2x^2-4rx+2r^4+2r^2y^2-4r^2sy+r^2s^2+2s^2x^2-4rs^2x+2r^2s^2+2s^2y^2-4s^3y+s^4+2t^2x^2-4rt^2x+2r^2t^2+2t^2y^2-4st^2y+s^2t^2-2s^2x^2+2r^2x^2-4rs^2x-4r^3x+2r^2s^2+2r^4+2s^2y^2+2r^2y^2-4s^3y-4r^2sy+2s^4+2r^2s^2+2s^2z^2+2r^2z^2-4s^2tz-4r^2tz+2s^2t^2+2r^2t^2)n + (2rx^3-4r^2x^2+2r^3x+2rxy^2-4rsxy+2rs^2x-2r^2x^2+4r^3x-2r^4-2r^2y^2+4r^2sy-2r^2s^2+2sx^2y-4rsxy+2r^2sy+2sy^3-4s^2y^2+2s^3y-2s^2x^2+4rs^2x-2r^2s^2-2s^2y^2+4s^3y-2s^4+2tx^2z-4rtxz+2r^2tz+2ty^2z-4styz+2s^2tz-2t^2x^2+4rt^2x-2r^2t^2-2t^2y^2+4st^2y-2s^2t^2-2rx^3+2r^2x^2-2sx^2y+s^2x^2+4r^2x^2-4r^3x+4rsyx-2rs^2x-2r^3x+2r^4-2r^2sy+r^2s^2-2rxy^2+2r^2y^2-2sy^3+s^2y^2+4rsyx-4r^2sy+4s^2y^2-2s^3y-2rs^2x+2r^2s^2-2s^3y+s^4-2rxz^2+2r^2z^2-2syz^2+s^2z^2+4rtxz-4r^2tz+4styz-2s^2tz-2rt^2x+2r^2t^2-2st^2y+s^2t^2)n^2)
+g`(n) = ////////////////////////////////////////////////////////////////////////////////////////////////////
+      	 (r^2+s^2+t^2)^2 + ((2xr(2r^2+2s^2+2t^2)-2r^2(2r^2+2s^2+2t^2)+2ys(2r^2+2s^2+2t^2)-2s^2(2r^2+2s^2+2t^2)+2zt(2r^2+2s^2+2t^2)-2t^2(2r^2+2s^2+2t^2)))n + (2(r^2+s^2+t^2)(x^2-2xr+r^2+y^2-2ys+s^2+z^2-2zt+t^2) + (2xr-2r^2+2ys-2s^2+2zt-2t^2)^2)n^2 + (2(x^2-2xr+r^2+y^2-2ys+s^2+z^2-2zt+t^2)(2xr-2r^2+2ys-2s^2+2zt-2t^2))n^3 + ((x^2-2xr+r^2+y^2-2ys+s^2+z^2-2zt+t^2)^2)n^4
+
+   	 -J1*((r^2s^2+s^4+2rt^2x+2st^2y-2s^2tz-2r^2tz+s^2t^2) + (4r^2x^2-4rx+4r^4+4r^2y^2-8r^2sy+7r^2s^2-8rs^2x+4s^2y^2-8s^3y+s^4+2t^2x^2-4rt^2x+2r^2t^2+2t^2y^2-4st^2y+s^2t^2-4r^3x+2s^4+2s^2z^2+2r^2z^2-4s^2tz-4r^2tz+2s^2t^2+2r^2t^2)n + (2rx^3-4r^2x^2+2r^3x+2rxy^2-4rsxy+2rs^2x-2r^2x^2+4r^3x-2r^4-2r^2y^2+4r^2sy-2r^2s^2+2sx^2y-4rsxy+2r^2sy+2sy^3-4s^2y^2+2s^3y-2s^2x^2+4rs^2x-2r^2s^2-2s^2y^2+4s^3y-2s^4+2tx^2z-4rtxz+2r^2tz+2ty^2z-4styz+2s^2tz-2t^2x^2+4rt^2x-2r^2t^2-2t^2y^2+4st^2y-2s^2t^2-2rx^3+2r^2x^2-2sx^2y+s^2x^2+4r^2x^2-4r^3x+4rsyx-2rs^2x-2r^3x+2r^4-2r^2sy+r^2s^2-2rxy^2+2r^2y^2-2sy^3+s^2y^2+4rsyx-4r^2sy+4s^2y^2-2s^3y-2rs^2x+2r^2s^2-2s^3y+s^4-2rxz^2+2r^2z^2-2syz^2+s^2z^2+4rtxz-4r^2tz+4styz-2s^2tz-2rt^2x+2r^2t^2-2st^2y+s^2t^2)n^2)
+g`(n) = ////////////////////////////////////////////////////////////////////////////////////////////////////
+      	 (...)
+
+
+
+
+w(n) = e^(g(n))*g`(n)
+u(n) = 1/g`(n)
+∫ e^(g(n))*g`(n) * 1/g`(n) dn
+= u(n)∫ w(n) dn - ∫ (u`(n) * ∫ w(m) dm) dn
+= e^(g(n))/g`(n) - ∫ ((1/g`(n))` * e^(g(n))) dn
+(1/g`(n))`
+= -g``(n)/(g`(n)^2)
+
+
+
+
+
+(x/(a+bx+cx^2))`
+= ((a+bx+cx^2)-(a+bx+cx^2)`*x)/((a+bx+cx^2)^2)
+= ((a+bx+cx^2)-((bx)`+(cx^2)`)*x)/(a^2+abx+acx^2 +abx+b^2x^2+bcx^3+acx^2+bcx^3+c^2x^4)
+= ((a+bx+cx^2)-bx-2cx^2)/(a^2+2abx+(2ac+b^2)x^2+2bcx^3+c^2x^4)
+= (a-cx^2)/(a^2+2abx+(2ac+b^2)x^2+2bcx^3+c^2x^4)
+
+((a-cx^2)/(a^2+2abx+(2ac+b^2)x^2+2bcx^3+c^2x^4))`
+= ((a-cx^2)`(a^2+2abx+(2ac+b^2)x^2+2bcx^3+c^2x^4) - (a^2+2abx+(2ac+b^2)x^2+2bcx^3+c^2x^4)`(a-cx^2)) / ((a^2+2abx+(2ac+b^2)x^2+2bcx^3+c^2x^4)^2)
+= ((-2cx)(a^2+2abx+(2ac+b^2)x^2+2bcx^3+c^2x^4) - (2ab+2(2ac+b^2)x+6bcx^2+4c^2x^3)(a-cx^2)) / (a^4 + 2a^3bx + (2a^3c+a^2b^2)x^2 + 2a^2bcx^3 + a^2*c^2x^4 + 2a^3bx + 4a^2b^2x^2 + (2ac+b^2)2abx^3 + 4ab^2cx^4 + 2abc^2x^5 + a^2(2ac+b^2)x^2 + 2ab(2ac+b^2)x^3 + (2ac+b^2)^2x^4 + (2ac+b^2)2bcx^5 + (2ac+b^2)c^2x^6 + 2a^2bcx^3 + 4ab^2cx^4 + 2bc(2ac+b^2)x^5 + 4b^2c^2x^6 + 2bc^3x^7 + a^2c^2x^4 + 2abc^2x^5 + c^2(2ac+b^2)x^6 + 2bc^3x^7 + c^4x^8)
+= (-2a^2cx - 4abcx^2 - 2c(2ac+b^2)x^3 - 4bc^2x^4 - 2c^3x^5 + 2abcx^2 + 2c(2ac+b^2)x^3 + 6bc^2x^4 + 4c^3x^5 - 2a^2b - 2a(2ac+b^2)x - 6abcx^2 - 4ac^2x^3) / (a^4 + 2a^3bx + (2a^3c+a^2b^2)x^2 + 2a^2bcx^3 + a^2*c^2x^4 + 2a^3bx + 4a^2b^2x^2 + (2ac+b^2)2abx^3 + 4ab^2cx^4 + 2abc^2x^5 + a^2(2ac+b^2)x^2 + 2ab(2ac+b^2)x^3 + (2ac+b^2)^2x^4 + (2ac+b^2)2bcx^5 + (2ac+b^2)c^2x^6 + 2a^2bcx^3 + 4ab^2cx^4 + 2bc(2ac+b^2)x^5 + 4b^2c^2x^6 + 2bc^3x^7 + a^2c^2x^4 + 2abc^2x^5 + c^2(2ac+b^2)x^6 + 2bc^3x^7 + c^4x^8)
+= (-2a^2cx - 4abcx^2 - 4ac^2x^3 - 2cb^2x^3 - 4bc^2x^4 - 2c^3x^5 + 2abcx^2 + 4ac^2x^3 + 2cb^2x^3 + 6bc^2x^4 + 4c^3x^5 - 2a^2b - 4a^2cx - 2ab^2x - 6abcx^2 - 4ac^2x^3) / (a^4 + 2a^3bx + 2a^3cx^2 + a^2b^2x^2 + 2a^2bcx^3 + a^2*c^2x^4 + 2a^3bx + 4a^2b^2x^2 + 4a^2bcx^3 + 2ab^3x^3 + 4ab^2cx^4 + 2abc^2x^5 + 2a^3cx^2 + a^2b^2x^2 + 4a^2cbx^3 + 2ab^3x^3 + 4a^2c^2x^4 + 4ab^2cx^4 + b^4x^4 + 4abc^2x^5 + 2b^3cx^5 + 2ac^3x^6 + b^2c^2x^6 + 2a^2bcx^3 + 4ab^2cx^4 + a4bc^2x^5 + 2b^3cx^5 + 4b^2c^2x^6 + 2bc^3x^7 + a^2c^2x^4 + 2abc^2x^5 + 2ac^3x^6 + b^2c^2x^6 + 2bc^3x^7 + c^4x^8)
+= (-2a^2b - 4a^2cx - 2ab^2x - 2a^2cx - 4abcx^2 + 2abcx^2 - 6abcx^2 - 4ac^2x^3 + 4ac^2x^3 + 2cb^2x^3 - 4ac^2x^3 - 2cb^2x^3 - 4bc^2x^4 + 6bc^2x^4 - 2c^3x^5 + 4c^3x^5) / (a^4 + 2a^3bx + 2a^3bx + 4a^2b^2x^2 + 2a^3cx^2 + a^2b^2x^2 + 2a^3cx^2 + a^2b^2x^2 + 4a^2cbx^3 + 2ab^3x^3 + 2a^2bcx^3 + 4a^2bcx^3 + 2ab^3x^3 + 2a^2bcx^3 + 4ab^2cx^4 + 4ab^2cx^4 + a^2*c^2x^4 + 4a^2c^2x^4 + 4ab^2cx^4 + b^4x^4 + a^2c^2x^4 + 2abc^2x^5 + 4abc^2x^5 + 2b^3cx^5 + 2abc^2x^5 + a4bc^2x^5 + 2b^3cx^5 + 4b^2c^2x^6 + 2ac^3x^6 + b^2c^2x^6 + 2ac^3x^6 + b^2c^2x^6 + 2bc^3x^7 + 2bc^3x^7 + c^4x^8)
+= (-2a^2b - (3ac + b^2)2ax - 8abcx^2 - 4ac^2x^3 + 2bc^2x^4 + 2c^3x^5) / (a^4 + 4a^3bx + (3b^2 + ac)2a^2x^2 + (3ac + b^2)4abx^3 + (12ab^2c + 6a^2c^2 + b^4)x^4 + (3ac + b^2)4bcx^5 + 6b^2c^2x^6 + 4ac^3x^6 + 4bc^3x^7 + c^4x^8)
+
+(x^2/(a+bx+cx^2))`
+= ?
+
+
+g`(x) = -J1*((pd(n).x^2+pd(n).y^2)/(pd(n).x^2+pd(n).y^2+pd(n).z^2))`
+= (-J1*(p2.y^2+p2.x^2) + -J1*2*(p2.x*(p1.x-p2.x)+p2.y*(p1.y-p2.y))*n + -J1*((p1.x-p2.x)^2+(p1.y-p2.y)^2)*n^2) / (p2.x^2+p2.y^2+p2.z^2 + 2*(p2.x*(p1.x-p2.x)+p2.y*(p1.y-p2.y)+p2.z*(p1.z-p2.z))*n + ((p1.x-p2.x)^2+(p1.y-p2.y)^2+(p1.z-p2.z)^2)*n^2)
+
+e^(J1*(|p1.xy * n + p2.xy * (1 - n)|^2/(|p1 * n + p2 * (1-n)|^2))-J2)
+= e^(J1*(|p2.xy + n*(p1.xy-p2.xy)|^2/(|p2 + n*(p1-p2)|^2))-J2)
+= e^(J1*(((p2.x + n*(p1.x-p2.x))^2 + (p2.y + n*(p1.y-p2.y))^2)/((p2.x + n*(p1.x-p2.x))^2 + (p2.y + n*(p1.y-p2.y))^2 + (p2.z + n*(p1.z-p2.z))^2))-J2)
+
+1/(1+e^(J1*(|p1.xy * n + p2.xy * (1 - n)|^2/(|p1 * n + p2 * (1-n)|^2))-J2))
+
+
+
+### phase 1: density at point
+
+d1(p) = |p.xy|/|p|^2 * [𝚺i A^i*cos(B^i*pi*(|p|+t))] + 1/(1+e^(J1*|p.xy|/|p.z|-J2)) + S/|p|^2
+d1(n*p) = |p.xy|/|p|^2 * [𝚺i A^i*cos(B^i*pi*(|p|*n+t))/n] + 1/(1+e^(J1*|p.xy|/|p.z|-J2)) + S/(|p|*n)^2   for 0<n
+d1int(p, n) = ∫ |p.xy|/|p|^2 * [𝚺i A^i*cos(B^i*pi*(|p|*n+t))/n] + 1/(1+e^(J1*|p.xy|/|p.z|-J2)) + S/(|p|*n)^2 dn   for 0<n
+d1int(p, n) = |p.xy|/|p|^2 * [𝚺i A^i * ∫ [cos(B^i*pi*(|p|*n+t))/n] dn] + n./(1+e^(J1*|p.xy|/|p.z|-J2)) - S/(|p|^2*n)   for 0<n
+
+where T = B^i*pi; u = T*|p|*n;
+du/dn = T*|p|
+du = T*|p| dn
+  ∫ [cos(T*(|p|*n+t))/n] dn
+= ∫ [cos(T*|p|*n+T*t)/n] dn
+= ∫ [(cos(T*|p|*n)cos(T*t)-sin(T*|p|*n)sin(T*t))/n] dn
+= cos(T*t) * ∫ cos(T*|p|*n)/n dn - sin(T*t) * ∫ sin(T*|p|*n)/n dn
+∫ cos(T*|p|*n)/n dn
+= ∫ cos(u)/n * T*|p|/T*|p| dn
+= ∫ cos(u)/u * T*|p| dn
+= ∫ cos(u)/u du
+= Cin(u)
+= Cin(T*|p|*n)
+  cos(T*t) * ∫ cos(T*|p|*n)/n dn - sin(T*t) * ∫ sin(T*|p|*n)/n dn
+= cos(T*t)*Cin(T*|p|*n) - sin(T*t)*Si(T*|p|*n)
+= cos(B^i*pi*t)*Cin(B^i*pi*|p|*n) - sin(B^i*pi*t)*Si(B^i*pi*|p|*n)
+
+d1int(p, n) = |p.xy|/|p|^2 * [𝚺i A^i*(cos(B^i*pi*t)*Cin(B^i*pi*|p|*n) - sin(B^i*pi*t)*Si(B^i*pi*|p|*n))] + n./(1+e^(J1*|p.xy|/|p.z|-J2)) - S/(|p|^2*n)   for 0<n
+
+
+### phase 2: total density between point and origin (note: dropping absolute value functions bc for any p.z, n*p.z will have a consistent sign)
+d2(p) = |p| * ∫(0,1) d1(n*p) dn
+d2(p) = |p| * (d1int(p, 1) - d1int(p, s/|p|))  #note: s = star size in same units as p
+
+### phase 3: total diffusion of primary star's light at point
+[available light] = [total light] / ([distance squared] * [density between here and star])
+[diffused light] = [available light] * [density here]
+d3(p) = L * d1(p) / (|p|^2 * d2(p))
+
+### phase 4: total density between two points (lerp)
+d4(p1, p2) = ∫(0,1) d1(n*p1 + (1-n)*p2) dn
+d1(p) = |p.xy|/|p|^2 * [𝚺i A^i*cos(B^i*pi*(|p|+t))] + 1/(1+e^(J1*|p.xy|/|p.z|-J2)) + S/|p|^2
+d1(n*p1 + (1-n)*p2) = |(n*p1 + (1-n)*p2).xy|/|(n*p1 + (1-n)*p2)|^2 * [𝚺i A^i*cos(B^i*pi*((n*p1 + (1-n)*p2)+t))] + 1/(1+e^(J1*|(n*p1 + (1-n)*p2).xy|/|(n*p1 + (1-n)*p2).z|-J2)) + S/|(n*p1 + (1-n)*p2)|^2
+d1int(n*p1 + (1-n)*p2) = ∫ d1(n*p1 + (1-n)*p2) dn
+= ∫ |(n*p1 + (1-n)*p2).xy|/|(n*p1 + (1-n)*p2)|^2 * [𝚺i A^i*cos(B^i*pi*((n*p1 + (1-n)*p2)+t))] + 1/(1+e^(J1*|(n*p1 + (1-n)*p2).xy|/|(n*p1 + (1-n)*p2).z|-J2)) + S/|(n*p1 + (1-n)*p2)|^2 dn
+= ∫ |(n*p1 + (1-n)*p2).xy|/|(n*p1 + (1-n)*p2)|^2 * [𝚺i A^i*cos(B^i*pi*((n*p1 + (1-n)*p2)+t))] dn + ∫ 1/(1+e^(J1*|(n*p1 + (1-n)*p2).xy|/|(n*p1 + (1-n)*p2).z|-J2)) dn + ∫ S/|(n*p1 + (1-n)*p2)|^2 dn
+
+#### phase 4 part A: T = (|p2.xy + n*(p1 - p2).xy|/|p2 + n*(p1 - p2)|^2)
+∫ |(n*p1 + (1-n)*p2).xy|/|(n*p1 + (1-n)*p2)|^2 * [𝚺i A^i*cos(B^i*pi*((n*p1 + (1-n)*p2)+t))] dn
+= [𝚺i ∫ |(n*p1 + (1-n)*p2).xy|/|(n*p1 + (1-n)*p2)|^2 * A^i*cos(B^i*pi*n*p1 + B^i*pi*(1-n)*p2 + B^i*pi*t) dn ]
+= [𝚺i A^i * ∫ T * cos(B^i*pi*p1*n - B^i*pi*p2*n + B^i*pi*p2 + B^i*pi*t) dn ]
+= [𝚺i A^i * ∫ T*cos(B^i*pi*p1*n - B^i*pi*p2*n)*cos(B^i*pi*p2 + B^i*pi*t) - T*sin(B^i*pi*p1*n - B^i*pi*p2*n)*sin(B^i*pi*p2 + B^i*pi*t) dn ]
+= [𝚺i A^i*cos(B^i*pi*p2 + B^i*pi*t) * ∫ T*cos(B^i*pi*p1*n - B^i*pi*p2*n) dn - A^i*sin(B^i*pi*p2 + B^i*pi*t) * ∫ T*sin(B^i*pi*p1*n - B^i*pi*p2*n) dn ]
+= [𝚺i A^i*cos(B^i*pi*p2 + B^i*pi*t) * (∫ T*cos(B^i*pi*p1*n)*cos(B^i*pi*p2*n) dn + ∫ T*sin(B^i*pi*p1*n)*sin(B^i*pi*p2*n) dn) - A^i*sin(B^i*pi*p2 + B^i*pi*t) * (∫ T*sin(B^i*pi*p1*n)*cos(B^i*pi*p2*n) dn - ∫ T*cos(B^i*pi*p1*n)*sin(B^i*pi*p2*n) dn) ]
+
+
+
+f(x) = x^2    x>=0
+g(x) = sqrt(x)  x>=0
+f`(x) = 2x
+g`(x) = 1/(f`(g(x)))
+= 1/(2*sqrt(x))
+
+
+u = |p2.xy + n*(p1 - p2).xy|
+u = sqrt(n^2*((p1.x - p2.x)^2 + (p1.y - p2.y)^2) + 2*n*(p2.x*(p1.x - p2.x) + p2.y*(p1.y - p2.y)) + p2.x^2 + p2.y^2)
+u^2 = n^2*((p1.x - p2.x)^2 + (p1.y - p2.y)^2) + 2*n*(p2.x*(p1.x - p2.x) + p2.y*(p1.y - p2.y)) + p2.x^2 + p2.y^2
+u^2 = an^2 + bn + c
+u^2/a = n^2 + bn/a + c/a
+u^2/a - c/a + (b/2a)^2 = n^2 + n*b/a + (b/2a)^2
+±sqrt((u^2 - c)/a + b^2/4a^2) = n + (b/2a)
+(b±sqrt(((u^2 - c)*4a + b^2)))/2a = n
+
+T = u / (u^2 + |p1.z*n + p2.z*(1-n)|)
+
+
+
+
+= (2*p2.y/(p1.y - p2.y) + (p1.x - p2.x)^2*n)(2*p2.x/(p1.x - p2.x) + (p1.y - p2.y)^2*n) + p2.x^2 + p2.y^2 - 4*p2.x*p2.y/((p1.x - p2.x)(p1.y - p2.y))
+
+
+sqrt((p2.x + n*(p1.x - p2.x))^2 + (p2.y + n*(p1.y - p2.y))^2) / ((p2.x + n*(p1.x - p2.x))^2 + (p2.y + n*(p1.y - p2.y))^2 + (p2.z + n*(p1.z - p2.z))^2)
+= sqrt((p2.x^2 + 2*p2.x*n*(p1.x - p2.x) + n^2*(p1.x - p2.x)^2) + (p2.y^2 + 2*p2.y*n*(p1.y - p2.y) + n^2*(p1.y - p2.y)^2)) / ...
+= sqrt(n^2*((p1.x - p2.x)^2 + (p1.y - p2.y)^2) + 2*n*(p2.x*(p1.x - p2.x) + p2.y*(p1.y - p2.y)) + p2.x^2 + p2.y^2) / ...
+
+a = (p1.x - p2.x)^2 + (p1.y - p2.y)^2
+= p1.x^2 - 2*p1.x*p2.x + p2.x^2 + p1.y^2 - 2*p1.y*p2.y + p2.y^2
+4ac = 4(p1.x^2 - 2*p1.x*p2.x + p2.x^2 + p1.y^2 - 2*p1.y*p2.y + p2.y^2)(p2.x^2 + p2.y^2)
+= 4*(p1.x^2*p2.x^2 - 2*p1.x*p2.x^3 + p2.x^4 + p1.y^2*p2.x^2 - 2*p1.y*p2.y*p2.x^2 + p2.y^2*p2.x^2 + p1.x^2*p2.y^2 - 2*p1.x*p2.x*p2.y^2 + p2.x^2*p2.y^2 + p1.y^2*p2.y^2 - 2*p1.y*p2.y^3 + p2.y^4)
+b^2 = 4*(p2.x*(p1.x - p2.x) + p2.y*(p1.y - p2.y))^2
+= 4*(p2.x*(p1.x - p2.x) + p2.y*(p1.y - p2.y))^2
+
+
+### phase 5: visible light from point p surviving to point c (camera)
+[light from p] / [density between p and c]
+d5(p, c) = d3(p) / d4(p, c)
+
+### phase 6: sum of visible light along line segment p-c (will be on nebula's bounding box in practice)
+d6(p, c) = ∫(0,1) d5(n*p + (1-n)*c, c) dn
+
+
+note: differentiation of exponential fourier
+d0(x) = 𝚺i 0.2^i*cos(15^i*pi*x)
+d0`(x) = 𝚺i (0.2^i*cos(15^i*pi*x))`
+d0`(x) = 𝚺i 0.2^i*cos`(15^i*pi*x)
+d0`(x) = -(𝚺i 0.2^i*sin(15^i*pi*x))
+
+
+
+
+d1int(p*n) = ∫ d1(p*n) dn = ∫ |p.xy| / |p| * 𝚺i A^i*cos(B^i*pi*|p|*n) / (n*|p.z|+1) + S dn
+= [∫ (𝚺i A^i*cos(B^i*pi*|p|*n)) / (n*|p.z|+1) dn] * |p.xy| / |p| + Sn
+= [∫ 𝚺i (A^i*cos(B^i*pi*|p|*n) / (n*|p.z|+1)) dn] * |p.xy| / |p| + Sn
+= 𝚺i [∫ A^i*cos(B^i*pi*|p|*n) / (n*|p.z|+1) dn] * |p.xy| / |p| + Sn
+= 𝚺i A^i * [∫ cos(B^i*pi*|p|*n) / (n*|p.z|+1) dn] * |p.xy| / |p| + Sn
+
+= 𝚺i A^i * cos(B^i*pi*|p|*n) * ln(|p.z|*n+1)/|p.z| - [∫ -(B^i*pi*|p|*sin(B^i*pi*|p|*n)) * ln(|p.z|*n+1)/|p.z| dn] * |p.xy| / |p| + Sn
+= 𝚺i (A^i * cos(B^i*pi*|p|*n) * ln(|p.z|*n+1)/|p.z| + B^i*pi*|p|/|p.z| * [∫ sin(B^i*pi*|p|*n) * ln(|p.z|*n+1) dn]) * |p.xy| / |p| + Sn
+= 𝚺i (A^i * cos(B^i*pi*|p|*n) * ln(|p.z|*n+1)/|p.z| + B^i*pi*|p|/|p.z| * ([∫ ln(|p.z|*n+1) * sin(B^i*pi*|p|*n) dn])) * |p.xy| / |p| + Sn
+= 𝚺i (A^i * cos(B^i*pi*|p|*n) * ln(|p.z|*n+1)/|p.z| + B^i*pi*|p|/|p.z| * (ln(|p.z|*n+1) * -cos(B^i*pi*|p|*n)/(B^i*pi*|p|*n) - [∫ |p.z|/(|p.z|*n+1) * -cos(B^i*pi*|p|*n)/(B^i*pi*|p|*n) dn])) * |p.xy| / |p| + Sn
+
+
+
+∫ 1/(ax+b) dx = ln(|ax+b|)/a + C
+(1/(ax+b))` = a/((ax+b)^2)
+
+∫ u(x)v`(x) dx = u(x)v(x) - ∫ u`(x)v(x) dx
+w(x)=v`(x)
+∫ u(x)w(x) dx = u(x)∫ w(x) dx - ∫ (u`(x) * ∫ w(x) dx) dx
+∫(a, b) u(x)w(x) dx = (u(a) - u(b)) * ∫(a, b) w(x) dx - ∫(a, b) (u`(x) * ∫ w(x) dx) dx
+
+
+cos(ax) = f(g(x))
+f = cos
+g(x) = ax
+cos`(ax) = f`(g(x))*g`(x)
+ = -sin(ax)*a
+
+f(x)=e
+(e^g(x))`
+= f^g(f` (g/f) + g` ln f)
+= (e^g)(g`)
+
+
+∫ cos(B^i*pi*|p|*n) / (n*|p.z|+1) dn
+∫(0,1) cos(A*n) / (B*n+1) dn =
+∫(0,1) [𝚺(0<=j<=∞) (-1)^j/((2j)!)*(A*n)^(2*j)] / (B*n+1) dn =
+𝚺(0<=j<=∞) (-1)^j/((2j)!)*∫(0,1) (A*n)^(2j)/(B*n+1) dn
+∫(0,1) (A*n)^(2j)/(B*n+1) dn
+= ∫(0,1) n^(2j)/(B*n+1) dn * A^(2j)
+= ∫(0,1) x^({2j+1}-1)*(1-x)^({2j+2}-{2j+1}-1)*(1-(-B)x)^(-1) dx * A^(2j)
+= B(2j+1, 1)*[2F1](1, 2j+1; 2j+2; -B) * A^(2j)
+≅ sqrt(2*pi)*(2j+1)^(2j+1/2)/(2j+2)^(2j+1.5) * [𝚺(0<=k<=∞) q(1, k)*q(2j+1, k)*(-B)^k/(q(2j+2, k)*k!)] * A^(2j)
+where q(x, k) = rising Pochhammer symbol
+
+
+from wolfram, probably wrong:
+∫ cos(A*n) / (B*n+C) dn = (cos(A*C/B)*Ci(A*(C/B+x))+sin(A*C/B)*Si(A*(C/B+x)))/B
+∫ n^(2j)/(B*n+C) = (n^(J+1)*[2F1](1, j+1, j+2, -bn/c)/(cj+c)
+
+∫ cos(A*n) / (B*n+1) dn = cos(A/B)*Ci(A*(x+1/B)) + sin(A/B)*Si(A*(x+1/B))
+^ B != 0 ^
+v B = 0 v
+∫ cos(A*n) dn = sin(A*n)/A + C
+
+∫ 1/(Bx+C) dx = ln(|Bx+C|)/B + C
+(1/(Bx+C))` = B/((Bx+C)^2)
+
+∫ e^(i*A*n) / (B*n+C) dn
+
+∫ [𝚺 (0<=j) (-1)^j/((2j)!)*(A*n)^(2*j)] / (B*n+C) dn
+𝚺 (0<=j) (-1)^j*A^(2*j)/((2j)!) * ∫ n^(2*j)/(B*n+C) dn
+𝚺 (0<=j) (-1)^j*A^(2*j)/((2j)!) * n^(2*j+1)*[2F1](1, 2*j+1; 2*j+2; -Bn/C)/(A*C+C)
+
+
+
+∫ 1/(1+be^(cx)) dx
+= ∫ be^(-cx)/(1+be^(-cx)) dx
+u = 1 + be^(-cx)
+du/dx = -bce^(-cx)
+du = -bce^(-cx) dx
+∫ be^(-cx)/(1+be^(-cx)) dx
+= ∫ -cbe^(-cx)/(-c*(1+be^(-cx))) dx
+= ∫ 1/(-c*u) du
+= ∫ 1/u du / (-c)
+= ln|u| / (-c)
+= ln|1 + be^(-cx)| / (-c)
+
+
+
+
+
+# octave dump
+
+function ret = foo(x, z)
+ret = 0
+r = sqrt(x.^2 + z.^2)
+for i = 1:100
+ret += 0.2^i*cos(15^i*pi*r)
+endfor
+ret .*= abs(x)./((abs(z)+1) .* r)
+endfunction
+
+function plotW(a, b)
+xy = linspace(a, b, 200)
+[xx, yy] = meshgrid(xy, xy)
+mesh(xy, xy, foo(xx, yy))
+endfunction
+
+subplot(2, 2, 1);
+plotW(-1, 1)
+subplot(2, 2, 2);
+plotW(-0.1, -0.025)
+subplot(2, 2, 3);
+plotW(-0.0005, -0.00025)
+subplot(2, 2, 4);
+plotW(-0.00015, -0.000075)
+
+
+function ret = Si(x)
+lhc = cos(x)./x
+rhc = sin(x)./x
+ret = pi/2 - lhc - rhc./x
+lh = 1
+rh = 1./x
+for i = 1:100
+ret -= lhc.*((-1)^i)*factorial(2*i)./(x.^(2*i)) + rhc.*((-1)^i)*factorial(2*i+1)./(x.^(2*i+1))
+endfor
+endfunction
+
+function ret = Ci(x)
+lh = 1
+rh = 1./x
+for i = 1:100
+lh += (-1)^i*factorial(2*i)./(x.^(2*i))
+rh += (-1)^i*factorial(2*i+1)./(x.^(2*i+1))
+endfor
+lh .*= sin(x)./x
+rh .*= cos(x)./x
+ret = lh - rh
+endfunction
+
+function ret = Si(x)
+ret = 0
+for n = 0:100
+ret += (-1)^n*(x.^(2*n+1))./((2*n+1)*factorial(2*n+1))
+endfor
+endfunction
+
+function ret = Ci(x)
+ret = 0.57721566490153286060651209008240243104215933593992 + log(x)
+for n = 1:100
+ret += (-1)^n*(x.^(2*n))./(2*n*factorial(2*n))
+endfor
+endfunction
+
+
+
+
+x = [0.001:0.001:1]
+plot(x, 1-x)
+
+
+
+
+function ret = ternMix(x, y, z)
+ret(x) = y(x)
+ret(!x) = z(!x)
+endfunction
+
+function ret = d1(x, s)
+ret = 0
+#for n = 1:1
+n = 1
+ret += 0.2^n*cos(15^n*pi*sqrt(x.^2+(x*s).^2))
+#endfor
+ret .*= abs(x)./((x*s+1) .* sqrt(x.^2+(x*s).^2))
+ret += 0.15
+endfunction
+
+#for x >= 4 only
+function ret = tif(x)
+ret = (1 + 1.744437068161936700618e2*x.^-2 + 1.96396372895146869801e5*x.^-4 + 2.37750310125431834034e7*x.^-6 + 1.43073403821274636888e9*x.^-8 + 4.33736238870432522765e10*x.^-10 + 6.40533830574022022911e11*x.^-12 + 4.209968180571076940208e12*x.^-14 + 1.00795182980368574617e13*x.^-16 + 4.94816688199951963482e12*x.^-18 - 4.94701168645415959931e11*x.^-20) ./ (x.*(1+7.46437068161927678031e2*x.^-2 + 1.978065247031583951450-10^5*x.^-4+2.14535670165126845144e7*x.^-6 + 1.47478952192985464958e9*x.^-8 + 4.58595155847765779830e10*x.^-10 + 7.08501308149515401563e11*x.^-12 + 5.06084464593475076774e12*x.^-14 + 1.43468549171581016479e13*x.^-16 + 1.11535493509914254097e13*x.^18))
+endfunction
+
+#for x >= 4 only
+function ret = tig(x)
+ret = (1 + 8.1359520115168615e2*x.^-2 + 2.352391816264782e5*x.^-4 + 3.12557570795778731e7*x.^-6 + 2.06297595146763354e9*x.^-8 + 6.83052205423625007e10*x.^-10 + 1.09049528450362786e12*x.^-12 + 7.57664583257834349e12*x.^-14 + 1.81004487464664575e13*x.^-16 + 6.43291613143049485e12*x.^-18 - 1.36517137670871689e12*x.^-20) ./ (x.^2.*(1 + 8.19595201151454564e2*x.^-2 + 2.40036752835578777e5*x.^-4 + 3.26026661647090822e7*x.^-6 + 2.23355543278099360e9*x.^-8 + 7.87465017341829930e10*x.^-10 + 1.39866710696414565e12*x.^-12 + 1.17164723371736605e13*x.^-14 + 4.0183908730765662e13*x.^-16 + 3.99653257887490811e13*x.^-18))
+endfunction
+
+#for x <= 4 only
+function ret = CiLow(x)
+ret = 0.57721566490153286060651209008240243104215933593992 + log(x) + x.^2.*((-0.25 + 7.51851524438898291e-3*x.^2 - 1.27528342240267686e-4*x.^4 + 1.05297363846239184e-6*x.^6 - 4.68889508144848019e-9*x.^8 + 1.06480802891189243e-11*x.^10 - 9.93728488857585407e-15*x.^12)./(1 + 1.1592605689110735e-2*x.^2 + 6.72126800814254432e-5*x.^4 + 2.55533277086129696e-7*x.^6 + 6.97071295760958946e-10*x.^8 + 1.38536352772778619e-12*x.^10 + 1.89106054713059759e-15*x.^12 + 1.39759616737376855e-18*x.^14))
+endfunction
+
+#for x <= 4 only
+function ret = SiLow(x)
+ret = x.*((1 - 4.54393409816329991e-2*x.^2 + 1.15457225751016682e-3*x.^4 - 1.41018536821330254e-5*x.^6 + 9.4328089438713025e-8*x.^8 - 3.53201978997168357e-10*x.^10 + 7.08240282274875911e-13*x.^12 - 6.05338212010422477e-16*x.^14)./(1 + 1.01162145739225565e-2*x.^2 + 4.99175116169755106e-5*x.^4 + 1.55654986308745614e-7*x.^6 + 3.28067571055789734e-10*x.^8 + 4.5049097575386581e-13*x.^10 + 3.21107051193712168e-16*x.^12))
+endfunction
+
+function ret = Ci(x)
+ret = ternMix(abs(x) >= 4, tif(x).*sin(x) - tig(x).*cos(x), CiLow(x))
+endfunction
+
+function ret = Si(x)
+ret = ternMix(abs(x) >= 4, pi/2 - tif(x).*cos(x) - tig(x).*sin(x), SiLow(x))
+endfunction
+
+function ret = d1int(x)
+s2=sqrt(2)
+y = 15.*pi
+ret = 0.2*(cos(s2*y)*Ci(s2*(x+1)*y)+sin(s2*y)*Si(s2*(x+1)*y))/s2
+endfunction
+
+x = [0:0.001:1]
+subplot(2, 1, 1)
+plot(x, d1(x, x))
+subplot(2, 1, 2)
+plot(x, d1int(x) - d1int(eps))
+
+
+
+
+
+
+#hypergeometric:
+
+function ret = q(x, n)
+ret = 1;
+for k = 0:n-1;
+ret .*= x + k;
+endfor
+endfunction
+
+function ret = hgf(a, b, c, z)
+ret = b./b; #wall of 1s, right number of dimensions
+for n = 1:50
+temp = (q(a, n).*q(b, n)./q(c, n)).*(z.^n./factorial(n));
+keep = (!isnan(temp)) & isfinite(temp);
+ret(keep) += temp(keep);
+endfor
+ret = real(ret)
+endfunction
+
+function ret = f0int(j)
+ret = (sqrt(2*pi)*(2j+1)^(2j+1/2)/(2j+2)^(2j+1.5)) .* hgf(1, 2*j+1, 2*j+2, -1)
+endfunction
+
+function ret = f1int(x, s)
+ret = 0;
+A=15*pi*x;
+B=x*s;
+for j = 1:100
+temp = 0;
+for k = 0:50
+temp += q(1, k).*q(2*j+1, k).*(-B).^k/(q(2*j+2, k)*factorial(k));
+endfor
+ret += A.^(2*j).*sqrt(2*pi).*(2j+1).^(2*j+1/2)./((2*j+2).^(2.*j+1.5)) .* temp .* (-1)^j ./ (factorial(2*j));
+endfor
+endfunction
+
+x = [0:0.001:1];
+subplot(1, 1, 1);
+plot(x, f1int(x, 1))
+
+#plot(x, hgf(1, 2*x+1, 2*x+2, -1), f0int(x));
+
+
+
+
+
+
+
+
+
+#function ret = d1int(x, m)
+#n = 1
+#y = 15^n.*pi
+#mp = sqrt(m^2+1)
+#ret = (0.2^n).*x.*cos(y.*mp.*x).*(cos(y.*mp/m).*Ci((m.*x+1).*y.*mp/m)+sin(y.*mp/m).*Si((m.*x+1).*y.*mp/m))./(mp.*x.*(mp.*y.*(m.*x+1).*sin(mp.*y/m).*sinc(mp.*y.*(m.*x+1)/m)+m.*cos(mp.*y/m).*cos(mp.*y.*(m.*x+1)/m)))
+#endfunction
+
+#function ret = d1int(x, z)
+#ret = 0
+#r = sqrt(x.^2 + z.^2)
+#B = x.*abs(z)
+#for n = 1:1
+#A = 15^n*pi*r
+#ret += (0.2^n)*(cos(A./B).*Ci(A.*(x+1./B)) + sin(A./B).*Si(A.*(x+1./B)))./B
+#endfor
+#ret .*= x ./ r
+#ret += 0.*x
+#endfunction
+
+#function ret = d1int(x)
+#ret = -0.110867*Ci(15*sqrt(2)*(x+1)*pi) - 0.0877983*Si(15*sqrt(2)*(x+1)*pi)
+#endfunction
+
+#function ret = d2(x, z)
+#ret = d1int(x, z) - d1int(eps, eps)
+#endfunction
+
+
+
+
+
+
+
+
+plot(x, [Si(x)(:), Ci(x)(:)])
+
+
+function ret = minicos(x)
+ret = 0
+for i = 0:100
+ret += (-1)^i/factorial(2*i)*x.^(2*i)
+endfor
+endfunction
+
+plot(x, [cos(x)(:), minicos(x)(:)])
+plot(x, cos(x) - minicos(x))
+
+
+y = linspace(0, -100, 501);
+x = linspace(-50, 50, 501);
+[xx, yy] = meshgrid(x, y);
+r = sqrt(xx.^2 + yy.^2);
+mesh(x, y, abs(yy.^2 ./ r.^2))
+
+
+y = x = linspace(-0.1, -10.1, 501);
+# y = linspace(-5, 5, 501);
+[xx, yy] = meshgrid(x, y);
+r = sqrt(xx.^2 + yy.^2);
+mesh(x, y, ((cos(pi.*r)./2+0.5)+(0.2*cos(15*pi.*r)./2+0.5)).*(xx./r).^2 + 1./(1+e.^(10.*(xx./r).^2-5/2)))
+
+1./(1+e.^(500./abs(yy).*(0.02.*abs(xx)-abs(yy)./200)))
+1./(1+e.^(500./abs(yy).*0.02.*abs(xx)-500./abs(yy).*abs(yy)./200))
+1./(1+e.^(10.*abs(xx./yy)-5./2))
+
+
+
+ratio of x to y along lerp between two points
+
+n = [0:0.001:1];
+p1 = [1, 2];
+p2 = [-8, 5];
+plot(n, (p1(1)*n + p2(1)*(1-n))./(p1(2)*n + p2(2)*(1-n)))
+
+
+
