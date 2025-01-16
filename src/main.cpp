@@ -20,6 +20,10 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 using namespace doh;
 
+namespace doh {
+  void timeUpdate();//implemented in time.cpp
+}
+
 int main(int argc, const char** argv) {
   WITE::configuration::setOptions(argc, argv);
   loadConfig();
@@ -31,6 +35,7 @@ int main(int argc, const char** argv) {
   createMainMenu();
   dbCycle();
   while(!WITE::shutdownRequested()) {
+    timeUpdate();
     WITE::winput::pollInput();
     dbUpdate();
     render();

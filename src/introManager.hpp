@@ -28,6 +28,7 @@ namespace doh {
     static void spunUp(uint64_t oid, void* db);
     static void spunDown(uint64_t oid, void* db);
     void* transients;
+    uint64_t stage = 0;
   };
   //!!registerDbType introManager
 

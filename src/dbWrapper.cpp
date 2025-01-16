@@ -80,8 +80,8 @@ namespace doh {
       return;
     }
     out = { true };
-    out.lastWrite = { std::chrono::current_zone(), std::chrono::clock_cast<std::chrono::system_clock>(std::filesystem::last_write_time(slotDir)) };
-    out.label = std::format("Slot {}: {:%c}", slotId, out.lastWrite.get_local_time());
+    std::chrono::zoned_time<std::chrono::file_clock::duration> lastWrite = { std::chrono::current_zone(), std::chrono::clock_cast<std::chrono::system_clock>(std::filesystem::last_write_time(slotDir)) };
+    out.label = std::format("Slot {}: {:%c}", slotId, lastWrite.get_local_time());
     if(!std::filesystem::is_directory(slotDir)) {
       out.usable = false;
       return;

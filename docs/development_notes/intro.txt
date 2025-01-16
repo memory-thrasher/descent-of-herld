@@ -80,11 +80,11 @@ OR
 
 [quest marker]
 
-< Return to zero velocity (Press [TBD] or throttle down hotas)
+< Test resource detection interface. (Press [space] to enter info mode)
 
 [wait for that]
 
-< Test resource detector
+< Test resource detection interface.
 
 [points to overlay menu, then to resources]
 
@@ -94,5 +94,29 @@ OR
 
 > Proceed
 
-< The new module requires [TBD], use the scanner to find some.
+< Specific resources can be filtered. Later advancements will unlock other resources. For now, select ferrous metal.
+
+[wait for player to do that]
+
+< The new module requires iron. Use the scanner to find some. (orbit to examine surrounding space)
+
+[wait for player to look towards nearby iron *dust cloud*. Provide quest marker if that takes too long?]
+
+< Approach the dust cloud. (Press [space] to return to flight mode)
+
+[wait for that, with resource marker]
+
+< Open dust scoop. (Press [space] to enter info mode)
+
+[wait, return to previous if player leaves dust cloud]]
+
+< Open dust scoop.
+[click>
+
+[wait]
+
+< Activate electro magnets
+[click>
+
+[wait]
 

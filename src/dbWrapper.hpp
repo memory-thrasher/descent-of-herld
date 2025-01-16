@@ -15,14 +15,12 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #pragma once
 
 #include <filesystem>
-#include <chrono>
 
 namespace doh {
 
   struct gameSlotInfo_t {
     bool exists, usable = true;
     std::string label, details;
-    std::chrono::zoned_time<std::chrono::file_clock::duration> lastWrite;
   };
 
   void createMainMenu();

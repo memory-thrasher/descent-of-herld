@@ -18,6 +18,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include <WITE/WITE.hpp>
 
 #include "introManager.hpp"
+#include "dbType.hpp"
 
 namespace doh {
 
