@@ -29,7 +29,7 @@ const vec2 fontNativeSize = vec2(8, 14);//bbox of character in obj units
 
 void main() {
   const uvec2 coords = uvec2(coords_packed % 8, coords_packed / 8);//location of vert in obj units
-  const float widthChars = floor((instance.bbox.z - instance.bbox.x - style.charMetric.z*2)/style.charMetric.x);//usable area width in chars
+  const uint widthChars = uint((instance.bbox.z - instance.bbox.x - style.charMetric.z*2)/style.charMetric.x);//usable area width in chars
   const uvec2 charPos = uvec2(mod(gl_InstanceIndex, widthChars), gl_InstanceIndex / widthChars);//location of char relative to first char, in units of chars
   //TODO truncate at height?
   gl_Position = vec4(instance.bbox.xy + style.charMetric.zw + style.charMetric.xy * (charPos + coords / fontNativeSize), 0, 1);

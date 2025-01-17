@@ -44,6 +44,9 @@ namespace doh {
     label.setStyle(style.textBuf);
   };
 
+  guiLabel::guiLabel(textOnlyStyle_t& style, glm::vec2 ul, std::string labelStr) :
+    guiLabel(style, glm::vec4(ul, ul.x + labelStr.length() * style.text.charMetric.x + style.text.charMetric.z*2, ul.y + style.text.charMetric.y + style.text.charMetric.w*2), labelStr) {};
+
   guiLabel::~guiLabel() {
     rect.destroy();
     label.destroy();

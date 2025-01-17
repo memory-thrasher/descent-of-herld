@@ -32,6 +32,7 @@ namespace doh {
     guiLabel() = delete;
     guiLabel(const guiLabel&);
     guiLabel(textOnlyStyle_t& style, glm::vec4 bounds, std::string label);
+    guiLabel(textOnlyStyle_t& style, glm::vec2 ul, std::string label);//one line, width to fit
     ~guiLabel();
   };
 

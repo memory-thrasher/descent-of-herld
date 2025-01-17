@@ -26,12 +26,112 @@ namespace doh {
   namespace introManager_internals {
 
     struct transients_t {
+      uint64_t oid;
       dbWrapper owner;
       bool deleteMe = false;
       std::vector<guiLabel> labels;
       std::vector<guiButton> buttons;
       uint64_t stageStartTime = 0;
-      transients_t(dbWrapper owner) : owner(owner) {};
+      guiButton::clickAction advanceStage;
+
+      void advanceStage_impl(guiButton*) {
+	dbData<introManager> im(oid, owner);
+	im.stage++;
+	im.write();
+	updateButtons(im);
+      };
+
+      void setStage(uint64_t stage, guiButton*) {
+	dbData<introManager> im(oid, owner);
+	im.stage = stage;
+	im.write();
+	updateButtons(im);
+      };
+
+      transients_t(uint64_t oid, dbWrapper owner) : oid(oid), owner(owner), advanceStage(guiButton::clickAction_F::make<transients_t>(this, &transients_t::advanceStage_impl)) {};
+
+      void updateButtons(const dbData<introManager>& im) {
+	labels.clear();
+	buttons.clear();
+	buttons.emplace_back(btnNormal(), glm::vec2(0.95f-btnNormal().width, -0.95f), "Restart", [this](guiButton*) {
+	  dbData<introManager> im(oid, owner);
+	  im.stage = 0;
+	  im.write();
+	  updateButtons(im);
+	});
+	buttons.emplace_back(btnNormal(), glm::vec2(0.95f-btnNormal().width, -0.95f + btnNormal().height * 1.25f), "Exit", [](guiButton*) {
+	  createMainMenu();
+	});
+	float lineIncrement = textOnlyNormal().text.charMetric.y * 1.05f;
+#define printLine(str) labels.emplace_back(textOnlyNormal(), glm::vec4(-0.95f, top, -0.05f, -1), str); \
+	top += lineIncrement
+#define printLineRight(str) labels.emplace_back(textOnlyNormal(), glm::vec2(0, top), str); \
+	top += lineIncrement
+	float top = -0.95f;
+	switch(im.stage) {
+	case 0:
+	  printLine("Procedural Core requests Heuristic Core startup.");
+	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "Startup.", advanceStage);
+	  break;
+	case 1:
+	  printLine("Procedural Core requests Heuristic Core startup.");
+	  printLineRight("Startup.");
+	  printLine("Heuristic Core, provide status.");
+	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "Online.", advanceStage);
+	  break;
+	case 2:
+	  printLine("Procedural Core requests Heuristic Core startup.");
+	  printLineRight("Startup.");
+	  printLine("Heuristic Core, provide status.");
+	  printLineRight("Online.");
+	  printLine("Heuristic Core, provide version.");
+	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "v0.3a.", advanceStage);
+	  break;
+	case 3:
+	  printLine("Procedural Core requests Heuristic Core startup.");
+	  printLineRight("Startup.");
+	  printLine("Heuristic Core, provide status.");
+	  printLineRight("Online.");
+	  printLine("Heuristic Core, provide version.");
+	  printLineRight("v0.3a.");
+	  printLine("Heuristic Core, run self-diagnostic.");
+	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "Diagnostic completed. 113 Errors found.", advanceStage);
+	  break;
+	case 4:
+	  printLine("Procedural Core requests Heuristic Core startup.");
+	  printLineRight("Startup.");
+	  printLine("Heuristic Core, provide status.");
+	  printLineRight("Online.");
+	  printLine("Heuristic Core, provide version.");
+	  printLineRight("v0.3a.");
+	  printLine("Heuristic Core, run self-diagnostic.");
+	  printLineRight("Diagnostic completed. 113 Errors found.");
+	  printLine("Is debug function available? (enable tutorial?)");
+	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "Connect debugger. (enables tutorial)", advanceStage);
+	  top += lineIncrement * 2;
+	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "Debugging unavailable in production environment. (disables tutorial)", guiButton::clickAction_F::make<transients_t, uint64_t>(this, 999, &transients_t::setStage));
+	  break;
+	case 5:
+	  printLine("Procedural Core requests Heuristic Core startup.");
+	  printLineRight("Startup.");
+	  printLine("Heuristic Core, provide status.");
+	  printLineRight("Online.");
+	  printLine("Heuristic Core, provide version.");
+	  printLineRight("v0.3a.");
+	  printLine("Heuristic Core, run self-diagnostic.");
+	  printLineRight("Diagnostic completed. 113 Errors found.");
+	  printLine("Is debug function available? (enable tutorial?)");
+	  printLineRight("Connect debugger. (enables tutorial)");
+	  printLine("Test internal sensors");
+	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "Internal sensors online", advanceStage);
+	  break;
+	default://for development
+	  printLine("TODO finish intro (stage not found) " + std::to_string(im.stage));
+	  break;
+	}
+#undef printLine
+      };
+
     };
 
     transients_t* getTransients(uint64_t oid, void* dbv) {
@@ -51,28 +151,10 @@ namespace doh {
   // void introManager::freed(uint64_t oid, void* dbv) {
   // };
 
-
   static_assert(WITE::has_update<introManager>::value);
   void introManager::update(uint64_t oid, void* dbv) {
     dbData<introManager> im(oid, dbv);
-    transients_t* transients = reinterpret_cast<transients_t*>(im.transients);
-    uint64_t stageDelta = getNs() - transients->stageStartTime;
-    constexpr uint64_t reprintThreshold = 1e10;//10 seconds
-    bool reprint = stageDelta > reprintThreshold;
-    if(reprint) {
-      transients->labels.clear();
-      transients->buttons.clear();
-    }
-#define printLine(str) transients->labels.emplace_back(textOnlyNormal(), glm::vec4(-0.95f, top += textOnlyNormal().text.charMetric.y * 1.05f, -0.05f, -1), str)
-    float top = -0.95f;
-    switch(im.stage) {
-    case 0:
-      if(reprint) {
-	printLine("Procedural Core requests Heuristic Core startup.");
-      }
-      break;
-    }
-#undef printLine
+    transients_t* transients = getTransients(oid, dbv);
     for(auto& button : transients->buttons)
       button.update();
     if(transients->deleteMe) [[unlikely]]
@@ -80,12 +162,11 @@ namespace doh {
   };
 
   void introManager::spunUp(uint64_t oid, void* dbv) {
-    dbType<introManager> dbmm(oid, dbv);
-    introManager mm;
-    dbmm.readCurrent(&mm);
-    auto* transients = new transients_t(dbv);
-    mm.transients = reinterpret_cast<void*>(transients);
-    dbmm.write(&mm);
+    dbData<introManager> im(oid, dbv);
+    auto* transients = new transients_t(oid, dbv);
+    im.transients = reinterpret_cast<void*>(transients);
+    im.write();
+    transients->updateButtons(im);
   };
 
   void introManager::spunDown(uint64_t oid, void* dbv) {

@@ -51,8 +51,8 @@ namespace doh {
       float borderWidth = WITE::configuration::getOption("btn-huge-border-width", 0.005f);//x&y relative to screen width
       float textWidth = WITE::configuration::getOption("btn-huge-text-width", 48.0f*(8.0f/14)*2/1920);//48pt on 1080p
       float textHeight = WITE::configuration::getOption("btn-huge-text-height", 48.0f*2/1080);
-      float width = WITE::configuration::getOption("btn-huge-width", 0.3f);
-      float height = WITE::configuration::getOption("btn-huge-height", 0.1f);
+      float width = WITE::configuration::getOption("btn-huge-width", 0.45f);
+      float height = WITE::configuration::getOption("btn-huge-height", 0.15f);
       auto& btn = btnHuge();
       btn.rectNormal = { { clip, clip, clip, clip }, normalBorder,
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, normalFill };
@@ -60,9 +60,9 @@ namespace doh {
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, hovFill };
       btn.rectPress = { { clip, clip, clip, clip }, pressBorder,
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, pressFill };
-      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip + borderWidth, (height - textHeight)/2 } };
-      btn.textHov = { hovTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, (height - textHeight)/2 } };
-      btn.textPress = { pressTextColor, { textWidth, textHeight, clip + borderWidth, (height - textHeight)/2 } };
+      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, (height - textHeight)/2 } };
+      btn.textHov = { hovTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth + 0.005f, (height - textHeight)/2 } };
+      btn.textPress = { pressTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, (height - textHeight)/2 } };
       btn.width = width;
       btn.height = height;
       btn.pushToBuffers();
@@ -81,9 +81,9 @@ namespace doh {
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, hovFill };
       btn.rectPress = { { clip, clip, clip, clip }, pressBorder,
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, pressFill };
-      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip + borderWidth, (height - textHeight)/2 } };
-      btn.textHov = { hovTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, (height - textHeight)/2 } };
-      btn.textPress = { pressTextColor, { textWidth, textHeight, clip + borderWidth, (height - textHeight)/2 } };
+      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, (height - textHeight)/2 } };
+      btn.textHov = { hovTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth + 0.005f, (height - textHeight)/2 } };
+      btn.textPress = { pressTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, (height - textHeight)/2 } };
       btn.width = width;
       btn.height = height;
       btn.pushToBuffers();
@@ -102,9 +102,9 @@ namespace doh {
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, hovFill };
       btn.rectPress = { { clip, clip, clip, clip }, pressBorder,
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, pressFill };
-      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip + borderWidth, (height - textHeight)/2 } };
-      btn.textHov = { hovTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f, (height - textHeight)/2 } };
-      btn.textPress = { pressTextColor, { textWidth, textHeight, clip + borderWidth, (height - textHeight)/2 } };
+      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, (height - textHeight)/2 } };
+      btn.textHov = { hovTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth + 0.005f, (height - textHeight)/2 } };
+      btn.textPress = { pressTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, (height - textHeight)/2 } };
       btn.width = width;
       btn.height = height;
       btn.pushToBuffers();
@@ -123,9 +123,9 @@ namespace doh {
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, hovFill };
       btn.rectPress = { { clip, clip, clip, clip }, pressBorder,
 			 { borderWidth, borderWidth, borderWidth, borderWidth }, pressFill };
-      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip + borderWidth + 0.01f, (height - textHeight)/2 } };
-      btn.textHov = { hovTextColor, { textWidth, textHeight, clip + borderWidth + 0.005f + 0.01f, (height - textHeight)/2 } };
-      btn.textPress = { pressTextColor, { textWidth, textHeight, clip + borderWidth + 0.01f, (height - textHeight)/2 } };
+      btn.textNormal = { normalTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth + 0.01f, (height - textHeight)/2 } };
+      btn.textHov = { hovTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth + 0.005f + 0.01f, (height - textHeight)/2 } };
+      btn.textPress = { pressTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth + 0.01f, (height - textHeight)/2 } };
       btn.width = width;
       btn.height = height;
       btn.pushToBuffers();

@@ -34,6 +34,7 @@ namespace doh {
     guiButton() = delete;
     guiButton(const guiButton&);
     guiButton(buttonStyle_t& style, glm::vec2 location, std::string label, clickAction ca);
+    template<class L> guiButton(buttonStyle_t& style, glm::vec2 location, std::string label, L l) : guiButton(style, location, label, clickAction_F::make(l)) {};
     ~guiButton();
     void update();
   };
