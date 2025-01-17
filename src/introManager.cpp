@@ -63,7 +63,7 @@ namespace doh {
       transients->labels.clear();
       transients->buttons.clear();
     }
-#define printLine(str) transients->labels.emplace_back(textOnlyNormal(), glm::vec4(-0.95f, top += textOnlyNormal().text.charMetric.y * 1.05f, -0.05f, 0), str)
+#define printLine(str) transients->labels.emplace_back(textOnlyNormal(), glm::vec4(-0.95f, top += textOnlyNormal().text.charMetric.y * 1.05f, -0.05f, -1), str)
     float top = -0.95f;
     switch(im.stage) {
     case 0:

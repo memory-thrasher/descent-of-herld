@@ -17,24 +17,23 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <WITE/WITE.hpp>
 
-#include "introManager.hpp"
-#include "windowPrimary.hpp"
-#include "dbType.hpp"
+#include "gpuShared.hpp"
 
 namespace doh {
 
-  struct gameManager : WITE::db_singleton {
-    static constexpr uint64_t typeId = 10002000;
-    static constexpr std::string dbFileId = "gameManager";
+  struct windowPrimary : WITE::db_singleton {
+    static constexpr uint64_t typeId = 10002002;
+    static constexpr std::string dbFileId = "windowPrimary";
     static void update(uint64_t oid, void* db);
     static void allocated(uint64_t oid, void* db);
-    static void freed(uint64_t oid, void* db);
+    // static void freed(uint64_t oid, void* db);
     static void spunUp(uint64_t oid, void* db);
     static void spunDown(uint64_t oid, void* db);
     void* transients;
-    dbRef<introManager> intro;
-    dbRef<windowPrimary> window;
+    cameraData_t cameraData;
+    compoundTransform_t cameraTrans;
+    float fov;
   };
-  //!!registerDbType gameManager
+  //!!registerDbType windowPrimary
 
 }

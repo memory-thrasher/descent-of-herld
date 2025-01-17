@@ -41,14 +41,19 @@ namespace doh {
     //new game: spawn everything
     dbData<gameManager> gm(oid, dbv);
     gm.intro.spawn(dbv);
-    gm.write();
     //TODO spawn ship
     //TODO spawn sector
-    //TODO spawn main window
+    gm.window.spawn(dbv);
+    gm.write();
   };
 
-  // void gameManager::freed(uint64_t oid, void* dbv) {
-  // };
+  void gameManager::freed(uint64_t oid, void* dbv) {
+    dbData<gameManager> gm(oid, dbv);
+    dbData(gm.intro, dbv).destroy();
+    //TODO spawn ship
+    //TODO spawn sector
+    dbData(gm.window, dbv).destroy();
+  };
 
   static_assert(WITE::has_update<gameManager>::value);
   void gameManager::update(uint64_t oid, void* dbv) {

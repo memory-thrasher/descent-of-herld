@@ -36,7 +36,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 > Connect debugger. (enables tutorial)
 OR
-> Debugging unavailble in production environment. (disables tutorial)
+> Debugging unavailable in production environment. (disables tutorial)
 
 [if tutorial disabled, jump ahead to TBD]
 
@@ -46,7 +46,7 @@ OR
 
 [erase chat history, show starting ship in third person]
 
-> (Use mouse or controller to orbit the ship)
+> (Use right-click-anddrag or controller to orbit the ship)
 [waits for user to move aroudn a little, progress bar?]
 
 > Analyze hardware status
@@ -94,9 +94,9 @@ OR
 
 > Proceed
 
-< Specific resources can be filtered. Later advancements will unlock other resources. For now, select ferrous metal.
+< Specific resources can be filtered. (Later advancements will unlock other resources. For now, select ferrous metal.)
 
-[wait for player to do that]
+[point at menu, wait for player to do that]
 
 < The new module requires iron. Use the scanner to find some. (orbit to examine surrounding space)
 

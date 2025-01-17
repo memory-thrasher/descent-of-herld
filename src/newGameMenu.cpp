@@ -56,7 +56,10 @@ namespace doh {
 	  bottom += textOnlyNormal().text.charMetric.y * 4;
 	  tempText.emplace_back(textOnlyNormal(), glm::vec4(0, top, 0.95f, bottom), "Using this slot will erase the previous game data.");
 	  top = bottom += 0.005;
-	  tempButtons.emplace_back(btnNormal(), glm::vec2(0, top), "Erase and Replace", guiButton::clickAction_F::make([slotId](guiButton*){ WARN("TODO erase and use slot ", slotId); }));
+	  tempButtons.emplace_back(btnNormal(), glm::vec2(0, top), "Erase and Replace", guiButton::clickAction_F::make([slotId, this](guiButton*){
+	    this->deleteMe = true;
+	    createNewGame(slotId);
+	  }));
 	  tempButtons.emplace_back(btnNormal(), glm::vec2(0.5f, top), "Cancel", guiButton::clickAction_F::make([this](guiButton*){
 	    this->tempButtons.clear();
 	    this->tempText.clear();

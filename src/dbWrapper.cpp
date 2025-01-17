@@ -69,7 +69,7 @@ namespace doh {
   void createNewGame(int slot) {
     nextDb.db = std::make_unique<db_t>(getSaveDir() / std::to_string(slot), true, true);
     nextDb.isTemp = false;
-    //TODO
+    nextDb.db->create<gameManager>();
   };
 
   void getSlotInfo(size_t slotId, gameSlotInfo_t& out) {

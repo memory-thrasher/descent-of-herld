@@ -82,6 +82,9 @@ namespace doh {
     void write() {
       dbType<A>(oid, db).write(this);
     };
+    void destroy() {
+      dbType<A>(oid, db).destroy();
+    };
   };
 
 }
