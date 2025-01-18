@@ -38,26 +38,27 @@ namespace doh {
 	dbData<introManager> im(oid, owner);
 	im.stage++;
 	im.write();
-	updateButtons(im);
+	updateStage(im);
       };
 
       void setStage(uint64_t stage, guiButton*) {
 	dbData<introManager> im(oid, owner);
 	im.stage = stage;
 	im.write();
-	updateButtons(im);
+	updateStage(im);
       };
 
       transients_t(uint64_t oid, dbWrapper owner) : oid(oid), owner(owner), advanceStage(guiButton::clickAction_F::make<transients_t>(this, &transients_t::advanceStage_impl)) {};
 
-      void updateButtons(const dbData<introManager>& im) {
+      void updateStage(const dbData<introManager>& im) {
 	labels.clear();
 	buttons.clear();
 	buttons.emplace_back(btnNormal(), glm::vec2(0.95f-btnNormal().width, -0.95f), "Restart", [this](guiButton*) {
 	  dbData<introManager> im(oid, owner);
 	  im.stage = 0;
 	  im.write();
-	  updateButtons(im);
+	  updateStage(im);
+	  //TODO hide anything that already got shown
 	});
 	buttons.emplace_back(btnNormal(), glm::vec2(0.95f-btnNormal().width, -0.95f + btnNormal().height * 1.25f), "Exit", [](guiButton*) {
 	  createMainMenu();
@@ -125,6 +126,11 @@ namespace doh {
 	  printLine("Test internal sensors");
 	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "Internal sensors online", advanceStage);
 	  break;
+	case 6:
+	  printLine("(Use right-click-and-drag or controller to orbit the ship)");
+	  buttons.emplace_back(btnNormal(), glm::vec2(0, top), "(Next)", advanceStage);
+	  //TODO show ship
+	  break;
 	default://for development
 	  printLine("TODO finish intro (stage not found) " + std::to_string(im.stage));
 	  break;
@@ -166,7 +172,7 @@ namespace doh {
     auto* transients = new transients_t(oid, dbv);
     im.transients = reinterpret_cast<void*>(transients);
     im.write();
-    transients->updateButtons(im);
+    transients->updateStage(im);
   };
 
   void introManager::spunDown(uint64_t oid, void* dbv) {

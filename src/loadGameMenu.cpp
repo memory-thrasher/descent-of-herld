@@ -17,6 +17,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "dbType.hpp"
 #include "uiStyle.hpp"
 #include "guiButton.hpp"
+#include "guiLabel.hpp"
 
 namespace doh {
 
@@ -27,20 +28,25 @@ namespace doh {
     struct transients_t {
       dbWrapper owner;
       std::vector<guiButton> buttons;
+      std::vector<guiLabel> text;
       bool deleteMe = false;
       transients_t(dbWrapper owner) :
 	owner(owner) {
+	gameSlotInfo_t info;
+	const float pitch = btnNormal().height * 1.25f;
 	for(size_t i = 0;i < saveSlots;i++) {
-	  //TODO harvest date and other data to add to button label
-	  buttons.emplace_back(btnHuge(), glm::vec2(-0.95f, -0.95f + btnHuge().height * 1.25f * i),
-			       "Slot " + std::to_string(i),
-			       guiButton::clickAction_F::make([this, i](guiButton*) {
-				 this->deleteMe = true;
-				 WARN("TODO load game ", i);
-				 dbTypeFactory<mainMenu>(this->owner).construct();
-			       }));
+	  getSlotInfo(i, info);
+	  if(info.exists) {
+	    buttons.emplace_back(btnNormal(), glm::vec2(-0.95f, -0.95f + pitch * i), info.label,
+				 guiButton::clickAction_F::make([this, i](guiButton*){
+				   this->deleteMe = true;
+				   dbLoadGame(i);
+				 }));
+	  } else {
+	    text.emplace_back(textOnlyNormal(), glm::vec2(-0.95f, -0.95f + pitch * i), info.label);
+	  }
 	}
-	buttons.emplace_back(btnHuge(), glm::vec2(-0.95f, -0.95f + btnHuge().height * 1.25f * (saveSlots + 1)), "Back",
+	buttons.emplace_back(btnNormal(), glm::vec2(-0.95f, -0.95f + pitch * (saveSlots + 1)), "Back",
 			     guiButton::clickAction_F::make([this](guiButton*){
 			       this->deleteMe = true;
 			       dbTypeFactory<mainMenu>(this->owner).construct();

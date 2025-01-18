@@ -88,7 +88,7 @@ namespace doh {
     }
   };
 
-  void loadGame(int slot) {
+  void dbLoadGame(int slot) {
     nextDb.db = std::make_unique<db_t>(getSaveDir() / std::to_string(slot), false, false);
     nextDb.isTemp = false;
   };

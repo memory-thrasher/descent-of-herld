@@ -46,7 +46,7 @@ OR
 
 [erase chat history, show starting ship in third person]
 
-> (Use right-click-anddrag or controller to orbit the ship)
+> (Use right-click-and-drag or controller to orbit the ship)
 [waits for user to move aroudn a little, progress bar?]
 
 > Analyze hardware status
