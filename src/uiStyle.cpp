@@ -45,6 +45,23 @@ namespace doh {
     return ret;
   };
 
+  void textInputStyle_t::pushToBuffers() {
+    textFocusedBuf.slowOutOfBandSet(textFocused);
+    textNormalBuf.slowOutOfBandSet(textNormal);
+    rectFocusedBuf.slowOutOfBandSet(rectFocused);
+    rectNormalBuf.slowOutOfBandSet(rectNormal);
+  };
+
+  textInputStyle_t& textInputNormal() {
+    static textInputStyle_t ret;
+    return ret;
+  };
+
+  textInputStyle_t& textInputBig() {
+    static textInputStyle_t ret;
+    return ret;
+  };
+
   void textOnlyStyle_t::pushToBuffers() {
     textBuf.slowOutOfBandSet(text);
     rectBuf.slowOutOfBandSet(rect);

@@ -28,7 +28,7 @@
 // This is for static text. There should eventually be a dynamic text renderable that has staging areas and a compute shader to render strings into direct buffers (like the WITE test).
 namespace doh {
 
-  constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::R8uint, sizeof(font_lines), FLID> fontMesh = font_lines;
+  constexpr ::WITE::meshWrapper<gpuId, WITE::UDM::R8uint, sizeof(font_lines)/sizeof(font_lines[0]), FLID> fontMesh = font_lines;
   constexpr size_t guiText_maxCharsPerString = 128;
   //!!append BR_all fontMesh.bufferRequirements_v
 
@@ -52,14 +52,14 @@ namespace doh {
   int guiTextFormat(guiTextIndirectBuffer_t& out, const char* format, ...);
   decltype(fontMesh)::buffer_t& fontMeshBuffer();
 
-  constexpr WITE::bufferRequirements BR_guiTextInstance = WITE::swappableUB<gpuId, FLID, sizeof(guiTextInstance_t)>::value,
-	      BR_guiTextStyle = WITE::swappableUB<gpuId, FLID, sizeof(guiTextStyle_t)>::value,
+  constexpr WITE::bufferRequirements BR_guiTextInstance = WITE::simpleUB<gpuId, FLID, sizeof(guiTextInstance_t)>::value,
+	      BR_guiTextStyle = WITE::simpleUB<gpuId, FLID, sizeof(guiTextStyle_t)>::value,
 	      BR_guiTextIndirect = {
 		.deviceId = gpuId,
 		.id = FLID,
 		.usage = vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndirectBuffer,
 		.size = sizeof(guiTextIndirectBuffer_t),
-		.frameswapCount = 2,
+		.frameswapCount = 1,
 		.hostVisible = false,
 	      };
   static_assert(guiText_maxCharsPerString % 16 == 0);

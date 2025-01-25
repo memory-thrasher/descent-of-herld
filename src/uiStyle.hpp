@@ -35,6 +35,18 @@ namespace doh {
   buttonStyle_t& btnNormal();
   buttonStyle_t& btnSmall();
 
+  struct textInputStyle_t {
+    WITE::buffer<BR_guiRectStyle> rectNormalBuf, rectFocusedBuf;
+    WITE::buffer<BR_guiTextStyle> textNormalBuf, textFocusedBuf;
+    guiRectStyle_t rectNormal, rectFocused;
+    guiTextStyle_t textNormal, textFocused;
+    glm::vec4 caretColor;
+    void pushToBuffers();
+  };
+
+  textInputStyle_t& textInputNormal();
+  textInputStyle_t& textInputBig();
+
   struct textOnlyStyle_t {
     WITE::buffer<BR_guiRectStyle> rectBuf;
     WITE::buffer<BR_guiTextStyle> textBuf;

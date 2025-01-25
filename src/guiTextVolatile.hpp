@@ -21,7 +21,6 @@
 
 #define FILE_ID 10003000
 
-// This is for static text. There should eventually be a dynamic text renderable that has staging areas and a compute shader to render strings into direct buffers (like the WITE test).
 namespace doh {
 
   constexpr WITE::objectLayout OL_guiTextVolatile = { .id = FLID };

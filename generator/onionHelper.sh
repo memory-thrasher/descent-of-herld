@@ -37,7 +37,7 @@ while IFS= read -d $'\0' file; do
     echo "#pragma once" >> $genStubNew
     echo 'namespace doh {' >> $genStubNew
     echo "  struct ${fileRaw} {" >> $genStubNew
-    echo "    void* onionObj;" >> $genStubNew
+    echo "    void* onionObj = NULL;" >> $genStubNew
     echo 'namespace doh {' > $genImplNew
     while read line; do
 	if [[ "$line" =~ \!\!onion\ (.*?) ]]; then
@@ -112,7 +112,7 @@ while IFS= read -d $'\0' file; do
 	elif [[ "$line" =~ \!\!include\ me ]]; then
 	    echo "#include \"../$file\""
 	else
-	    echo "Unrecognized directive: $line"
+	    echo "Unrecognized directive: $line" >&2
 	    exit 1;
 	fi
     done < <(grep -ho '!!.*' "$file")
@@ -129,11 +129,14 @@ while IFS= read -d $'\0' file; do
 	echo '  };' >> $genStubNew #end struct
 	echo '}' >> $genStubNew #end namespace
 	echo "  void ${fileRaw}::destroy() {" >> $genImplNew
+	echo "    if(onionObj) {" >> $genImplNew
 	if $hasGlobalCollection; then
-	    echo "    WITE::scopeLock lock(&allInstances_mutex);" >> $genImplNew
-	    echo "    allInstances.erase(allInstances.find(*this));" >> $genImplNew
+	    echo "      WITE::scopeLock lock(&allInstances_mutex);" >> $genImplNew
+	    echo "      allInstances.erase(allInstances.find(*this));" >> $genImplNew
 	fi
-	echo "    getOnionFull()->destroy(castOnionObj);" >> $genImplNew
+	echo "      getOnionFull()->destroy(castOnionObj);" >> $genImplNew
+	echo "      onionObj = NULL;" >> $genImplNew
+	echo '    };' >> $genImplNew
 	echo '  };' >> $genImplNew
 	echo "  ${fileRaw} ${fileRaw}::create() { //static" >> $genImplNew
 	echo "    ${fileRaw} ret { reinterpret_cast<void*>(getOnionFull()->template create<${objId}>()) };" >> $genImplNew

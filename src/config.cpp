@@ -43,9 +43,6 @@ namespace doh {
     glm::vec4 pressBorder = getOptionColor("btn-press-border-color", { 0.9f, 0.75f, 0, 1 });
     glm::vec4 pressFill = getOptionColor("btn-press-fill-color", { 0.5f, 0.4f, 0, 1 });
     glm::vec4 pressTextColor = getOptionColor("btn-press-text-color", { 1, 1, 1, 1 });
-    glm::vec4 textBorder = getOptionColor("txt-border-color", { 0, 0.75f, 0.9f, 1 });
-    glm::vec4 textFill = getOptionColor("txt-fill-color", { 0, 0.4f, 0.5f, 1 });
-    glm::vec4 textTextColor = getOptionColor("txt-text-color", { 1, 1, 1, 1 });
     {
       float clip = WITE::configuration::getOption("btn-huge-corner", 0.01f);//x&y relative to screen width
       float borderWidth = WITE::configuration::getOption("btn-huge-border-width", 0.005f);//x&y relative to screen width
@@ -130,6 +127,9 @@ namespace doh {
       btn.height = height;
       btn.pushToBuffers();
     }
+    glm::vec4 textBorder = getOptionColor("txt-border-color", { 0, 0.75f, 0.9f, 1 });
+    glm::vec4 textFill = getOptionColor("txt-fill-color", { 0, 0.4f, 0.5f, 1 });
+    glm::vec4 textTextColor = getOptionColor("txt-text-color", { 1, 1, 1, 1 });
     {
       float clip = WITE::configuration::getOption("txt-huge-corner", 0.005f);
       float borderWidth = WITE::configuration::getOption("txt-huge-border-width", 0.002f);
@@ -173,6 +173,41 @@ namespace doh {
       txt.rect = { { clip, clip, clip, clip }, textBorder,
 		   { borderWidth, borderWidth, borderWidth, borderWidth }, textFill };
       txt.pushToBuffers();
+    }
+    glm::vec4 textInputFill = getOptionColor("txt-fill-color", { 0, 0.4f, 0.5f, 1 });
+    glm::vec4 textInputTextColor = getOptionColor("input-text-color", { 1, 1, 1, 1 });
+    glm::vec4 textInputCaretColor = getOptionColor("input-caret-color", { 1, 1, 1, 1 });
+    glm::vec4 textInputBorder = getOptionColor("input-border-color", { 0.8f, 0.8f, 0.8f, 0.8f });
+    glm::vec4 textInputFocusedBorder = getOptionColor("input-focused-border-color", { 1, 1, 1, 1 });
+    {
+      float clip = WITE::configuration::getOption("input-big-corner", 0.01f);//x&y relative to screen width
+      float borderWidth = WITE::configuration::getOption("input-big-border-width", 0.003f);//x&y relative to screen width
+      float textWidth = WITE::configuration::getOption("input-big-text-width", 24.0f*(8.0f/14)*2/1920);//24pt on 1080p
+      float textHeight = WITE::configuration::getOption("input-big-text-height", 24.0f*2/1080);
+      auto& input = textInputBig();
+      input.rectNormal = { { clip, clip, clip, clip }, textInputBorder,
+			 { borderWidth, borderWidth, borderWidth, borderWidth }, textInputFill };
+      input.rectFocused = { { clip, clip, clip, clip }, textInputFocusedBorder,
+			 { borderWidth, borderWidth, borderWidth, borderWidth }, textInputFill };
+      input.textNormal = { textInputTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, clip/2 + borderWidth + 0.005f } };
+      input.textFocused = { textInputTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, clip/2 + borderWidth + 0.005f } };
+      input.caretColor = textInputCaretColor;
+      input.pushToBuffers();
+    }
+    {
+      float clip = WITE::configuration::getOption("input-normal-corner", 0.005f);//x&y relative to screen width
+      float borderWidth = WITE::configuration::getOption("input-normal-border-width", 0.002f);//x&y relative to screen width
+      float textWidth = WITE::configuration::getOption("input-normal-text-width", 18.0f*(8.0f/14)*2/1920);//14pt on 1080p
+      float textHeight = WITE::configuration::getOption("input-normal-text-height", 18.0f*2/1080);
+      auto& input = textInputNormal();
+      input.rectNormal = { { clip, clip, clip, clip }, textInputBorder,
+			 { borderWidth, borderWidth, borderWidth, borderWidth }, textInputFill };
+      input.rectFocused = { { clip, clip, clip, clip }, textInputFocusedBorder,
+			 { borderWidth, borderWidth, borderWidth, borderWidth }, textInputFill };
+      input.textNormal = { textInputTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, clip/2 + borderWidth + 0.005f } };
+      input.textFocused = { textInputTextColor, { textWidth, textHeight, clip * 1.5f + borderWidth, clip/2 + borderWidth + 0.005f } };
+      input.caretColor = textInputCaretColor;
+      input.pushToBuffers();
     }
   };
 

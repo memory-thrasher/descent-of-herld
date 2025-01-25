@@ -15,6 +15,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "mainMenu.hpp"
 #include "newGameMenu.hpp"
 #include "loadGameMenu.hpp"
+#include "settingsMenu.hpp"
 #include "dbType.hpp"
 #include "uiStyle.hpp"
 #include "guiLabel.hpp"
@@ -45,7 +46,10 @@ namespace doh {
 		 dbTypeFactory<newGameMenu>(this->owner).construct();
 	       })),
 	settingsBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
-		    guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ })),
+		    guiButton::clickAction_F::make([this](guiButton*){
+		      this->deleteMe = true;
+		      dbTypeFactory<settingsMenu>(this->owner).construct();
+		    })),
 	exitBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
 		guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); })),
 	buttons(&continueBtn, &loadBtn, &newBtn, &settingsBtn, &exitBtn) {};
