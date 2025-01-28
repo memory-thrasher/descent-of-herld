@@ -18,6 +18,11 @@ namespace doh {
 
   decltype(mesh_inputCaret)::buffer_t& inputCaret_meshBuffer() {
     static decltype(mesh_inputCaret)::buffer_t ret;
+    static bool loaded = false;
+    if(!loaded) {
+      loaded = true;
+      mesh_inputCaret.load(&ret);
+    }
     return ret;
   };
 

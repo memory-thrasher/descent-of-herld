@@ -91,7 +91,7 @@ namespace doh {
   }
 
   //template helper: (replace @@ with two !, #nom with nom passed to above define)
-  //decltype(mesh_#nom)::buffer_t& #nom_meshBuffer();
+  //decltype(mesh_#nom)::buffer_t& #nom_meshBuffer(); //define this and make it load the data, see fontMesh
   //@@append SL_all SL_guiWireframe_#nom
   //@@append S_RP_gui S_guiWireframe_#nom
   //@@append RS_all RS_guiWireframe_#nom_all

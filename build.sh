@@ -135,7 +135,7 @@ $WORKNICE $COMPILER -Wl,--icf=all build/release/*.o $WITEBUILD/release/WITE/*.o 
 
 $WORKNICE $COMPILER -DDEBUG -Wl,--icf=all build/debug/*.o $WITEBUILD/WITE/*.o "-Wl,-rpath,." -fuse-ld=lld -lrt -latomic -L${VK_SDK_PATH}/lib -lvulkan -lSDL2 -Wl,--gc-sections $BOTHOPTS -o "build/debug/descentOfHerld" || exit 1
 
-LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$VK_SDK_PATH/lib" ./build/debug/descentOfHerld
+#LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$VK_SDK_PATH/lib" ./build/debug/descentOfHerld
 
 while pgrep $WIN_COMPILER_RUNNING_TEST &>/dev/null || $COMPILER &>/dev/null; do sleep 0.05s; done
 

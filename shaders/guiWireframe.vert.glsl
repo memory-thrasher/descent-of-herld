@@ -22,5 +22,5 @@ layout(std140, set = 0, binding = 0) uniform instance_t {
 layout(location = 0) in vec2 coords;
 
 void main() {
-  gl_Position = vec4(instance.bbox.xy + (instance.bbox.xy - instance.bbox.zw) * coords, 0, 1);
+  gl_Position = vec4(instance.bbox.xy + (instance.bbox.zw - instance.bbox.xy) * coords, 0, 1);
 }
