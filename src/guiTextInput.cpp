@@ -76,7 +76,9 @@ namespace doh {
       for(const uint32_t&key : WITE::winput::frameKeyboardBuffer) {
 	if(key == 0) break;
 	char insert = 0;
+	int insertPntDelta = 0;
 	switch(key) {
+	case SDLK_KP_ENTER:
 	case SDLK_RETURN:
 	case SDLK_ESCAPE:
 	case SDLK_TAB://TODO (shift) tab sends focus somewhere else
@@ -84,6 +86,48 @@ namespace doh {
 	  isFocused = false;
 	  updated = true;
 	  break;
+	  //TODO non-qwerty layouts (mostly what symbols are shifted of what base keys)
+	case SDLK_UP:
+	  //TODO shift focus?
+	  break;
+	case SDLK_DOWN:
+	  //TODO shift focus?
+	  break;
+	case SDLK_LEFT:
+	  insertPntDelta = -1;
+	  break;
+	case SDLK_RIGHT:
+	  insertPntDelta = 1;
+	  break;
+	case SDLK_END:
+	  insertPnt = std::strlen(content);
+	  updated = true;
+	  break;
+	case SDLK_HOME:
+	  insertPnt = 0;
+	  updated = true;
+	  break;
+	case SDLK_BACKSPACE:
+	  if(insertPnt == 0) break;
+	  insertPnt--;
+	case SDLK_DELETE:
+	  {
+	    size_t len = std::strlen(content);
+	    if(insertPnt >= len) break;
+	    std::memmove(content + insertPnt, content + insertPnt + 1, len - insertPnt);//copies null term too
+	  }
+	  updated = true;
+	  break;
+	case SDLK_KP_0: insert = '0'; break;
+	case SDLK_KP_1: insert = '1'; break;
+	case SDLK_KP_2: insert = '2'; break;
+	case SDLK_KP_3: insert = '3'; break;
+	case SDLK_KP_4: insert = '4'; break;
+	case SDLK_KP_5: insert = '5'; break;
+	case SDLK_KP_6: insert = '6'; break;
+	case SDLK_KP_7: insert = '7'; break;
+	case SDLK_KP_8: insert = '8'; break;
+	case SDLK_KP_9: insert = '9'; break;
 	case ' ': insert = shiftDown ? ' ' : ' '; break;
 	case '!': insert = shiftDown ? '!' : '!'; break;
 	case '"': insert = shiftDown ? '"' : '"'; break;
@@ -94,11 +138,16 @@ namespace doh {
 	case '\'': insert = shiftDown ? '"' : '\''; break;
 	case '(': insert = shiftDown ? '(' : '('; break;
 	case ')': insert = shiftDown ? ')' : ')'; break;
+	case SDLK_KP_MULTIPLY:
 	case '*': insert = shiftDown ? '*' : '*'; break;
+	case SDLK_KP_PLUS:
 	case '+': insert = shiftDown ? '+' : '+'; break;
 	case ',': insert = shiftDown ? '<' : ','; break;
+	case SDLK_KP_MINUS:
 	case '-': insert = shiftDown ? '_' : '-'; break;
+	case SDLK_KP_PERIOD:
 	case '.': insert = shiftDown ? '>' : '.'; break;
+	case SDLK_KP_DIVIDE:
 	case '/': insert = shiftDown ? '?' : '/'; break;
 	case '0': insert = shiftDown ? ')' : '0'; break;
 	case '1': insert = shiftDown ? '!' : '1'; break;
@@ -156,9 +205,16 @@ namespace doh {
 	  ASSERT_TRAP(insertPnt < sizeof(content), "overflow");
 	  ASSERT_TRAP(newLen < sizeof(content), "overflow");
 	  content[insertPnt] = insert;
+	  insertPntDelta = 1;
 	  content[newLen] = 0;
-	  insertPnt = WITE::min(insertPnt + 1, newLen - 1);
 	  updated = true;
+	}
+	if(insertPntDelta) {
+	  updated = true;
+	  if(-insertPntDelta >= static_cast<int>(insertPnt))
+	    insertPnt = 0;
+	  else
+	    insertPnt = WITE::min(insertPnt + insertPntDelta, std::strlen(content));
 	}
       }
     }
