@@ -71,15 +71,10 @@ namespace doh {
 	insertPnt = WITE::min(static_cast<uint32_t>((mouseInSnorm.x - textData.bbox.x - style.textNormal.charMetric.z + style.textNormal.charMetric.x/2) / style.textNormal.charMetric.x), static_cast<uint32_t>(std::strlen(content)));
       }
     }
-    //TODO do not limit typing to one key per frame
     if(isFocused) {
-      WITE::winput::inputPair ip;
-      WITE::winput::getLatest(ip);
-      if(ip.id.type == WITE::winput::type_e::key &&
-	 ip.data.axes[0].justChanged() &&
-	 ip.data.axes[0].isPressed()) {
-	auto key = ip.id.controlId;
-	bool shiftDown = WITE::winput::keyPressed<SDLK_LSHIFT>() || WITE::winput::keyPressed<SDLK_RSHIFT>();
+      bool shiftDown = WITE::winput::keyPressed<SDLK_LSHIFT>() || WITE::winput::keyPressed<SDLK_RSHIFT>();
+      for(const uint32_t&key : WITE::winput::frameKeyboardBuffer) {
+	if(key == 0) break;
 	char insert = 0;
 	switch(key) {
 	case SDLK_RETURN:
