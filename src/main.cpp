@@ -22,13 +22,15 @@ using namespace doh;
 
 namespace doh {
   void timeUpdate();//implemented in time.cpp
+  void inputInit();//input.cpp
+  void inputUpdate();//input.cpp
 }
 
 int main(int argc, const char** argv) {
   WITE::configuration::setOptions(argc, argv);
   loadConfig();
   WITE::gpu::init("Descent of Herld", {}, {}, {"VK_EXT_mesh_shader"});
-  WITE::winput::initInput();
+  inputInit();
   WITE::wsound::initSound();
   loadDefaults();
   createOnionFull();
@@ -36,7 +38,7 @@ int main(int argc, const char** argv) {
   dbCycle();
   while(!WITE::shutdownRequested()) {
     timeUpdate();
-    WITE::winput::pollInput();
+    inputUpdate();
     dbUpdate();
     render();
     dbEndFrame();
