@@ -12,16 +12,18 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#include "controllerMenu.hpp"
 #include "settingsMenu.hpp"
-#include "mainMenu.hpp"
 #include "dbType.hpp"
 #include "uiStyle.hpp"
 #include "guiLabel.hpp"
 #include "guiButton.hpp"
+#include "guiTextInput.hpp"
+#include "input.hpp"
 
 namespace doh {
 
-  namespace settingsMenu_internals {
+  namespace controllerMenu_internals {
 
     struct transients_t {
       dbWrapper owner;
@@ -36,48 +38,43 @@ namespace doh {
 		})) {};
     };
 
-    static_assert(WITE::dbAllocationBatchSizeOf<settingsMenu>::value == 1);
-    static_assert(WITE::dbLogAllocationBatchSizeOf<settingsMenu>::value == 1);
-
     transients_t* getTransients(uint64_t oid, void* dbv) {
-      dbType<settingsMenu> dbmm(oid, dbv);
-      settingsMenu mm;
+      dbType<controllerMenu> dbmm(oid, dbv);
+      controllerMenu mm;
       dbmm.readCurrent(&mm);//current because old pointers don't help
       return reinterpret_cast<transients_t*>(mm.transients);
     };
 
   }
 
-  using namespace settingsMenu_internals;//I know that's kinda lazy
+  using namespace controllerMenu_internals;
 
-  // void settingsMenu::allocated(uint64_t oid, void* dbv) {
+  // void controllerMenu::allocated(uint64_t oid, void* dbv) {
   // };
 
-  // void settingsMenu::freed(uint64_t oid, void* dbv) {
+  // void controllerMenu::freed(uint64_t oid, void* dbv) {
   // };
 
-  static_assert(WITE::has_update<settingsMenu>::value);
-  void settingsMenu::update(uint64_t oid, void* dbv) {
+  void controllerMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     transients->exitBtn.update();
     transients->input.update();
     if(transients->deleteMe) [[unlikely]]
-      dbType<settingsMenu>(oid, dbv).destroy();
+      dbType<controllerMenu>(oid, dbv).destroy();
   };
 
-  void settingsMenu::spunUp(uint64_t oid, void* dbv) {
-    dbType<settingsMenu> dbmm(oid, dbv);
-    settingsMenu mm;
+  void controllerMenu::spunUp(uint64_t oid, void* dbv) {
+    dbType<controllerMenu> dbmm(oid, dbv);
+    controllerMenu mm;
     dbmm.readCurrent(&mm);
     auto* transients = new transients_t(dbv);
     mm.transients = reinterpret_cast<void*>(transients);
     dbmm.write(&mm);
   };
 
-  void settingsMenu::spunDown(uint64_t oid, void* dbv) {
+  void controllerMenu::spunDown(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     delete transients;
   };
 
 }
-

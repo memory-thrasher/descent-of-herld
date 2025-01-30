@@ -24,7 +24,7 @@ namespace doh {
     const char*label;
   };
 
-  struct control : public WITE::inputIdentifier {
+  struct control : public WITE::winput::inputIdentifier {
     uint8_t axisId;
     auto operator<=>(const control&) const = default;
   };
@@ -37,14 +37,17 @@ namespace doh {
     char label[64];
   };
 
-  struct controlValue : public WITE::compositeInputData::axis {
+  struct controlValue : public WITE::winput::compositeInputData::axis {
     float normalizedValue;
   };
+
+  typedef WITE::dbFile<controlConfiguration, 4096> inputConfigFile_t;
 
   controlConfiguration* getControl(const control&);
   controlConfiguration* getControl(uint32_t controlActionId);
   void getControlValue(const control&, controlValue& out);
-  void getAllControls(std::vector<controlConfiguration*>& out);//for control bindings menu
+  inputConfigFile_t::iterator_t getControlBegin();
+  inputConfigFile_t::iterator_t getControlEnd();
 
   //TODO list of actions
 
