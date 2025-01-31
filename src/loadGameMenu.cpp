@@ -38,7 +38,7 @@ namespace doh {
 	  getSlotInfo(i, info);
 	  if(info.exists) {
 	    buttons.emplace_back(btnNormal(), glm::vec2(-0.95f, -0.95f + pitch * i), info.label,
-				 guiButton::clickAction_F::make([this, i](guiButton*){
+				 guiButton::clickAction_F::make([this, i](uxButton*){
 				   this->deleteMe = true;
 				   dbLoadGame(i);
 				 }));
@@ -47,7 +47,7 @@ namespace doh {
 	  }
 	}
 	buttons.emplace_back(btnNormal(), glm::vec2(-0.95f, -0.95f + pitch * (saveSlots + 1)), "Back",
-			     guiButton::clickAction_F::make([this](guiButton*){
+			     guiButton::clickAction_F::make([this](uxButton*){
 			       this->deleteMe = true;
 			       dbTypeFactory<mainMenu>(this->owner).construct();
 			     }));

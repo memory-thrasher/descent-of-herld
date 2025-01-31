@@ -72,6 +72,7 @@ while IFS= read -d $'\0' file; do
 	elif [[ "$line" =~ \!\!genObjGetWindow ]]; then
 	    echo "    WITE::window& getWindow() const;" >> $genStubNew
 	    echo "  WITE::window& ${fileRaw}::getWindow() const {" >> $genImplNew
+	    echo '    ASSERT_TRAP(*this, "attempted to access onion object that has not been created");' >> $genImplNew
 	    echo "    return castOnionObj->getWindow();" >> $genImplNew
 	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!genObjWrite\ (.*?)\ (.*?)\ (.*?) ]]; then
@@ -80,6 +81,7 @@ while IFS= read -d $'\0' file; do
 	    dataName="${BASH_REMATCH[3]}"
 	    echo "    void ${fnName}(const ${dataName}& data);" >> $genStubNew
 	    echo "  void ${fileRaw}::${fnName}(const ${dataName}& data) {" >> $genImplNew
+	    echo '    ASSERT_TRAP(*this, "attempted to access onion object that has not been created");' >> $genImplNew
 	    echo "    castOnionObj->template write<${rs}.id>(data);" >> $genImplNew
 	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!genObjSet\ (.*?)\ (.*?)\ (.*?) ]]; then
@@ -88,6 +90,7 @@ while IFS= read -d $'\0' file; do
 	    dataName="${BASH_REMATCH[3]}"
 	    echo "    void ${fnName}(${dataName}& data);" >> $genStubNew
 	    echo "  void ${fileRaw}::${fnName}(${dataName}& data) {" >> $genImplNew
+	    echo '    ASSERT_TRAP(*this, "attempted to access onion object that has not been created");' >> $genImplNew
 	    echo "    castOnionObj->template set<${rs}.id>(&data);" >> $genImplNew
 	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!genObjSingleton\ (.*?)\ (.*?) ]]; then
@@ -100,6 +103,7 @@ while IFS= read -d $'\0' file; do
 	    dataName="${BASH_REMATCH[3]}"
 	    echo "    void ${fnName}(const ${dataName}& data);" >> $genStubNew
 	    echo "  void ${fileRaw}::${fnName}(const ${dataName}& data) {" >> $genImplNew
+	    echo '    ASSERT_TRAP(*this, "attempted to access onion object that has not been created");' >> $genImplNew
 	    echo "    castOnionObj->template get<${rs}.id>().template slowOutOfBandSet<${dataName}>(data);" >> $genImplNew
 	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!genObjStepControl\ (.*?)\ (.*?) ]]; then
@@ -107,6 +111,7 @@ while IFS= read -d $'\0' file; do
 	    fnName="${BASH_REMATCH[2]}"
 	    echo "    void ${fnName}(bool data);" >> $genStubNew
 	    echo "  void ${fileRaw}::${fnName}(bool data) {" >> $genImplNew
+	    echo '    ASSERT_TRAP(*this, "attempted to access onion object that has not been created");' >> $genImplNew
 	    echo "    castOnionObj->template stepEnabled<${stepId}>() = data;" >> $genImplNew
 	    echo "  };" >> $genImplNew
 	elif [[ "$line" =~ \!\!include\ me ]]; then
@@ -124,10 +129,14 @@ while IFS= read -d $'\0' file; do
 	    echo "  WITE::syncLock ${fileRaw}::allInstances_mutex;" >> $genImplNew
 	fi
 	echo "    auto operator<=>(const ${fileRaw}& o) const = default;" >> $genStubNew
+	echo "    operator bool() const;" >> $genStubNew
 	echo "    void destroy();" >> $genStubNew
 	echo "    static ${fileRaw} create();" >> $genStubNew
 	echo '  };' >> $genStubNew #end struct
 	echo '}' >> $genStubNew #end namespace
+	echo "  ${fileRaw}::operator bool() const {" >> $genImplNew
+	echo '    return onionObj;' >> $genImplNew
+	echo '  };' >> $genImplNew
 	echo "  void ${fileRaw}::destroy() {" >> $genImplNew
 	echo "    if(onionObj) {" >> $genImplNew
 	if $hasGlobalCollection; then

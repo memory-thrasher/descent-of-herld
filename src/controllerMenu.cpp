@@ -32,9 +32,9 @@ namespace doh {
       transients_t(dbWrapper owner) :
 	owner(owner),
 	exitBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Back",
-		guiButton::clickAction_F::make([this](guiButton*){
+		guiButton::clickAction_F::make([this](uxButton*){
 		  deleteMe = true;
-		  dbTypeFactory<mainMenu>(this->owner).construct();
+		  dbTypeFactory<settingsMenu>(this->owner).construct();
 		})) {};
     };
 
@@ -58,7 +58,6 @@ namespace doh {
   void controllerMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     transients->exitBtn.update();
-    transients->input.update();
     if(transients->deleteMe) [[unlikely]]
       dbType<controllerMenu>(oid, dbv).destroy();
   };

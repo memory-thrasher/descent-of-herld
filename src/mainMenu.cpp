@@ -29,29 +29,29 @@ namespace doh {
       guiLabel title = { textOnlyHuge(), glm::vec4(-0.25f, -0.95f, 0.25f, -1), "Descent of Herld" };
       dbWrapper owner;
       guiButton continueBtn, loadBtn, newBtn, settingsBtn, exitBtn;
-      guiButton*buttons[5];
+      uxButton*buttons[5];
       bool deleteMe = false;
       transients_t(dbWrapper owner) :
 	owner(owner),
 	continueBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Continue",
-		    guiButton::clickAction_F::make([](guiButton*){ /*TODO*/ })),
+		    guiButton::clickAction_F::make([](uxButton*){ /*TODO*/ })),
 	loadBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Load",
-		guiButton::clickAction_F::make([this](guiButton*){
+		guiButton::clickAction_F::make([this](uxButton*){
 		 this->deleteMe = true;
 		 dbTypeFactory<loadGameMenu>(this->owner).construct();
 	       })),
 	newBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 2 }, "New",
-	       guiButton::clickAction_F::make([this](guiButton*){
+	       guiButton::clickAction_F::make([this](uxButton*){
 		 this->deleteMe = true;
 		 dbTypeFactory<newGameMenu>(this->owner).construct();
 	       })),
 	settingsBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 3 }, "Settings",
-		    guiButton::clickAction_F::make([this](guiButton*){
+		    guiButton::clickAction_F::make([this](uxButton*){
 		      this->deleteMe = true;
 		      dbTypeFactory<settingsMenu>(this->owner).construct();
 		    })),
 	exitBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 4 }, "Exit",
-		guiButton::clickAction_F::make([](guiButton*){ WITE::requestShutdown(); })),
+		guiButton::clickAction_F::make([](uxButton*){ WITE::requestShutdown(); })),
 	buttons(&continueBtn, &loadBtn, &newBtn, &settingsBtn, &exitBtn) {};
     };
 

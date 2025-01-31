@@ -14,29 +14,17 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-#include "uiStyle.hpp"
-#include "../generated/guiRect_stub.hpp"
-#include "../generated/guiText_stub.hpp"
+#include "uxButton.hpp"
 
 namespace doh {
 
-  struct guiButton {
-    typedefCB(clickAction, void, guiButton*);
-    guiRect rect;
-    guiRectInstance_t rectData;
-    guiText label;
-    guiTextInstance_t labelData;
-    guiTextIndirectBuffer_t labelContent;
-    buttonStyle_t& style;
-    std::string labelStr;
-    clickAction onClick;
-    bool isPressed = false;
+  //thin wrapper for uxButton that shows up immediately, for simple cases with no parent/panel
+  struct guiButton : public uxButton {
     guiButton() = delete;
     guiButton(const guiButton&);
     guiButton(buttonStyle_t& style, glm::vec2 location, std::string label, clickAction ca);
     template<class L> guiButton(buttonStyle_t& style, glm::vec2 location, std::string label, L l) : guiButton(style, location, label, clickAction_F::make(l)) {};
     ~guiButton();
-    void update();
   };
 
 }

@@ -40,13 +40,13 @@ namespace doh {
 	  buttons.emplace_back(btnNormal(), glm::vec2(-0.95f, -0.95f + btnNormal().height * 1.25f * i), info.label, guiButton::clickAction_F::make<transients_t, size_t, gameSlotInfo_t>(this, i, info, &transients_t::slotClicked));
 	}
 	buttons.emplace_back(btnNormal(), glm::vec2(-0.95f, -0.95f + btnNormal().height * 1.25f * (saveSlots + 1)), "Back",
-			     guiButton::clickAction_F::make([this](guiButton*){
+			     guiButton::clickAction_F::make([this](uxButton*){
 			       this->deleteMe = true;
 			       dbTypeFactory<mainMenu>(this->owner).construct();
 			     }));
       };
 
-      void slotClicked(size_t slotId, gameSlotInfo_t info, guiButton*) {
+      void slotClicked(size_t slotId, gameSlotInfo_t info, uxButton*) {
 	if(info.exists) {
 	  tempButtons.clear();
 	  tempText.clear();
@@ -56,11 +56,11 @@ namespace doh {
 	  bottom += textOnlyNormal().text.charMetric.y * 4;
 	  tempText.emplace_back(textOnlyNormal(), glm::vec4(0, top, 0.95f, bottom), "Using this slot will erase the previous game data.");
 	  top = bottom += 0.005;
-	  tempButtons.emplace_back(btnNormal(), glm::vec2(0, top), "Erase and Replace", guiButton::clickAction_F::make([slotId, this](guiButton*){
+	  tempButtons.emplace_back(btnNormal(), glm::vec2(0, top), "Erase and Replace", guiButton::clickAction_F::make([slotId, this](uxButton*){
 	    this->deleteMe = true;
 	    createNewGame(slotId);
 	  }));
-	  tempButtons.emplace_back(btnNormal(), glm::vec2(0.5f, top), "Cancel", guiButton::clickAction_F::make([this](guiButton*){
+	  tempButtons.emplace_back(btnNormal(), glm::vec2(0.5f, top), "Cancel", guiButton::clickAction_F::make([this](uxButton*){
 	    this->tempButtons.clear();
 	    this->tempText.clear();
 	  }));

@@ -34,14 +34,14 @@ namespace doh {
       uint64_t stageStartTime = 0;
       guiButton::clickAction advanceStage;
 
-      void advanceStage_impl(guiButton*) {
+      void advanceStage_impl(uxButton*) {
 	dbData<introManager> im(oid, owner);
 	im.stage++;
 	im.write();
 	updateStage(im);
       };
 
-      void setStage(uint64_t stage, guiButton*) {
+      void setStage(uint64_t stage, uxButton*) {
 	dbData<introManager> im(oid, owner);
 	im.stage = stage;
 	im.write();
@@ -53,14 +53,14 @@ namespace doh {
       void updateStage(const dbData<introManager>& im) {
 	labels.clear();
 	buttons.clear();
-	buttons.emplace_back(btnNormal(), glm::vec2(0.95f-btnNormal().width, -0.95f), "Restart", [this](guiButton*) {
+	buttons.emplace_back(btnNormal(), glm::vec2(0.95f-btnNormal().width, -0.95f), "Restart", [this](uxButton*) {
 	  dbData<introManager> im(oid, owner);
 	  im.stage = 0;
 	  im.write();
 	  updateStage(im);
 	  //TODO hide anything that already got shown
 	});
-	buttons.emplace_back(btnNormal(), glm::vec2(0.95f-btnNormal().width, -0.95f + btnNormal().height * 1.25f), "Exit", [](guiButton*) {
+	buttons.emplace_back(btnNormal(), glm::vec2(0.95f-btnNormal().width, -0.95f + btnNormal().height * 1.25f), "Exit", [](uxButton*) {
 	  createMainMenu();
 	});
 	float lineIncrement = textOnlyNormal().text.charMetric.y * 1.05f;

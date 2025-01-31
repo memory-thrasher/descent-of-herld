@@ -45,7 +45,7 @@ namespace doh {
     WITE::concurrentReadLock_read lock(&WITE::winput::allInputData_mutex);
     bool updated = false;
     //MAYBE change this to a manual operation in the settings menu, if this causes slowness
-    for(auto& pair : WITE::winput::allinputData) {
+    for(auto& pair : WITE::winput::allInputData) {
       for(int i = 0;i < 3;i++) {
 	auto& axis = pair.second.axes[i];
 	if(axis.justChanged()) [[unlikely]] {
