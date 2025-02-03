@@ -14,6 +14,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
+#include "uxBase.hpp"
 #include "../generated/guiRect_stub.hpp"
 #include "../generated/guiText_stub.hpp"
 #include "../generated/guiInputCaret_stub.hpp"
@@ -21,7 +22,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  struct guiTextInput {
+  struct uxTextInput : public uxBase {
     guiRect rect;
     guiRectInstance_t rectData;
     guiText text;
@@ -33,11 +34,17 @@ namespace doh {
     char content[guiText_maxCharsPerString];
     uint32_t insertPnt = 0;
     bool isFocused = false;
-    guiTextInput() = delete;
-    guiTextInput(const guiTextInput&) = delete;
-    guiTextInput(textInputStyle_t& style, glm::vec4 bbox, const char* initialContent);
-    ~guiTextInput();
-    void update();
+    uxTextInput() = delete;
+    uxTextInput(const uxTextInput&) = delete;
+    uxTextInput(textInputStyle_t& style, const char* initialContent);
+    ~uxTextInput();
+    void destroy();
+    void create();
+    void updateCaretData();
+    virtual void update() override;
+    virtual const glm::vec4& getBounds() const override;
+    virtual void setBounds(const glm::vec4&) override;
+    virtual void updateVisible(bool parentVisible) override;
   };
 
 }

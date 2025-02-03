@@ -33,7 +33,7 @@ namespace doh {
     return visible;
   };
 
-  bool uxBase::isHovered() const {
+  bool uxBase::isHovered(glm::vec2* mouseOut) const {
     WITE::winput::compositeInputData mouseLocation;
     const glm::vec4& bounds = getBounds();
     bool isHovered = false;
@@ -45,6 +45,8 @@ namespace doh {
 			     mouseLocation.axes[1].current / size.y * 2 - 1);
       if(rectContainsPoint(bounds, mouseInSnorm)) {
 	isHovered = true;
+	if(mouseOut)
+	  *mouseOut = mouseInSnorm;
 	break;
       }
     }

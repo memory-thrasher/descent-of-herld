@@ -39,7 +39,7 @@ namespace doh {
     virtual const glm::vec4& getBounds() const = 0;
     virtual bool isVisible() const;
     virtual void update();//default noop
-    bool isHovered() const;
+    bool isHovered(glm::vec2* = NULL) const;
   };
 
 }

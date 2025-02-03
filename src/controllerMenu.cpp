@@ -18,7 +18,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "uiStyle.hpp"
 #include "guiLabel.hpp"
 #include "guiButton.hpp"
-#include "guiTextInput.hpp"
+#include "uxTextInput.hpp"
 #include "input.hpp"
 
 namespace doh {

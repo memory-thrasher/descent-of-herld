@@ -15,59 +15,35 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include <set>
 #include <iostream>
 
-#include "guiTextInput.hpp"
+#include "uxTextInput.hpp"
 #include "../generated/targetPrimary_stub.hpp"
 #include "math.hpp"
 
 namespace doh {
 
-  guiTextInput::guiTextInput(textInputStyle_t& style, glm::vec4 bbox, const char* initialContent) :
-    rect(guiRect::create()),
-    rectData({ bbox }),
-    text(guiText::create()),
-    textData({ bbox }),
-    style(style)
-  {
+  uxTextInput::uxTextInput(textInputStyle_t& style, const char* initialContent) : style(style) {
     WITE::strcpy(content, initialContent, guiText_maxCharsPerString-1);
     content[guiText_maxCharsPerString-1] = 0;
     guiTextFormat(textContent, "%s", content);
-    rect.writeInstanceData(rectData);
-    text.writeIndirectBuffer(textContent);
-    text.writeInstanceData(textData);
     caretData.color = style.caretColor;
-    update();
   };
 
-  guiTextInput::~guiTextInput() {
+  uxTextInput::~uxTextInput() {
     rect.destroy();
     text.destroy();
     caret.destroy();//destroy has embedded existance check
   };
 
-  void guiTextInput::update() {
-    bool updated = false;
-    WITE::winput::compositeInputData mouseLocation, lmbCid;
-    bool isHovered = false;
+  void uxTextInput::update() {
+    WITE::winput::compositeInputData lmbCid;
     glm::vec2 mouseInSnorm;
-    WITE::winput::getInput(WITE::winput::mouse, mouseLocation);
-    {
-      WITE::scopeLock lock(&targetPrimary::allInstances_mutex);
-      for(const targetPrimary& camera : targetPrimary::allInstances) {
-	const auto size = camera.getWindow().getVecSize();
-	mouseInSnorm = { mouseLocation.axes[0].current / size.x * 2 - 1,
-			 mouseLocation.axes[1].current / size.y * 2 - 1 };
-	if(rectContainsPoint(rectData.extents, mouseInSnorm)) {
-	  isHovered = true;
-	  break;
-	}
-      }
-    }
+    bool updated = false, hover = isHovered(&mouseInSnorm);
     WITE::winput::getInput(WITE::winput::lmb, lmbCid);
     auto& lmb = lmbCid.axes[0];
     if(lmb.isPressed()) [[unlikely]] {
       updated = true;
-      isFocused = isHovered;
-      if(isHovered) {
+      isFocused = hover;
+      if(hover) {
 	insertPnt = WITE::min(static_cast<uint32_t>((mouseInSnorm.x - textData.bbox.x - style.textNormal.charMetric.z + style.textNormal.charMetric.x/2) / style.textNormal.charMetric.x), static_cast<uint32_t>(std::strlen(content)));
       }
     }
@@ -221,10 +197,7 @@ namespace doh {
     if(updated) {
       guiTextFormat(textContent, "%s", content);
       if(isFocused) {
-	caretData.bbox.x = textData.bbox.x + style.textNormal.charMetric.z + style.textNormal.charMetric.x * insertPnt - style.textNormal.charMetric.x/2;
-	caretData.bbox.y = textData.bbox.y + style.textNormal.charMetric.w;
-	caretData.bbox.z = caretData.bbox.x + style.textNormal.charMetric.x;
-	caretData.bbox.w = caretData.bbox.y + style.textNormal.charMetric.y;
+	updateCaretData();
 	if(!caret.onionObj) {
 	  caret = guiInputCaret::create();
 	}
@@ -232,11 +205,69 @@ namespace doh {
 	caret.destroy();
       }
     }
-    rect.setStyle(isFocused ? style.rectFocusedBuf : style.rectNormalBuf);
-    text.setStyle(isFocused ? style.textFocusedBuf : style.textNormalBuf);
-    text.writeIndirectBuffer(textContent);
+    if(rect)
+      rect.setStyle(isFocused ? style.rectFocusedBuf : style.rectNormalBuf);
+    if(text) {
+      text.setStyle(isFocused ? style.textFocusedBuf : style.textNormalBuf);
+      text.writeIndirectBuffer(textContent);
+    }
     if(caret.onionObj)
       caret.writeInstanceData(caretData);
+  };
+
+  void uxTextInput::updateCaretData() {
+    caretData.bbox.x = textData.bbox.x + style.textNormal.charMetric.z + style.textNormal.charMetric.x * insertPnt - style.textNormal.charMetric.x/4;
+    caretData.bbox.y = textData.bbox.y + style.textNormal.charMetric.w;
+    caretData.bbox.z = caretData.bbox.x + style.textNormal.charMetric.x/2;
+    caretData.bbox.w = caretData.bbox.y + style.textNormal.charMetric.y;
+  };
+
+  void uxTextInput::destroy() {
+    rect.destroy();
+    text.destroy();
+    caret.destroy();
+  };
+
+  void uxTextInput::create() {
+    if(!rect) [[likely]] {
+      rect = guiRect::create();
+      rect.writeInstanceData(rectData);
+      rect.setStyle(style.rectNormalBuf);
+    }
+    if(!text) [[likely]] {
+      text = guiText::create();
+      text.writeIndirectBuffer(textContent);
+      text.writeInstanceData(textData);
+      text.setStyle(style.textNormalBuf);
+    }
+    if(isFocused && !caret) [[likely]] {
+      caret = guiInputCaret::create();
+      updateCaretData();
+      caret.writeInstanceData(caretData);
+    }
+  };
+
+  const glm::vec4& uxTextInput::getBounds() const {
+    return rectData.extents;
+  };
+
+  void uxTextInput::setBounds(const glm::vec4& bbox) {
+    rectData.extents = textData.bbox = bbox;
+    updateCaretData();
+    if(isVisible()) [[likely]] {
+      destroy();
+      create();
+    }
+  };
+
+  void uxTextInput::updateVisible(bool parentVisible) {
+    bool shouldBeVisible = parentVisible && wantsVisibility;
+    if(shouldBeVisible == visible) [[likely]] return;
+    if(shouldBeVisible)
+      create();
+    else
+      destroy();
+    visible = shouldBeVisible;
   };
 
 }
