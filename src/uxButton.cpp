@@ -35,10 +35,6 @@ namespace doh {
     label.destroy();
   };
 
-  uxButton::uxButton(const uxButton& o) : uxButton(o.style, o.labelStr, o.onClick) {
-    setBounds(o.getBounds());
-  };
-
   void uxButton::update() {
     WITE::winput::compositeInputData lmbCid;
     bool isHovered = this->isHovered(), isClicked = false;

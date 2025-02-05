@@ -33,7 +33,6 @@ namespace doh {
     clickAction onClick;
     bool isPressed = false;
     uxButton() = delete;
-    uxButton(const uxButton&);
     uxButton(buttonStyle_t& style, std::string label, clickAction ca);
     template<class L> uxButton(buttonStyle_t& style, std::string label, L l) : uxButton(style, label, clickAction_F::make(l)) {};
     ~uxButton();

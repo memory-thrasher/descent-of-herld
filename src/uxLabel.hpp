@@ -32,7 +32,7 @@ namespace doh {
     uxLabel() = delete;
     uxLabel(const uxLabel&) = delete;
     uxLabel(textOnlyStyle_t& style, std::string label);
-    ~uxLabel();
+    virtual ~uxLabel();
     void destroy();
     void create();
     void setLabel(std::string);

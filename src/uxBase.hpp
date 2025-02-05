@@ -32,6 +32,7 @@ namespace doh {
     bool wantsVisibility = false;//if this component would be visible if all its ancestors are
   public:
     uxBase();
+    uxBase(const uxBase&) = delete;//copy/move is a bad idea bc uxPanel keeps pointers to these
     virtual ~uxBase() = default;
     virtual void setBounds(const glm::vec4&) = 0;
     virtual void setVisible(bool visible);

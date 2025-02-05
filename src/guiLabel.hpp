@@ -14,6 +14,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
+#include "uxLabel.hpp"
 #include "uiStyle.hpp"
 #include "../generated/guiRect_stub.hpp"
 #include "../generated/guiText_stub.hpp"
@@ -21,19 +22,12 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 namespace doh {
 
   //TODO volatile version if needed
-  struct guiLabel {
-    guiRect rect;
-    guiRectInstance_t rectData;
-    guiText label;
-    guiTextInstance_t labelData;
-    guiTextIndirectBuffer_t labelContent;
-    textOnlyStyle_t& style;
-    std::string labelStr;
+  struct guiLabel : public uxLabel {
     guiLabel() = delete;
     guiLabel(const guiLabel&);
-    guiLabel(textOnlyStyle_t& style, glm::vec4 bounds, std::string label);
-    guiLabel(textOnlyStyle_t& style, glm::vec2 ul, std::string label);//one line, width to fit
-    ~guiLabel();
+    guiLabel(textOnlyStyle_t& style, const glm::vec4& bounds, std::string label);
+    guiLabel(textOnlyStyle_t& style, const glm::vec2& ul, std::string label);//one line, width to fit
+    virtual ~guiLabel() = default;
   };
 
 }
