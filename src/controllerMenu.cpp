@@ -16,9 +16,12 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "settingsMenu.hpp"
 #include "dbType.hpp"
 #include "uiStyle.hpp"
-#include "guiLabel.hpp"
 #include "guiButton.hpp"
+#include "uxButton.hpp"
+#include "uxButton.hpp"
 #include "uxTextInput.hpp"
+#include "uxPanel.hpp"
+#include "uxGridLayout.hpp"
 #include "input.hpp"
 
 namespace doh {
@@ -28,14 +31,28 @@ namespace doh {
     struct transients_t {
       dbWrapper owner;
       guiButton exitBtn;
+      uxGridLayout layout;
+      uxPanel panel;
+      std::vector<std::unique_ptr<uxButton>> testButtons;
       bool deleteMe = false;
       transients_t(dbWrapper owner) :
 	owner(owner),
-	exitBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 0 }, "Back",
+	exitBtn(btnNormal(), { -0.95f, -0.95f }, "Back",
 		guiButton::clickAction_F::make([this](uxButton*){
 		  deleteMe = true;
 		  dbTypeFactory<settingsMenu>(this->owner).construct();
-		})) {};
+		})),
+	layout(btnNormal().height, { btnNormal().width, btnNormal().width * 2, btnNormal().width }, { 0.005f, 0.03f }),
+	panel()
+      {
+	panel.setBounds({ -0.95f, -0.95f + btnNormal().height * 3, 0.95f, 0.95f });
+	panel.setLayout(&layout);
+	for(size_t i = 0;i < 100;i++)
+	  panel.push(testButtons.emplace_back(std::make_unique<uxButton>(btnNormal(), "test button", [i](uxButton*){ WARN("btn ", i); })).get());
+	panel.redraw();
+	panel.setVisible(true);
+	panel.updateVisible(true);
+      };
     };
 
     transients_t* getTransients(uint64_t oid, void* dbv) {
@@ -58,6 +75,7 @@ namespace doh {
   void controllerMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     transients->exitBtn.update();
+    transients->panel.update();
     if(transients->deleteMe) [[unlikely]]
       dbType<controllerMenu>(oid, dbv).destroy();
   };

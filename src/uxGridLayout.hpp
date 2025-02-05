@@ -14,16 +14,25 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
+#include <memory>
+
+#include <WITE/WITE.hpp>
+
 #include "uxLayout.hpp"
 
 namespace doh {
 
   struct uxGridLayout : public uxLayout {
-    uxGridLayout();
+    uint32_t columns, count;
+    float cellHeight, totalWidth;
+    std::unique_ptr<float[]> columnWidths;
+    glm::vec2 padding;
+    uxGridLayout(float cellHeight, std::initializer_list<float>, glm::vec2 padding = { 0.005f, 0.01f });
     uxGridLayout(const uxGridLayout&) = delete;
     virtual ~uxGridLayout() = default;
     virtual void reset() override;
     virtual void handle(uxBase*) override;
+    virtual void finalize() override;
   };
 
 }

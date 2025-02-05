@@ -14,18 +14,21 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include "uxPanel.hpp"
 #include "uxLayout.hpp"
+#include "math.hpp"
 
 namespace doh {
 
-  uxPanel::uxPanel() : uxBase() {};
+  uxPanel::uxPanel() : uxBase(), scrollOffset(), scrollbarThickness(0) {};
 
   void uxPanel::setLayout(uxLayout* l) {
     layout = l;
     l->panel = this;
-    redraw();
+    if(visible) [[unlikely]] //just in case we're changing layouts live, which would be dumb
+      redraw();
   };
 
   void uxPanel::redraw() {
+    ASSERT_TRAP(layout, "layout not set");
     bool wasVisible = isVisible();
     setVisible(false);
     layout->reset();
@@ -36,8 +39,6 @@ namespace doh {
 
   void uxPanel::push(uxBase* b) {
     children.emplace_back(b);
-    layout->handle(b);
-    b->updateVisible(isVisible());
   };
 
   void uxPanel::clear() {
@@ -45,24 +46,30 @@ namespace doh {
     children.clear();
   };
 
-  virtual void uxPanel::update() {
+  void uxPanel::updateScrollBars(const glm::vec2& logicalSize) {
+    WARN("TODO scroll bars");
+  };
+
+  void uxPanel::update() {
     for(uxBase* c : children)
       c->update();
   };
 
-  virtual const glm::vec4& uxPanel::getBounds() const {
+  const glm::vec4& uxPanel::getBounds() const {
     return bounds;
   };
 
-  virtual void uxPanel::setBounds(const glm::vec4& v) {
+  void uxPanel::setBounds(const glm::vec4& v) {
     bounds = v;
-    redraw();
+    if(visible) [[unlikely]]
+      redraw();
   };
 
-  virtual void uxPanel::updateVisible(bool parentVisible) {
+  void uxPanel::updateVisible(bool parentVisible) {
     visible = parentVisible && wantsVisibility;
+    glm::vec4 usableBounds { bounds.x, bounds.y, bounds.z - scrollbarThickness, bounds.w - scrollbarThickness };
     for(uxBase* c : children)
-      c->updateVisible(visible);
+      c->updateVisible(visible && rectContainsRect(usableBounds, c->getBounds()));
   };
   
 }

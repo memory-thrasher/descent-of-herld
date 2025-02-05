@@ -20,4 +20,8 @@ namespace doh {
     return point.x > rect.x && point.y > rect.y && point.x < rect.z && point.y < rect.w;
   };
 
+  constexpr inline bool rectContainsRect(const glm::vec4& rect, const glm::vec4& rect2) {
+    return rect2.x >= rect.x && rect2.y >= rect.y && rect2.z <= rect.z && rect2.w <= rect.w;
+  };
+
 }

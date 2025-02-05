@@ -35,7 +35,7 @@ namespace doh {
     uxButton() = delete;
     uxButton(const uxButton&);
     uxButton(buttonStyle_t& style, std::string label, clickAction ca);
-    template<class L> uxButton(buttonStyle_t& style, glm::vec2 location, std::string label, L l) : uxButton(style, location, label, clickAction_F::make(l)) {};
+    template<class L> uxButton(buttonStyle_t& style, std::string label, L l) : uxButton(style, label, clickAction_F::make(l)) {};
     ~uxButton();
     void destroy();
     void create();

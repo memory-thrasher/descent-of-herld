@@ -27,6 +27,7 @@ namespace doh {
     onClick(ca)
   {
     guiTextFormat(labelContent, "%s", labelStr.c_str());
+    wantsVisibility = true;
   };
 
   uxButton::~uxButton() {

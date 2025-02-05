@@ -17,15 +17,20 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 namespace doh {
 
   struct uxPanel;
+  struct uxBase;
 
   //interface / base class for layouts
   struct uxLayout {
-    uxPanel* panel;
-    uxLayout();
+  protected:
+    uxPanel* panel;//set by panel, read by child (especially panel->bounds and scrollOffset)
+    friend uxPanel;
+  public:
+    uxLayout() = default;
     uxLayout(const uxLayout&) = delete;
     virtual ~uxLayout() = default;
     virtual void reset() = 0;
     virtual void handle(uxBase*) = 0;//generally calls c->setBounds and increments some internal counter
+    virtual void finalize() = 0;//called when panel is done pushing elements. child should call panel->updateScrollBars()
   };
 
 }

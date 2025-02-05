@@ -14,6 +14,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include "settingsMenu.hpp"
 #include "mainMenu.hpp"
+#include "controllerMenu.hpp"
 #include "dbType.hpp"
 #include "uiStyle.hpp"
 #include "guiLabel.hpp"
@@ -25,7 +26,7 @@ namespace doh {
 
     struct transients_t {
       dbWrapper owner;
-      guiButton exitBtn;
+      guiButton exitBtn, controllersMenuBtn;
       bool deleteMe = false;
       transients_t(dbWrapper owner) :
 	owner(owner),
@@ -33,7 +34,12 @@ namespace doh {
 		guiButton::clickAction_F::make([this](uxButton*){
 		  deleteMe = true;
 		  dbTypeFactory<mainMenu>(this->owner).construct();
-		})) {};
+		})),
+	controllersMenuBtn(btnHuge(), { -0.95f, -0.95f + btnHuge().height * 1.25f * 1 }, "Controllers",
+			   guiButton::clickAction_F::make([this](uxButton*){
+			     deleteMe = true;
+			     dbTypeFactory<controllerMenu>(this->owner).construct();
+			   })){};
     };
 
     static_assert(WITE::dbAllocationBatchSizeOf<settingsMenu>::value == 1);
@@ -60,6 +66,7 @@ namespace doh {
   void settingsMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     transients->exitBtn.update();
+    transients->controllersMenuBtn.update();
     if(transients->deleteMe) [[unlikely]]
       dbType<settingsMenu>(oid, dbv).destroy();
   };

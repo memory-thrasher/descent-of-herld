@@ -16,6 +16,10 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include <vector>
 
+#include <WITE/WITE.hpp>
+
+#include "uxBase.hpp"
+
 namespace doh {
 
   struct uxLayout;
@@ -23,6 +27,8 @@ namespace doh {
   struct uxPanel : public uxBase {
     uxLayout* layout;
     glm::vec4 bounds;
+    glm::vec2 scrollOffset;
+    float scrollbarThickness;
     std::vector<uxBase*> children;
     uxPanel();
     uxPanel(const uxPanel&) = delete;
@@ -30,7 +36,8 @@ namespace doh {
     void setLayout(uxLayout*);
     void redraw();
     void clear();
-    void push(uxBase*);
+    void push(uxBase*);//call redraw when done pushing
+    void updateScrollBars(const glm::vec2& logicalSize);
     virtual void update() override;
     virtual const glm::vec4& getBounds() const override;
     virtual void setBounds(const glm::vec4&) override;
