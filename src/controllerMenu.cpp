@@ -18,7 +18,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 #include "uiStyle.hpp"
 #include "guiButton.hpp"
 #include "uxButton.hpp"
-#include "uxButton.hpp"
+#include "uxLabel.hpp"
 #include "uxTextInput.hpp"
 #include "uxPanel.hpp"
 #include "uxGridLayout.hpp"
@@ -33,7 +33,7 @@ namespace doh {
       guiButton exitBtn;
       uxGridLayout layout;
       uxPanel panel;
-      std::vector<std::unique_ptr<uxButton>> testButtons;
+      std::vector<std::unique_ptr<uxLabel>> testButtons;
       bool deleteMe = false;
       transients_t(dbWrapper owner) :
 	owner(owner),
@@ -48,7 +48,7 @@ namespace doh {
 	panel.setBounds({ -0.95f, -0.95f + btnNormal().height * 3, 0.95f, 0.95f });
 	panel.setLayout(&layout);
 	for(size_t i = 0;i < 100;i++)
-	  panel.push(testButtons.emplace_back(std::make_unique<uxButton>(btnNormal(), "test button", [i](uxButton*){ WARN("btn ", i); })).get());
+	  panel.push(testButtons.emplace_back(std::make_unique<uxLabel>(textOnlyNormal(), "test button")).get());
 	panel.redraw();
 	panel.setVisible(true);
 	panel.updateVisible(true);
