@@ -35,6 +35,17 @@ namespace doh {
   buttonStyle_t& btnNormal();
   buttonStyle_t& btnSmall();
 
+  struct sliderStyle_t {
+    WITE::buffer<BR_guiRectStyle> rectBarNormalBuf, rectBarHovBuf, rectBarPressBuf,
+      rectIndNormalBuf, rectIndHovBuf, rectIndPressBuf;
+    guiRectStyle_t rectBarNormal, rectBarHov, rectBarPress,
+      rectIndNormal, rectIndHov, rectIndPress;
+    float barThickness, indicatorThickness, pad, indicatorMinLen;
+    void pushToBuffers();
+  };
+
+  sliderStyle_t& sliderStyle();//only one style for now
+
   struct textInputStyle_t {
     WITE::buffer<BR_guiRectStyle> rectNormalBuf, rectFocusedBuf;
     WITE::buffer<BR_guiTextStyle> textNormalBuf, textFocusedBuf;

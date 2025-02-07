@@ -34,6 +34,7 @@ namespace doh {
     layout->reset();
     for(uxBase* c : children)
       layout->handle(c);
+    layout->finalize();
     setVisible(wasVisible);
   };
 
@@ -47,7 +48,12 @@ namespace doh {
   };
 
   void uxPanel::updateScrollBars(const glm::vec2& logicalSize) {
-    WARN("TODO scroll bars");
+    glm::vec4 ib = getInnerBounds();
+    glm::vec2 domain { logicalSize.x / (ib.z - ib.x), logicalSize.y / (ib.w - ib.y) };
+    sliderH.setVisible(domain.x > 1);
+    sliderV.setVisible(domain.y > 1);
+    sliderBoth.setVisible(domain.x > 1 || domain.y > 1);
+    updateVisible(isVisible());
   };
 
   void uxPanel::update() {
@@ -61,13 +67,24 @@ namespace doh {
 
   void uxPanel::setBounds(const glm::vec4& v) {
     bounds = v;
+    glm::vec4 ib = getInnerBounds();
+    sliderH.setBounds({ v.x, ib.y, ib.z, v.w });
+    sliderV.setBounds({ ib.x, v.y, v.z, ib.w });
+    sliderBoth.setBounds({ ib.z, ib.w, v.z, v.w });
     if(visible) [[unlikely]]
       redraw();
   };
 
+  glm::vec4 uxPanel::getInnerBounds() const {
+    return { bounds.x, bounds.y, bounds.z - scrollbarThickness, bounds.w - scrollbarThickness };//TODO reserve space for 2d slider?
+  };
+
   void uxPanel::updateVisible(bool parentVisible) {
     visible = parentVisible && wantsVisibility;
-    glm::vec4 usableBounds { bounds.x, bounds.y, bounds.z - scrollbarThickness, bounds.w - scrollbarThickness };
+    sliderH.updateVisible(visible);
+    sliderV.updateVisible(visible);
+    sliderBoth.updateVisible(visible);
+    glm::vec4 usableBounds = getInnerBounds();
     for(uxBase* c : children)
       c->updateVisible(visible && rectContainsRect(usableBounds, c->getBounds()));
   };

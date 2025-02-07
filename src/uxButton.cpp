@@ -36,6 +36,7 @@ namespace doh {
   };
 
   void uxButton::update() {
+    if(!isVisible()) [[unlikely]] return;
     WITE::winput::compositeInputData lmbCid;
     bool isHovered = this->isHovered(), isClicked = false;
     WITE::winput::getInput(WITE::winput::lmb, lmbCid);

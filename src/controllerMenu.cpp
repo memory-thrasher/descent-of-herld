@@ -12,6 +12,8 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#include <list>
+
 #include "controllerMenu.hpp"
 #include "settingsMenu.hpp"
 #include "dbType.hpp"
@@ -33,7 +35,7 @@ namespace doh {
       guiButton exitBtn;
       uxGridLayout layout;
       uxPanel panel;
-      std::vector<std::unique_ptr<uxLabel>> testButtons;
+      std::list<uxLabel> testButtons;
       bool deleteMe = false;
       transients_t(dbWrapper owner) :
 	owner(owner),
@@ -48,7 +50,7 @@ namespace doh {
 	panel.setBounds({ -0.95f, -0.95f + btnNormal().height * 3, 0.95f, 0.95f });
 	panel.setLayout(&layout);
 	for(size_t i = 0;i < 100;i++)
-	  panel.push(testButtons.emplace_back(std::make_unique<uxLabel>(textOnlyNormal(), "test button")).get());
+	  panel.push(&testButtons.emplace_back(textOnlyNormal(), "test button"));
 	panel.redraw();
 	panel.setVisible(true);
 	panel.updateVisible(true);

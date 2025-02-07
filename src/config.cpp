@@ -127,6 +127,38 @@ namespace doh {
       btn.height = height;
       btn.pushToBuffers();
     }
+    {
+      auto& slider = sliderStyle();
+      slider.rectBarNormal.borderColor = getOptionColor("slider-bar-border-color", { 0.25f, 0.175f, 0, 1 });
+      slider.rectBarNormal.fillColor = getOptionColor("slider-bar-fill-color", { 0.05f, 0.035f, 0, 1 });
+      slider.rectBarHov.borderColor = getOptionColor("slider-bar-hov-border-color", { 0.35f, 0.275f, 0, 1 });
+      slider.rectBarHov.fillColor = getOptionColor("slider-bar-hov-fill-color", { 0.15f, 0.1f, 0, 1 });
+      slider.rectBarPress.borderColor = getOptionColor("slider-bar-press-border-color", { 0.45f, 0.375f, 0, 1 });
+      slider.rectBarPress.fillColor = getOptionColor("slider-bar-press-fill-color", { 0.25f, 0.2f, 0, 1 });
+      float barBorderWidth = WITE::configuration::getOption("slider-bar-border-width", 0.002f);
+      slider.rectBarNormal.borderThickness = slider.rectBarHov.borderThickness = slider.rectBarPress.borderThickness =
+	{ barBorderWidth, barBorderWidth, barBorderWidth, barBorderWidth };
+      float barClip = WITE::configuration::getOption("slider-bar-corner", 0.005f);
+      slider.rectBarNormal.clip = slider.rectBarHov.clip = slider.rectBarPress.clip =
+	{ barClip, barClip, barClip, barClip };
+      slider.rectIndNormal.borderColor = getOptionColor("slider-ind-border-color", { 0.5f, 0.35f, 0, 1 });
+      slider.rectIndNormal.fillColor = getOptionColor("slider-ind-fill-color", { 0.1f, 0.07f, 0, 1 });
+      slider.rectIndHov.borderColor = getOptionColor("slider-ind-hov-border-color", { 0.7f, 0.55f, 0, 1 });
+      slider.rectIndHov.fillColor = getOptionColor("slider-ind-hov-fill-color", { 0.3f, 0.21f, 0, 1 });
+      slider.rectIndPress.borderColor = getOptionColor("slider-ind-press-border-color", { 0.9f, 0.75f, 0, 1 });
+      slider.rectIndPress.fillColor = getOptionColor("slider-ind-press-fill-color", { 0.5f, 0.4f, 0, 1 });
+      float indBorderWidth = WITE::configuration::getOption("slider-ind-border-width", 0.002f);
+      slider.rectIndNormal.borderThickness = slider.rectIndHov.borderThickness = slider.rectIndPress.borderThickness =
+	{ indBorderWidth, indBorderWidth, indBorderWidth, indBorderWidth };
+      float indClip = WITE::configuration::getOption("slider-ind-corner", 0.005f);
+      slider.rectIndNormal.clip = slider.rectIndHov.clip = slider.rectIndPress.clip =
+	{ indClip, indClip, indClip, indClip };
+      slider.barThickness = WITE::configuration::getOption("slider-bar-thickness", 0.002f);
+      slider.indicatorThickness = WITE::configuration::getOption("slider-indicator-thickness", 0.005f);
+      slider.pad = WITE::configuration::getOption("slider-pad", 0.001f);
+      slider.indicatorMinLen = WITE::configuration::getOption("slider-indicator-min-len", 0.002f);
+      slider.pushToBuffers();
+    }
     glm::vec4 textBorder = getOptionColor("txt-border-color", { 0, 0.75f, 0.9f, 1 });
     glm::vec4 textFill = getOptionColor("txt-fill-color", { 0, 0.4f, 0.5f, 1 });
     glm::vec4 textTextColor = getOptionColor("txt-text-color", { 1, 1, 1, 1 });

@@ -45,6 +45,20 @@ namespace doh {
     return ret;
   };
 
+  void sliderStyle_t::pushToBuffers() {
+    rectBarNormalBuf.slowOutOfBandSet(rectBarNormal);
+    rectBarHovBuf.slowOutOfBandSet(rectBarHov);
+    rectBarPressBuf.slowOutOfBandSet(rectBarPress);
+    rectIndNormalBuf.slowOutOfBandSet(rectIndNormal);
+    rectIndHovBuf.slowOutOfBandSet(rectIndHov);
+    rectIndPressBuf.slowOutOfBandSet(rectIndPress);
+  };
+
+  sliderStyle_t& sliderStyle() {
+    static sliderStyle_t ret;
+    return ret;
+  };
+
   void textInputStyle_t::pushToBuffers() {
     textFocusedBuf.slowOutOfBandSet(textFocused);
     textNormalBuf.slowOutOfBandSet(textNormal);

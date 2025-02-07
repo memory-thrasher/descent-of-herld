@@ -14,33 +14,37 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-#include <vector>
-
-#include <WITE/WITE.hpp>
-
 #include "uxBase.hpp"
-#include "uxSlider.hpp"
+#include "uiStyle.hpp"
+#include "../generated/guiRect_stub.hpp"
+#include "../generated/guiRectVolatile_stub.hpp"
+#include "../generated/guiText_stub.hpp"
 
 namespace doh {
 
-  struct uxLayout;
-
-  struct uxPanel : public uxBase {
-    uxLayout* layout;
-    glm::vec4 bounds;
-    glm::vec2 scrollOffset;
-    float scrollbarThickness;
-    std::vector<uxBase*> children;
-    uxSlider sliderH, sliderV, sliderBoth;
-    uxPanel();
-    uxPanel(const uxPanel&) = delete;
-    virtual ~uxPanel() = default;
-    void setLayout(uxLayout*);
+  struct uxSlider : public uxBase {
+    typedefCB(updateAction, void, uxSlider*);
+    guiRect rectBar;
+    guiRectInstance_t rectBarData;
+    guiRectVolatile rectInd;
+    guiRectInstance_t rectIndData;
+    //note: style.pad is external (see uxPanel)
+    glm::vec4 bounds;//since neither other rect is the complete bounds
+    glm::vec2 value;//0-domain.xy
+    glm::vec2 domain;//max value in each direction, negative to lock axis (generally, in pages)
+    glm::vec2 dragOffset;
+    sliderStyle_t& style;//keeping this ref just in case more styles exist later
+    bool isPressed = false;
+    uxSlider();
+    uxSlider(sliderStyle_t& style, const glm::vec2& domain, const glm::vec4& bounds);
+    uxSlider(sliderStyle_t& style);
+    uxSlider(const uxSlider&) = delete;
+    ~uxSlider();
+    glm::vec2 getIndicatorSize();
     void redraw();
-    void clear();
-    void push(uxBase*);//call redraw when done pushing
-    void updateScrollBars(const glm::vec2& logicalSize);
-    glm::vec4 getInnerBounds() const;
+    void setDomain(const glm::vec2&);
+    void destroy();
+    void create();
     virtual void update() override;
     virtual const glm::vec4& getBounds() const override;
     virtual void setBounds(const glm::vec4&) override;
