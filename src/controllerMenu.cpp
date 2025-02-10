@@ -44,13 +44,16 @@ namespace doh {
 		  deleteMe = true;
 		  dbTypeFactory<settingsMenu>(this->owner).construct();
 		})),
-	layout(btnNormal().height, { btnNormal().width, btnNormal().width * 2, btnNormal().width }, { 0.005f, 0.03f }),
+	layout(btnNormal().height, { 0.8f, 0.9f, 0.7f }, { 0.005f, 0.03f }),
 	panel()
       {
 	panel.setBounds({ -0.95f, -0.95f + btnNormal().height * 3, 0.95f, 0.95f });
 	panel.setLayout(&layout);
-	for(size_t i = 0;i < 100;i++)
-	  panel.push(&testButtons.emplace_back(textOnlyNormal(), "test button"));
+	char labelBuf[64];
+	for(size_t i = 0;i < 100;i++) {
+	  sprintf(labelBuf, "test label %zu", i);
+	  panel.push(&testButtons.emplace_back(textOnlyNormal(), labelBuf));
+	}
 	panel.redraw();
 	panel.setVisible(true);
 	panel.updateVisible(true);

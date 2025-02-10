@@ -28,6 +28,7 @@ namespace doh {
     auto iter = fs.begin();
     for(size_t i = 0;i < columns;i++)
       totalWidth += columnWidths[i] = *(iter++);
+    totalWidth += columns * padding.x;
   };
 
   void uxGridLayout::reset() {
@@ -48,7 +49,7 @@ namespace doh {
 
   void uxGridLayout::finalize() {
     uint32_t rows = count == 0 ? 0 : (count - 1) / columns + 1;
-    panel->updateScrollBars({ totalWidth, rows * cellHeight });
+    panel->updateScrollBars({ totalWidth, rows * (cellHeight + padding.y) });
   };
 
 }

@@ -28,18 +28,19 @@ namespace doh {
   struct uxPanel : public uxBase {
     uxLayout* layout;
     glm::vec4 bounds;
-    glm::vec2 scrollOffset;
-    float scrollbarThickness;
+    glm::vec2 scrollOffset, logicalSize;
     std::vector<uxBase*> children;
-    uxSlider sliderH, sliderV, sliderBoth;
+    uxSlider sliderH, sliderV;
     uxPanel();
     uxPanel(const uxPanel&) = delete;
     virtual ~uxPanel() = default;
+    void onScroll(uxSlider*);
     void setLayout(uxLayout*);
     void redraw();
     void clear();
     void push(uxBase*);//call redraw when done pushing
     void updateScrollBars(const glm::vec2& logicalSize);
+    void updateScrollBars();
     glm::vec4 getInnerBounds() const;
     virtual void update() override;
     virtual const glm::vec4& getBounds() const override;

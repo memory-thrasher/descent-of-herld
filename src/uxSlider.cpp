@@ -48,38 +48,57 @@ namespace doh {
     auto& lmb = lmbCid.axes[0];
     if(!lmb.isPressed()) [[likely]]
       isPressed = false;
-    else if(!isPressed) [[likely]]
-      //dragging on does not proc hover
-      isHovered = false;
     else if(isHovered && lmb.justPressed()) [[unlikely]] {
       isPressed = true;
       if(rectContainsPoint(rectIndData.extents, mouseInSnorm)) [[likely]]
 	dragOffset = mouseInSnorm - glm::vec2(rectIndData.extents);
       else
 	//began pressing when over rect but not over indicator, so jump to that spot
-	dragOffset = { rectIndData.extents.z - rectIndData.extents.x, rectIndData.extents.w - rectIndData.extents.y};
-    }
+	dragOffset = { (rectIndData.extents.z - rectIndData.extents.x) / 2, (rectIndData.extents.w - rectIndData.extents.y) / 2 };
+    } else if(!isPressed) [[likely]]
+      //dragging on does not proc hover
+      isHovered = false;
     glm::vec2 indicatorSize = getIndicatorSize();
+    glm::vec2 valueOld = value;
     if(isPressed) [[unlikely]] {
-      value.x = domain.x <= 0 ? 0 : domain.x * (mouseInSnorm.x - dragOffset.x) / (bounds.z - indicatorSize.x - bounds.x);
-      value.y = domain.y <= 0 ? 0 : domain.y * (mouseInSnorm.y - dragOffset.y) / (bounds.w - indicatorSize.y - bounds.y);
-    } else {
-      //TODO scroll wheel
+      value.x = domain.x <= 0 ? 0 : domain.x * (mouseInSnorm.x - dragOffset.x - bounds.x) / (bounds.z - indicatorSize.x - bounds.x);
+      value.y = domain.y <= 0 ? 0 : domain.y * (mouseInSnorm.y - dragOffset.y - bounds.y) / (bounds.w - indicatorSize.y - bounds.y);
     }
-    rectIndData.extents.x = bounds.x + (domain.x <= 0 ? 0 : value.x / domain.x * (bounds.z - indicatorSize.x - bounds.x));
-    rectIndData.extents.y = bounds.y + (domain.y <= 0 ? 0 : value.y / domain.y * (bounds.w - indicatorSize.y - bounds.y));
+    if(value.x > domain.x) [[unlikely]] value.x = domain.x;
+    if(value.x < 0) [[unlikely]] value.x = 0;
+    if(value.y > domain.y) [[unlikely]] value.y = domain.y;
+    if(value.y < 0) [[unlikely]] value.y = 0;
+    if(valueOld != value) [[unlikely]]
+      for(auto& ua : updateListeners)
+	ua(this);
+    //notify listeners before updating the UI just in case a listener changes the value
+    rectIndData.extents.x = domain.x <= 0 ? (bounds.x + bounds.z - indicatorSize.x)/2 :
+      bounds.x + value.x * (bounds.z - indicatorSize.x - bounds.x) / domain.x;
+    rectIndData.extents.y = domain.y <= 0 ? (bounds.y + bounds.w - indicatorSize.y)/2 :
+      bounds.y + value.y * (bounds.w - indicatorSize.y - bounds.y) / domain.y;
     rectIndData.extents.z = rectIndData.extents.x + indicatorSize.x;
     rectIndData.extents.w = rectIndData.extents.y + indicatorSize.y;
+    ASSERT_TRAP(rectBar, "isVisible() returned true earlier (", isVisible(), " now) but no rectBar");
+    ASSERT_TRAP(rectInd, "isVisible() returned true earlier (", isVisible(), " now) but no rectInd");
     rectInd.writeInstanceData(rectIndData);
-    ASSERT_TRAP(rectBar, "isVisible() returned true but no rectBar");
+    rectBar.writeInstanceData(rectBarData);
     rectBar.setStyle(isPressed ? style.rectBarPressBuf : isHovered ? style.rectBarHovBuf : style.rectBarNormalBuf);
     rectInd.setStyle(isPressed ? style.rectIndPressBuf : isHovered ? style.rectIndHovBuf : style.rectIndNormalBuf);
+// #ifdef DEBUG
+//     static int hits = 0;
+//     if((hits++) > 10 && hits < 15) [[unlikely]]
+//       WARN("slider ", this, " at: ", bounds, " with bar: ", rectBarData.extents, " with indicator: ", rectIndData.extents, " from value: ", value, " in domain: ", domain);
+// #endif
+  };
+
+  void uxSlider::addListener(const updateAction& ua) {
+    updateListeners.emplace_back(ua);
   };
 
   glm::vec2 uxSlider::getIndicatorSize() {
     //the size of the indicator compared to the bar (bounds) should be proportional to the size of the viewport (1 "page" = 1 in domain space) compared to the scrollable content (domain)
     //ret.x/bounds.width = 1/domain.x
-    return { domain.x <= 0 ? style.indicatorThickness : WITE::max(style.indicatorMinLen, (bounds.z - bounds.x) / domain.x), domain.y <= 0 ? style.indicatorThickness : WITE::max(style.indicatorMinLen, (bounds.w - bounds.y) / domain.y) };
+    return { domain.x <= 0 ? style.indicatorThickness : WITE::max(style.indicatorMinLen, (bounds.z - bounds.x) / (domain.x + 1)), domain.y <= 0 ? style.indicatorThickness : WITE::max(style.indicatorMinLen, (bounds.w - bounds.y) / (domain.y + 1)) };
   };
 
   void uxSlider::destroy() {
@@ -92,11 +111,13 @@ namespace doh {
       rectInd = guiRectVolatile::create();
       rectInd.writeInstanceData(rectIndData);
       rectInd.setStyle(style.rectIndNormalBuf);
+      // WARN("slider ", this, " ind created");
     }
     if(!rectBar) [[likely]] {
-      rectBar = guiRect::create();
+      rectBar = guiRectVolatile::create();
       rectBar.writeInstanceData(rectBarData);
       rectBar.setStyle(style.rectBarNormalBuf);
+      // WARN("slider ", this, " bar created");
     }
   };
 
@@ -111,36 +132,32 @@ namespace doh {
 
   void uxSlider::setDomain(const glm::vec2& d) {
     domain = d;
-    if(value.x > d.x) [[unlikely]] value.x = d.x;
-    if(value.y > d.y) [[unlikely]] value.y = d.y;
     redraw();
   };
 
   void uxSlider::redraw() {
-    //only redraw the bar, since the indicator gets updated every frame anyway
+    //only update the bar, since the indicator gets updated every frame anyway
     glm::vec2 center { (bounds.z - bounds.x)/2, (bounds.w - bounds.y)/2 };
     if(domain.x <= 0) [[likely]] {
-      rectBarData.extents.x = (bounds.z - bounds.x - style.barThickness)/2;
+      rectBarData.extents.x = (bounds.z + bounds.x - style.barThickness)/2;
       rectBarData.extents.z = rectBarData.extents.x + style.barThickness;
     } else {
       rectBarData.extents.x = bounds.x;
       rectBarData.extents.z = bounds.z;
     }
     if(domain.y <= 0) [[likely]] {
-      rectBarData.extents.y = (bounds.w - bounds.y - style.barThickness)/2;
+      rectBarData.extents.y = (bounds.w + bounds.y - style.barThickness)/2;
       rectBarData.extents.w = rectBarData.extents.y + style.barThickness;
     } else {
       rectBarData.extents.y = bounds.y;
       rectBarData.extents.w = bounds.w;
     }
-    if(isVisible()) [[likely]] {
-      rectBar.destroy();
-      create();
-    }
+    // WARN("slider ", this, " at: ", bounds, " with bar: ", rectBarData.extents, " with indicator: ", rectIndData.extents);
   };
 
   void uxSlider::updateVisible(bool parentVisible) {
     bool shouldBeVisible = parentVisible && wantsVisibility;
+    // WARN("slider ", this, " updateVisible(", parentVisible, ") is setting visible: ", shouldBeVisible, " was: ", visible);
     if(shouldBeVisible == visible) [[likely]] return;
     if(shouldBeVisible)
       create();

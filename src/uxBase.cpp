@@ -43,10 +43,10 @@ namespace doh {
       const auto size = camera.getWindow().getVecSize();
       glm::vec2 mouseInSnorm(mouseLocation.axes[0].current / size.x * 2 - 1,
 			     mouseLocation.axes[1].current / size.y * 2 - 1);
+      if(mouseOut) [[unlikely]]
+	*mouseOut = mouseInSnorm;
       if(rectContainsPoint(bounds, mouseInSnorm)) {
 	isHovered = true;
-	if(mouseOut)
-	  *mouseOut = mouseInSnorm;
 	break;
       }
     }

@@ -16,15 +16,13 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #include "uxBase.hpp"
 #include "uiStyle.hpp"
-#include "../generated/guiRect_stub.hpp"
 #include "../generated/guiRectVolatile_stub.hpp"
-#include "../generated/guiText_stub.hpp"
 
 namespace doh {
 
   struct uxSlider : public uxBase {
     typedefCB(updateAction, void, uxSlider*);
-    guiRect rectBar;
+    guiRectVolatile rectBar;
     guiRectInstance_t rectBarData;
     guiRectVolatile rectInd;
     guiRectInstance_t rectIndData;
@@ -35,11 +33,13 @@ namespace doh {
     glm::vec2 dragOffset;
     sliderStyle_t& style;//keeping this ref just in case more styles exist later
     bool isPressed = false;
+    std::vector<updateAction> updateListeners;
     uxSlider();
     uxSlider(sliderStyle_t& style, const glm::vec2& domain, const glm::vec4& bounds);
     uxSlider(sliderStyle_t& style);
     uxSlider(const uxSlider&) = delete;
     ~uxSlider();
+    void addListener(const updateAction&);
     glm::vec2 getIndicatorSize();
     void redraw();
     void setDomain(const glm::vec2&);

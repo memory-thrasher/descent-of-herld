@@ -18,7 +18,19 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  uxPanel::uxPanel() : uxBase(), scrollOffset(), scrollbarThickness(0) {};
+  uxPanel::uxPanel() : uxBase(), scrollOffset() {
+    auto scrl = uxSlider::updateAction_F::make(this, &uxPanel::onScroll);
+    sliderH.addListener(scrl);
+    sliderV.addListener(scrl);
+  };
+
+  void uxPanel::onScroll(uxSlider* s) {
+    if(!s) [[unlikely]] return;//should never happen but not a problem if it does
+    glm::vec4 ib = getInnerBounds();
+    if(s->domain.x > 0) [[likely]] scrollOffset.x = -s->value.x * (ib.z - ib.x);
+    if(s->domain.y > 0) [[likely]] scrollOffset.y = -s->value.y * (ib.w - ib.y);
+    redraw();//also updates scroll bars via layout->finalize()
+  };
 
   void uxPanel::setLayout(uxLayout* l) {
     layout = l;
@@ -29,13 +41,13 @@ namespace doh {
 
   void uxPanel::redraw() {
     ASSERT_TRAP(layout, "layout not set");
-    bool wasVisible = isVisible();
-    setVisible(false);
+    // bool wasVisible = isVisible();
+    // updateVisible(false);
     layout->reset();
     for(uxBase* c : children)
       layout->handle(c);
     layout->finalize();
-    setVisible(wasVisible);
+    // updateVisible(wasVisible);
   };
 
   void uxPanel::push(uxBase* b) {
@@ -48,17 +60,33 @@ namespace doh {
   };
 
   void uxPanel::updateScrollBars(const glm::vec2& logicalSize) {
+    this->logicalSize = logicalSize;
+    updateScrollBars();
+  };
+
+  void uxPanel::updateScrollBars() {
     glm::vec4 ib = getInnerBounds();
-    glm::vec2 domain { logicalSize.x / (ib.z - ib.x), logicalSize.y / (ib.w - ib.y) };
-    sliderH.setVisible(domain.x > 1);
-    sliderV.setVisible(domain.y > 1);
-    sliderBoth.setVisible(domain.x > 1 || domain.y > 1);
+    auto& scrollStyle = sliderStyle();
+    glm::vec2 domain { (logicalSize.x + scrollStyle.pad) / (ib.z - ib.x) - 1,
+		       (logicalSize.y + scrollStyle.pad) / (ib.w - ib.y) - 1 };
+    if(domain.x <= 0) [[unlikely]] domain.x = -1;
+    if(domain.y <= 0) [[unlikely]] domain.y = -1;
+    // WARN("updateScrollBars: ", logicalSize, " domain: ", domain, " ib: ", ib, " bounds: ", bounds);
+    sliderH.setBounds({ bounds.x, ib.w + scrollStyle.pad, ib.z, bounds.w });
+    sliderV.setBounds({ ib.z + scrollStyle.pad, bounds.y, bounds.z, ib.w });
+    sliderH.setDomain({ domain.x, -1 });
+    sliderV.setDomain({ -1, domain.y });
+    sliderH.setVisible(domain.x > 0);
+    sliderV.setVisible(domain.y > 0);
     updateVisible(isVisible());
   };
 
   void uxPanel::update() {
+    sliderH.update();
+    sliderV.update();
     for(uxBase* c : children)
       c->update();
+    //TODO scroll wheel
   };
 
   const glm::vec4& uxPanel::getBounds() const {
@@ -67,23 +95,25 @@ namespace doh {
 
   void uxPanel::setBounds(const glm::vec4& v) {
     bounds = v;
-    glm::vec4 ib = getInnerBounds();
-    sliderH.setBounds({ v.x, ib.y, ib.z, v.w });
-    sliderV.setBounds({ ib.x, v.y, v.z, ib.w });
-    sliderBoth.setBounds({ ib.z, ib.w, v.z, v.w });
     if(visible) [[unlikely]]
       redraw();
+    // WARN("Panel at: ", bounds, " (inner: ", getInnerBounds(), ")");
+    updateScrollBars();
   };
 
   glm::vec4 uxPanel::getInnerBounds() const {
-    return { bounds.x, bounds.y, bounds.z - scrollbarThickness, bounds.w - scrollbarThickness };//TODO reserve space for 2d slider?
+    auto& scrollStyle = sliderStyle();
+    float barSpace = WITE::max(scrollStyle.indicatorThickness, scrollStyle.barThickness) + scrollStyle.pad;
+    //TODO space for 2d scroll area if both overflow
+    return { bounds.x, bounds.y,
+	     bounds.w - bounds.y > logicalSize.y ? bounds.z : bounds.z - barSpace,
+	     bounds.z - bounds.x > logicalSize.x ? bounds.w : bounds.w - barSpace };
   };
 
   void uxPanel::updateVisible(bool parentVisible) {
     visible = parentVisible && wantsVisibility;
     sliderH.updateVisible(visible);
     sliderV.updateVisible(visible);
-    sliderBoth.updateVisible(visible);
     glm::vec4 usableBounds = getInnerBounds();
     for(uxBase* c : children)
       c->updateVisible(visible && rectContainsRect(usableBounds, c->getBounds()));
