@@ -14,8 +14,43 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
+#include <list>
+
+#include "uxPanel.hpp"
+#include "uxButtonVolatile.hpp"
+#include "uxGridLayout.hpp"
+
 namespace doh {
 
-  //
+  struct uxTabbedView;
+
+  struct uxTab {
+    uxButtonVolatile btn;
+    uxPanel panel;
+    uxTab(uxTabbedView* owner, std::string label);
+    uxTab(const uxTab&) = delete;
+  };
+
+  struct uxTabbedView : public uxBase {
+    std::list<uxTab> tabs;
+    uxPanel btnPanel;
+    uxGridLayout btnPanelLayout;
+    uxTab* currentTab;
+    buttonStyle_t& btnStyle;
+    glm::vec2 padding;
+    glm::vec4 bounds;
+    uxTabbedView(buttonStyle_t& btnStyle, const glm::vec2& padding = { 0.005f, 0.1f });
+    uxTabbedView(const uxTabbedView&) = delete;
+    virtual ~uxTabbedView() = default;
+    void redraw();
+    void setCurrentTab(uxTab*, uxButtonVolatile* = NULL);
+    uxPanel& emplaceTab(std::string btnLabel);
+    glm::vec4 getContentBounds();
+    glm::vec4 getBtnBounds();
+    virtual void update() override;
+    virtual const glm::vec4& getBounds() const override;
+    virtual void setBounds(const glm::vec4&) override;
+    virtual void updateVisible(bool parentVisible) override;
+  };
 
 }

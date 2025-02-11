@@ -95,8 +95,7 @@ namespace doh {
 
   void uxPanel::setBounds(const glm::vec4& v) {
     bounds = v;
-    if(visible) [[unlikely]]
-      redraw();
+    redraw();
     // WARN("Panel at: ", bounds, " (inner: ", getInnerBounds(), ")");
     updateScrollBars();
   };
@@ -104,7 +103,6 @@ namespace doh {
   glm::vec4 uxPanel::getInnerBounds() const {
     auto& scrollStyle = sliderStyle();
     float barSpace = WITE::max(scrollStyle.indicatorThickness, scrollStyle.barThickness) + scrollStyle.pad;
-    //TODO space for 2d scroll area if both overflow
     return { bounds.x, bounds.y,
 	     bounds.w - bounds.y > logicalSize.y ? bounds.z : bounds.z - barSpace,
 	     bounds.z - bounds.x > logicalSize.x ? bounds.w : bounds.w - barSpace };
