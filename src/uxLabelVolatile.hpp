@@ -14,37 +14,32 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
+#include "uiStyle.hpp"
 #include "uxBase.hpp"
 #include "../generated/guiRectVolatile_stub.hpp"
 #include "../generated/guiTextVolatile_stub.hpp"
-#include "../generated/guiInputCaret_stub.hpp"
-#include "uiStyle.hpp"
 
 namespace doh {
 
-  struct uxTextInput : public uxBase {
+  struct uxLabelVolatile : public uxBase {
     guiRectVolatile rect;
     guiRectInstance_t rectData;
-    guiTextVolatile text;
-    guiTextInstance_t textData;
-    guiTextIndirectBuffer_t textContent;
-    guiInputCaret caret;
-    guiWireframeInstance_t caretData;
-    textInputStyle_t& style;
-    char content[guiText_maxCharsPerString];
-    uint32_t insertPnt = 0;
-    bool isFocused = false;
-    uxTextInput() = delete;
-    uxTextInput(const uxTextInput&) = delete;
-    uxTextInput(textInputStyle_t& style, const char* initialContent);
-    ~uxTextInput();
+    guiTextVolatile label;
+    guiTextInstance_t labelData;
+    guiTextIndirectBuffer_t labelContent;
+    textOnlyStyle_t& style;
+    std::string labelStr;
+    uxLabelVolatile() = delete;
+    uxLabelVolatile(const uxLabelVolatile&) = delete;
+    uxLabelVolatile(textOnlyStyle_t& style, std::string label);
+    virtual ~uxLabelVolatile();
     void destroy();
     void create();
-    void updateCaretData();
-    virtual void update() override;
+    void setLabel(std::string);
     virtual const glm::vec4& getBounds() const override;
     virtual void setBounds(const glm::vec4&) override;
     virtual void updateVisible(bool parentVisible) override;
+    virtual void update() override;
   };
 
 }

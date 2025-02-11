@@ -35,6 +35,7 @@ namespace doh {
   };
 
   void uxTextInput::update() {
+    if(!isVisible()) [[unlikely]] return;
     WITE::winput::compositeInputData lmbCid;
     glm::vec2 mouseInSnorm;
     bool updated = false, hover = isHovered(&mouseInSnorm);
@@ -205,13 +206,16 @@ namespace doh {
 	caret.destroy();
       }
     }
-    if(rect)
+    if(rect) [[likely]] {
+      rect.writeInstanceData(rectData);
       rect.setStyle(isFocused ? style.rectFocusedBuf : style.rectNormalBuf);
-    if(text) {
+    }
+    if(text) [[likely]] {
+      text.writeInstanceData(textData);
       text.setStyle(isFocused ? style.textFocusedBuf : style.textNormalBuf);
       text.writeIndirectBuffer(textContent);
     }
-    if(caret.onionObj)
+    if(caret) [[unlikely]]
       caret.writeInstanceData(caretData);
   };
 
@@ -230,12 +234,12 @@ namespace doh {
 
   void uxTextInput::create() {
     if(!rect) [[likely]] {
-      rect = guiRect::create();
+      rect = guiRectVolatile::create();
       rect.writeInstanceData(rectData);
       rect.setStyle(style.rectNormalBuf);
     }
     if(!text) [[likely]] {
-      text = guiText::create();
+      text = guiTextVolatile::create();
       text.writeIndirectBuffer(textContent);
       text.writeInstanceData(textData);
       text.setStyle(style.textNormalBuf);
@@ -254,10 +258,6 @@ namespace doh {
   void uxTextInput::setBounds(const glm::vec4& bbox) {
     rectData.extents = textData.bbox = bbox;
     updateCaretData();
-    if(isVisible()) [[likely]] {
-      destroy();
-      create();
-    }
   };
 
   void uxTextInput::updateVisible(bool parentVisible) {
