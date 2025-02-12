@@ -42,6 +42,7 @@ namespace doh {
 
   struct guiTextStyle_t {
     glm::vec4 color, charMetric;
+    inline float widthToFitChars(uint32_t chars) { return charMetric.x * chars + charMetric.z * 2; };
   };
 
   struct guiTextIndirectBuffer_t {

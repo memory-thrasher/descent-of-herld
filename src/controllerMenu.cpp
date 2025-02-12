@@ -45,7 +45,7 @@ namespace doh {
 		  deleteMe = true;
 		  dbTypeFactory<settingsMenu>(this->owner).construct();
 		})),
-	tabs(btnNormal(), { 0.005f, 0.03f })
+	tabs(btnNormal(), 48, { 0.005f, 0.03f })
       {
 	tabs.setBounds({ -0.95f, -0.95f + btnNormal().height * 3, 0.95f, 0.95f });
 	char labelBuf[64];

@@ -49,7 +49,7 @@ namespace doh {
       //dragging on does not proc indication of press sensitivity
       isHovered = false;
     else if(!lmb.isPressed()) {
-      if(lmb.justClicked() || (isPressed && lmb.justReleased())) [[unlikely]]
+      if(isPressed && lmb.justReleased()) [[unlikely]]
 	isClicked = true;
       isPressed = false;
     }

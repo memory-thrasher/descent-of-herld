@@ -40,6 +40,8 @@ namespace doh {
     glm::vec2 padding;
     glm::vec4 bounds;
     uxTabbedView(buttonStyle_t& btnStyle, const glm::vec2& padding = { 0.005f, 0.1f });
+    uxTabbedView(float btnWidth, buttonStyle_t& btnStyle, const glm::vec2& padding = { 0.005f, 0.1f });
+    uxTabbedView(buttonStyle_t& btnStyle, uint32_t btnChars, const glm::vec2& padding = { 0.005f, 0.1f });
     uxTabbedView(const uxTabbedView&) = delete;
     virtual ~uxTabbedView() = default;
     void redraw();

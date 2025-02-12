@@ -21,8 +21,12 @@ namespace doh {
 	uxButtonVolatile::clickAction_F::make<uxTabbedView, uxTab*>(owner, this, &uxTabbedView::setCurrentTab))
   {};
 
-  uxTabbedView::uxTabbedView(buttonStyle_t& btnStyle, const glm::vec2& padding) :
-    btnPanelLayout(btnStyle.height, { btnStyle.width }, padding),
+  uxTabbedView::uxTabbedView(buttonStyle_t& btnStyle, const glm::vec2& padding) : uxTabbedView(btnStyle.width, btnStyle, padding) {};
+
+  uxTabbedView::uxTabbedView(buttonStyle_t& btnStyle, uint32_t btnChars, const glm::vec2& padding) : uxTabbedView(btnStyle.textPress.widthToFitChars(btnChars), btnStyle, padding) {};
+
+  uxTabbedView::uxTabbedView(float btnWidth, buttonStyle_t& btnStyle, const glm::vec2& padding) :
+    btnPanelLayout(btnStyle.height, { btnWidth }, padding),
     currentTab(NULL),
     btnStyle(btnStyle),
     padding(padding)
@@ -69,13 +73,13 @@ namespace doh {
   glm::vec4 uxTabbedView::getContentBounds() {
     auto& scrollStyle = sliderStyle();
     float barSpace = WITE::max(scrollStyle.indicatorThickness, scrollStyle.barThickness) + scrollStyle.pad;
-    return { bounds.x + btnStyle.width + barSpace + padding.x, bounds.y, bounds.z, bounds.w };
+    return { bounds.x + btnPanelLayout.totalWidth + barSpace + padding.x, bounds.y, bounds.z, bounds.w };
   };
 
   glm::vec4 uxTabbedView::getBtnBounds() {
     auto& scrollStyle = sliderStyle();
     float barSpace = WITE::max(scrollStyle.indicatorThickness, scrollStyle.barThickness) + scrollStyle.pad;
-    return { bounds.x, bounds.y, bounds.x + btnStyle.width + barSpace, bounds.w };
+    return { bounds.x, bounds.y, bounds.x + btnPanelLayout.totalWidth + barSpace, bounds.w };
   };
 
   void uxTabbedView::update() {
@@ -95,11 +99,8 @@ namespace doh {
 
   void uxTabbedView::updateVisible(bool parentVisible) {
     bool v = wantsVisibility && parentVisible;
-    WARN(v);
-    for(uxTab& ut : tabs) {
+    for(uxTab& ut : tabs)
       ut.panel.updateVisible(v && &ut == currentTab);
-      WARN("visible: ", ut.btn.isVisible(), ", bounds: ", ut.btn.getBounds());
-    }
     btnPanel.updateVisible(v);
   };
 

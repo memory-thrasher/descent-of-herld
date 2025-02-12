@@ -72,6 +72,8 @@ namespace doh {
     if(domain.x <= 0) [[unlikely]] domain.x = -1;
     if(domain.y <= 0) [[unlikely]] domain.y = -1;
     // WARN("updateScrollBars: ", logicalSize, " domain: ", domain, " ib: ", ib, " bounds: ", bounds);
+    sliderH.value.x = -scrollOffset.x / (ib.z - ib.x);
+    sliderV.value.y = -scrollOffset.y / (ib.w - ib.y);
     sliderH.setBounds({ bounds.x, ib.w + scrollStyle.pad, ib.z, bounds.w });
     sliderV.setBounds({ ib.z + scrollStyle.pad, bounds.y, bounds.z, ib.w });
     sliderH.setDomain({ domain.x, -1 });
@@ -86,7 +88,19 @@ namespace doh {
     sliderV.update();
     for(uxBase* c : children)
       c->update();
-    //TODO scroll wheel
+    if(isHovered() && sliderV.domain.y > 0 && children.size()) [[unlikely]] {
+      const glm::vec4& bb = children[0]->getBounds();
+      WITE::winput::compositeInputData mw;//mouse wheel
+      WITE::winput::getInput(WITE::winput::mouseWheel, mw);
+      if(mw.axes[1].delta) [[unlikely]] {
+	scrollOffset.y += (bb.w - bb.y) * mw.axes[1].delta;
+	glm::vec4 ib = getInnerBounds();
+	float min = -sliderV.domain.y * (ib.w - ib.y);
+	if(scrollOffset.y < min) [[unlikely]] scrollOffset.y = min;
+	if(scrollOffset.y > 0) [[unlikely]] scrollOffset.y = 0;
+	redraw();
+      }
+    }
   };
 
   const glm::vec4& uxPanel::getBounds() const {
