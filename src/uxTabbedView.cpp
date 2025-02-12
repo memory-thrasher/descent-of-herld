@@ -28,6 +28,7 @@ namespace doh {
     padding(padding)
   {
     btnPanel.setLayout(&btnPanelLayout);
+    btnPanel.setVisible(true);
   };
 
   void uxTabbedView::redraw() {
@@ -38,7 +39,7 @@ namespace doh {
     glm::vec4 content = getContentBounds();
     for(uxTab& t : tabs) {
       btnPanel.push(&t.btn);
-      t.btn.setBounds(content);
+      t.panel.setBounds(content);//calls panel->redraw() if layout is set
     }
     btnPanel.redraw();
     updateVisible(wasVisible);
@@ -50,7 +51,8 @@ namespace doh {
 	currentTab->panel.updateVisible(false);
       currentTab = NULL;
     } else {
-      currentTab->panel.updateVisible(false);
+      if(currentTab) [[likely]]
+	currentTab->panel.updateVisible(false);
       currentTab = t;
       currentTab->panel.updateVisible(true);
     }
@@ -58,15 +60,22 @@ namespace doh {
 
   uxPanel& uxTabbedView::emplaceTab(std::string btnLabel) {
     uxTab& t = tabs.emplace_back(this, btnLabel);
+    btnPanel.push(&t.btn);
+    t.btn.setVisible(true);
+    t.panel.setVisible(true);
     return t.panel;
   };
 
   glm::vec4 uxTabbedView::getContentBounds() {
-    return { bounds.x + btnStyle.width + padding.x, bounds.y, bounds.z, bounds.w };
+    auto& scrollStyle = sliderStyle();
+    float barSpace = WITE::max(scrollStyle.indicatorThickness, scrollStyle.barThickness) + scrollStyle.pad;
+    return { bounds.x + btnStyle.width + barSpace + padding.x, bounds.y, bounds.z, bounds.w };
   };
 
   glm::vec4 uxTabbedView::getBtnBounds() {
-    return { bounds.x, bounds.y, bounds.x + btnStyle.width, bounds.w };
+    auto& scrollStyle = sliderStyle();
+    float barSpace = WITE::max(scrollStyle.indicatorThickness, scrollStyle.barThickness) + scrollStyle.pad;
+    return { bounds.x, bounds.y, bounds.x + btnStyle.width + barSpace, bounds.w };
   };
 
   void uxTabbedView::update() {
@@ -85,9 +94,12 @@ namespace doh {
   };
 
   void uxTabbedView::updateVisible(bool parentVisible) {
-    bool v = isVisible() && parentVisible;
-    for(uxTab& ut : tabs)
+    bool v = wantsVisibility && parentVisible;
+    WARN(v);
+    for(uxTab& ut : tabs) {
       ut.panel.updateVisible(v && &ut == currentTab);
+      WARN("visible: ", ut.btn.isVisible(), ", bounds: ", ut.btn.getBounds());
+    }
     btnPanel.updateVisible(v);
   };
 

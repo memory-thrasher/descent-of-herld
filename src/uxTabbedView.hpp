@@ -44,7 +44,7 @@ namespace doh {
     virtual ~uxTabbedView() = default;
     void redraw();
     void setCurrentTab(uxTab*, uxButtonVolatile* = NULL);
-    uxPanel& emplaceTab(std::string btnLabel);
+    uxPanel& emplaceTab(std::string btnLabel);//call redraw() after (batch of) emplace
     glm::vec4 getContentBounds();
     glm::vec4 getBtnBounds();
     virtual void update() override;

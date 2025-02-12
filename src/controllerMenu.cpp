@@ -12,19 +12,20 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
-#include <list>
+#include <forward_list>
 
 #include "controllerMenu.hpp"
 #include "settingsMenu.hpp"
 #include "dbType.hpp"
 #include "uiStyle.hpp"
 #include "guiButton.hpp"
-#include "uxButton.hpp"
-#include "uxLabel.hpp"
-#include "uxTextInput.hpp"
-#include "uxPanel.hpp"
+// #include "uxButtonVolatile.hpp"
+#include "uxLabelVolatile.hpp"
+// #include "uxTextInput.hpp"
+// #include "uxPanel.hpp"
 #include "uxGridLayout.hpp"
 #include "input.hpp"
+#include "uxTabbedView.hpp"
 
 namespace doh {
 
@@ -33,9 +34,9 @@ namespace doh {
     struct transients_t {
       dbWrapper owner;
       guiButton exitBtn;
-      uxGridLayout layout;
-      uxPanel panel;
-      std::list<uxLabel> testButtons;
+      uxTabbedView tabs;
+      std::forward_list<uxGridLayout> tabLayouts;//these need stored at unchanging addresses and destroyed but never need to be accessed
+      std::forward_list<uxLabelVolatile> labels;
       bool deleteMe = false;
       transients_t(dbWrapper owner) :
 	owner(owner),
@@ -44,19 +45,22 @@ namespace doh {
 		  deleteMe = true;
 		  dbTypeFactory<settingsMenu>(this->owner).construct();
 		})),
-	layout(btnNormal().height, { 0.8f, 0.9f, 0.7f }, { 0.005f, 0.03f }),
-	panel()
+	tabs(btnNormal(), { 0.005f, 0.03f })
       {
-	panel.setBounds({ -0.95f, -0.95f + btnNormal().height * 3, 0.95f, 0.95f });
-	panel.setLayout(&layout);
+	tabs.setBounds({ -0.95f, -0.95f + btnNormal().height * 3, 0.95f, 0.95f });
 	char labelBuf[64];
-	for(size_t i = 0;i < 100;i++) {
-	  sprintf(labelBuf, "test label %zu", i);
-	  panel.push(&testButtons.emplace_back(textOnlyNormal(), labelBuf));
+	for(size_t i = 0;i < 30;i++) {
+	  uxPanel& p = tabs.emplaceTab("test panel " + std::to_string(i));
+	  uxGridLayout& gl = tabLayouts.template emplace_front<const float&, std::initializer_list<float>>(btnNormal().height, { 0.4f, 0.4f, 0.4f });
+	  p.setLayout(&gl);
+	  for(size_t j = 0;j < 100;j++) {
+	    sprintf(labelBuf, "test panel %zu, label %zu", i, j);
+	    p.push(&labels.emplace_front(textOnlyNormal(), labelBuf));
+	  }
 	}
-	panel.redraw();
-	panel.setVisible(true);
-	panel.updateVisible(true);
+	tabs.redraw();
+	tabs.setVisible(true);
+	tabs.updateVisible(true);
       };
     };
 
@@ -80,7 +84,7 @@ namespace doh {
   void controllerMenu::update(uint64_t oid, void* dbv) {
     transients_t* transients = getTransients(oid, dbv);
     transients->exitBtn.update();
-    transients->panel.update();
+    transients->tabs.update();
     if(transients->deleteMe) [[unlikely]]
       dbType<controllerMenu>(oid, dbv).destroy();
   };

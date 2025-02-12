@@ -35,7 +35,7 @@ namespace doh {
   void uxPanel::setLayout(uxLayout* l) {
     layout = l;
     l->panel = this;
-    if(visible) [[unlikely]] //just in case we're changing layouts live, which would be dumb
+    if(isVisible()) [[unlikely]] //just in case we're changing layouts live, which would be dumb
       redraw();
   };
 
@@ -95,7 +95,8 @@ namespace doh {
 
   void uxPanel::setBounds(const glm::vec4& v) {
     bounds = v;
-    redraw();
+    if(layout) [[likely]]//can't draw without a layout, but any other bounds change should be reflected
+      redraw();
     // WARN("Panel at: ", bounds, " (inner: ", getInnerBounds(), ")");
     updateScrollBars();
   };

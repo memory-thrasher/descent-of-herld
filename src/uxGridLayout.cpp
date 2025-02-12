@@ -28,7 +28,7 @@ namespace doh {
     auto iter = fs.begin();
     for(size_t i = 0;i < columns;i++)
       totalWidth += columnWidths[i] = *(iter++);
-    totalWidth += columns * padding.x;
+    totalWidth += (columns - 1) * padding.x;
   };
 
   void uxGridLayout::reset() {
