@@ -43,6 +43,7 @@ namespace doh {
 
   typedef WITE::dbFile<controlConfiguration, 4096> inputConfigFile_t;
 
+  controlConfiguration* getControl(const inputConfigFile_t::iterator_t&);
   controlConfiguration* getControl(const control&);
   controlConfiguration* getControl(uint32_t controlActionId);
   void getControlValue(const control&, controlValue& out);

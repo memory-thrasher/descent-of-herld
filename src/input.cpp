@@ -77,6 +77,11 @@ namespace doh {
     return eid == WITE::NONE ? NULL : &config->file.deref_unsafe(eid);
   };
 
+  controlConfiguration* getControl(const inputConfigFile_t::iterator_t& it) {
+    uint64_t eid = *it;
+    return eid == WITE::NONE ? NULL : &config->file.deref_unsafe(eid);
+  };
+
   controlConfiguration* getControl(uint32_t controlActionId) {
     uint64_t eid = config->byAction.findAny(controlActionId);
     return eid == WITE::NONE ? NULL : &config->file.deref_unsafe(eid);
