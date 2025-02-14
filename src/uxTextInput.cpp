@@ -177,7 +177,7 @@ namespace doh {
 	case 'z': insert = shiftDown ? 'Z' : 'z'; break;
 	}
 	if(insert) {
-	  size_t newLen = WITE::min(std::strlen(content) + 1, sizeof(content) - 1, (textData.bbox.z - textData.bbox.x - style.textNormal.charMetric.z) / style.textNormal.charMetric.x - 1);
+	  size_t newLen = WITE::min(std::strlen(content) + 1, sizeof(content) - 1, maxLen, (textData.bbox.z - textData.bbox.x - style.textNormal.charMetric.z) / style.textNormal.charMetric.x - 1);
 	  std::memmove(content + insertPnt + 1, content + insertPnt, newLen - insertPnt);
 	  ASSERT_TRAP(insertPnt < sizeof(content), "overflow");
 	  ASSERT_TRAP(newLen < sizeof(content), "overflow");

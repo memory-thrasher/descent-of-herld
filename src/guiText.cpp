@@ -39,5 +39,9 @@ namespace doh {
     return ret;
   };
 
+  float guiTextStyle_t::widthToFitChars(uint32_t chars) {
+    return charMetric.x * (chars + 0.01f) + charMetric.z * 2;
+  };
+
 }
 

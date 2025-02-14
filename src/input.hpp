@@ -46,9 +46,11 @@ namespace doh {
   controlConfiguration* getControl(const inputConfigFile_t::iterator_t&);
   controlConfiguration* getControl(const control&);
   controlConfiguration* getControl(uint32_t controlActionId);
+  void deleteControl(const control& c);
   void getControlValue(const control&, controlValue& out);
   inputConfigFile_t::iterator_t getControlBegin();
   inputConfigFile_t::iterator_t getControlEnd();
+  std::string to_string(const control&);
 
   //TODO list of actions
 

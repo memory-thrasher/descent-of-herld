@@ -72,6 +72,15 @@ namespace doh {
       config->byControl.rebalance();//likely framerate drop here, but only happens the first time a control is used since the game was installed (or the config was wiped).
   };
 
+  void deleteControl(const control& c) {
+    uint64_t eid = config->byControl.findAny(c);
+    if(eid != WITE::NONE) [[likely]] {
+      config->byControl.remove(c);
+      config->byAction.remove(getControl(c)->action);
+      config->file.free_unsafe(eid);
+    }
+  };
+
   controlConfiguration* getControl(const control& c) {
     uint64_t eid = config->byControl.findAny(c);
     return eid == WITE::NONE ? NULL : &config->file.deref_unsafe(eid);
@@ -92,9 +101,18 @@ namespace doh {
     ASSERT_TRAP(cc != NULL, "Attempted to get value from control not found in db");
     WITE::winput::compositeInputData cid;
     WITE::winput::getInput(c, cid);
+    if(cc->min != cc->min || cc->min > cid.axes[cc->id.axisId].min) [[unlikely]]
+      cc->min = cid.axes[cc->id.axisId].min;
+    if(cc->max != cc->max || cc->max < cid.axes[cc->id.axisId].max) [[unlikely]]
+      cc->max = cid.axes[cc->id.axisId].max;
     float upperBandLowerBound = WITE::max(cc->deadzone, cc->min);
     float lowerBandUpperBound = WITE::min(-cc->deadzone, cc->max);
-    out = { cid.axes[c.axisId], std::abs(out.current) < cc->deadzone ? 0 : out.current > 0 ? (out.current - upperBandLowerBound) / (cc->max - upperBandLowerBound) : (out.current - lowerBandUpperBound) / (lowerBandUpperBound - cc->min) };
+    out = { cid.axes[c.axisId], 0 };
+    out.normalizedValue = std::abs(out.current) < cc->deadzone || cc->min == cc->max ? 0 : out.current >= 0 ? (out.current - upperBandLowerBound) / (cc->max - upperBandLowerBound) : (out.current - lowerBandUpperBound) / (lowerBandUpperBound - cc->min);
+    //temp debug
+    // static constexpr control lmb { WITE::winput::lmb, 0 };
+    // if(c == lmb) [[unlikely]]
+    //   WARN(
   };
 
   inputConfigFile_t::iterator_t getControlBegin() {
@@ -105,5 +123,84 @@ namespace doh {
     return config->file.end();
   };
 
+  std::string to_string(const control& c) {
+    using namespace std::string_literals;
+    switch(c.type) {
+    case WITE::winput::type_e::mouse: return std::format("mouse {} {} axis", c.controllerId, static_cast<char>('X' + c.axisId));
+    case WITE::winput::type_e::mouseButton:
+      static constexpr std::string btnLut[4] = { "?", "left", "middle", "right" };
+      return std::format("mouse {} {} button", c.controllerId, btnLut[c.controlId]);
+    case WITE::winput::type_e::mouseWheel: return std::format("mouse {} wheel {} axis", c.controllerId, static_cast<char>('X' + c.axisId));
+    case WITE::winput::type_e::joyButton: return std::format("joy {} btn {}", c.controllerId, c.controlId);
+    case WITE::winput::type_e::joyAxis:
+      return std::format("joy {} {} axis", c.controllerId, c.controlId < 3 ? std::to_string(static_cast<char>('X' + c.controlId)) : std::to_string(c.controlId));
+    case WITE::winput::type_e::key:
+      std::string ret;
+      if(c.controlId <= 'z' && c.controlId >= '!') [[likely]]
+	ret = std::string(1, static_cast<char>(c.controlId));
+      else
+	switch(c.controlId) {
+	default: return "keycode "s + std::to_string(c.controlId);
+	case SDLK_RETURN: ret = "return"s; break;
+	case SDLK_ESCAPE: ret = "escape"s; break;
+	case SDLK_BACKSPACE: ret = "backspace"s; break;
+	case SDLK_TAB: ret = "tab"s; break;
+	case SDLK_SPACE: ret = "space"s; break;
+	case SDLK_CAPSLOCK: ret = "caps lock"s; break;
+	case SDLK_F1: ret = "f1"s; break;
+	case SDLK_F2: ret = "f2"s; break;
+	case SDLK_F3: ret = "f3"s; break;
+	case SDLK_F4: ret = "f4"s; break;
+	case SDLK_F5: ret = "f5"s; break;
+	case SDLK_F6: ret = "f6"s; break;
+	case SDLK_F7: ret = "f7"s; break;
+	case SDLK_F8: ret = "f8"s; break;
+	case SDLK_F9: ret = "f9"s; break;
+	case SDLK_F10: ret = "f10"s; break;
+	case SDLK_F11: ret = "f11"s; break;
+	case SDLK_F12: ret = "f12"s; break;
+	case SDLK_PRINTSCREEN: ret = "print screen"s; break;
+	case SDLK_SCROLLLOCK: ret = "scroll lock"s; break;
+	case SDLK_PAUSE: ret = "pause"s; break;
+	case SDLK_INSERT: ret = "insert"s; break;
+	case SDLK_HOME: ret = "home"s; break;
+	case SDLK_PAGEUP: ret = "page up"s; break;
+	case SDLK_DELETE: ret = "delete"s; break;
+	case SDLK_END: ret = "end"s; break;
+	case SDLK_PAGEDOWN: ret = "page down"s; break;
+	case SDLK_RIGHT: ret = "right"s; break;
+	case SDLK_LEFT: ret = "left"s; break;
+	case SDLK_DOWN: ret = "down"s; break;
+	case SDLK_UP: ret = "up"s; break;
+	case SDLK_NUMLOCKCLEAR: return "num lock"s;
+	case SDLK_KP_DIVIDE: return "numpad /"s;
+	case SDLK_KP_MULTIPLY: return "numpad *"s;
+	case SDLK_KP_MINUS: return "numpad -"s;
+	case SDLK_KP_PLUS: return "numpad +"s;
+	case SDLK_KP_ENTER: return "numpad enter"s;
+	case SDLK_KP_1: return "numpad 1"s;
+	case SDLK_KP_2: return "numpad 2"s;
+	case SDLK_KP_3: return "numpad 3"s;
+	case SDLK_KP_4: return "numpad 4"s;
+	case SDLK_KP_5: return "numpad 5"s;
+	case SDLK_KP_6: return "numpad 6"s;
+	case SDLK_KP_7: return "numpad 7"s;
+	case SDLK_KP_8: return "numpad 8"s;
+	case SDLK_KP_9: return "numpad 9"s;
+	case SDLK_KP_0: return "numpad 0"s;
+	case SDLK_KP_PERIOD: return "numpad ."s;
+	case SDLK_LCTRL: ret = "L ctrl"; break;
+	case SDLK_LSHIFT: ret = "L shift"; break;
+	case SDLK_LALT: ret = "L alt"; break;
+	case SDLK_LGUI: ret = "L gui"; break;
+	case SDLK_RCTRL: ret = "R ctrl"; break;
+	case SDLK_RSHIFT: ret = "R shift"; break;
+	case SDLK_RALT: ret = "R alt"; break;
+	case SDLK_RGUI: ret = "R gui"; break;
+	case SDLK_MODE: ret = "mode"; break;
+	}
+      return ret + " key"s;
+    };
+  };
 
 }

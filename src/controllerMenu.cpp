@@ -54,25 +54,45 @@ namespace doh {
       return ret;
     };
 
+    std::vector<control> pendingDelete;
+
     struct uxControl {
       uxLabelVolatile sysName, value;
-      uxTextInput input;//TODO change listener? Apply button?
-      //TODO deadzone?
+      uxButtonVolatile deleteBtn;
+      uxTextInput input;
+      float displayValue = NAN;
+      //TODO deadzone slider?
+      //TODO delete button
       uxControl() = delete;
       uxControl(const uxControl&) = delete;
-      uxControl(std::string sysName, std::string userLabel) : sysName(textOnlyNormal(), sysName), value(textOnlyNormal(), "ND"s), input(textInputNormal(), userLabel.c_str()) {};
+      uxControl(controlConfiguration* ite) :
+	sysName(textOnlyNormal(), to_string(ite->id)),
+	value(textOnlyNormal(), "ND"s),
+	deleteBtn(btnNormal(), "Delete"s, [ite](uxButtonVolatile*) {
+	  pendingDelete.emplace_back(ite->id);
+	}),
+	input(textInputNormal(), ite->label) {};
     };
 
     struct uxController {
       uxPanel* panel = NULL;
-      uxGridLayout layout { btnNormal().height, { textOnlyNormal().text.widthToFitChars(16), textOnlyNormal().text.widthToFitChars(4), textInputNormal().textFocused.widthToFitChars(96) } };
+      uxLabelVolatile sysNameHeader, valueHeader, inputHeader, deleteHeader;
+      uxGridLayout layout { btnNormal().height, { textOnlyNormal().text.widthToFitChars(32), textOnlyNormal().text.widthToFitChars(16), btnNormal().textHov.widthToFitChars(6), textInputNormal().textFocused.widthToFitChars(63) } };
       std::map<control, uxControl> controls {};
+      uxController() : sysNameHeader(textOnlyNormal(), "System Name"), valueHeader(textOnlyNormal(), "Value raw / adj"), inputHeader(textOnlyNormal(), "User-Defined Label (enter text, like 'trigger' or 'hat up')"), deleteHeader(textOnlyNormal(), "Delete") {};
       void redraw() {
 	panel->clear();
+	panel->push(&sysNameHeader);
+	panel->push(&valueHeader);
+	panel->push(&deleteHeader);
+	panel->push(&inputHeader);
 	for(auto& pair : controls) {
 	  panel->push(&pair.second.sysName);
 	  panel->push(&pair.second.value);
+	  panel->push(&pair.second.deleteBtn);
 	  panel->push(&pair.second.input);
+	  pair.second.input.setVisible(true);
+	  pair.second.input.maxLen = sizeof(controlConfiguration::label) - 1;
 	}
 	panel->redraw();
       };
@@ -84,6 +104,7 @@ namespace doh {
       uxTabbedView tabs;
       std::map<controller, uxController> controllers;
       bool deleteMe = false;
+
       transients_t(dbWrapper owner) :
 	owner(owner),
 	exitBtn(btnNormal(), { -0.95f, -0.95f }, "Back",
@@ -96,8 +117,14 @@ namespace doh {
 	tabs.setBounds({ -0.95f, -0.95f + btnNormal().height * 3, 0.95f, 0.95f });
 	update();
       };
+
       void update() {
-	bool updated = false;
+	bool updated = !pendingDelete.empty();
+	for(const control& c : pendingDelete) {
+	  deleteControl(c);
+	  controllers[c].controls.erase(c);
+	}
+	pendingDelete.clear();
 	auto end = getControlEnd();
 	auto it = getControlBegin();
 	while(it != end) {
@@ -115,8 +142,18 @@ namespace doh {
 	    if(!updated) [[unlikely]]
 	      tabs.updateVisible(false);
 	    updated = true;
-	    uxc.controls.emplace(std::piecewise_construct, std::make_tuple(ite->id), std::make_tuple(std::to_string(ite->id.controlId) + "_"s + std::to_string(ite->id.axisId), ""s));
+	    // WARN(to_string(ite->id), " = axis: ", static_cast<uint32_t>(ite->id.axisId), ", controlId: ", ite->id.controlId, ", controllerId: ", ite->id.controllerId, ", type: ", static_cast<uint32_t>(ite->id.type));
+	    uxc.controls.emplace(std::piecewise_construct, std::make_tuple(ite->id), std::make_tuple(ite));
 	    //controls will be pushed into panel by uxController::redraw below
+	  }
+	  auto& row = uxc.controls.at(ite->id);
+	  controlValue value;
+	  getControlValue(ite->id, value);
+	  if(row.value.isVisible() && row.displayValue != value.current) [[unlikely]] {
+	    row.value.setLabel(std::format("{:4.2f} / {:4.2f}", value.current, value.normalizedValue));
+	    row.displayValue = value.current;
+	    if(std::strcmp(ite->label, row.input.content)) [[unlikely]]
+	      WITE::strcpy(ite->label, row.input.content, sizeof(ite->label));
 	  }
 	  ++it;
 	}
@@ -128,6 +165,7 @@ namespace doh {
 	  tabs.updateVisible(true);
 	}
       };
+
     };
 
     transients_t* getTransients(uint64_t oid, void* dbv) {
@@ -151,6 +189,7 @@ namespace doh {
     transients_t* transients = getTransients(oid, dbv);
     transients->exitBtn.update();
     transients->tabs.update();
+    transients->update();
     if(transients->deleteMe) [[unlikely]]
       dbType<controllerMenu>(oid, dbv).destroy();
   };

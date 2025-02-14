@@ -32,6 +32,7 @@ namespace doh {
     guiWireframeInstance_t caretData;
     textInputStyle_t& style;
     char content[guiText_maxCharsPerString];
+    size_t maxLen = guiText_maxCharsPerString - 1;
     uint32_t insertPnt = 0;
     bool isFocused = false;
     uxTextInput() = delete;
