@@ -23,10 +23,10 @@ namespace doh {
 
   uxTabbedView::uxTabbedView(buttonStyle_t& btnStyle, const glm::vec2& padding) : uxTabbedView(btnStyle.width, btnStyle, padding) {};
 
-  uxTabbedView::uxTabbedView(buttonStyle_t& btnStyle, uint32_t btnChars, const glm::vec2& padding) : uxTabbedView(btnStyle.textPress.widthToFitChars(btnChars), btnStyle, padding) {};
+  uxTabbedView::uxTabbedView(buttonStyle_t& btnStyle, uint32_t btnChars, const glm::vec2& padding) : uxTabbedView(btnStyle.textHov.widthToFitChars(btnChars), btnStyle, padding) {};
 
   uxTabbedView::uxTabbedView(float btnWidth, buttonStyle_t& btnStyle, const glm::vec2& padding) :
-    btnPanelLayout(btnStyle.height, { btnWidth }, padding),
+    btnPanelLayout(btnStyle.height, { btnWidth + padding.x }, padding),
     currentTab(NULL),
     btnStyle(btnStyle),
     padding(padding)

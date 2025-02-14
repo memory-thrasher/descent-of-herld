@@ -24,13 +24,39 @@ namespace doh {
     inputConfigFile_t file;
     WITE::dbIndex<control> byControl;
     WITE::dbIndex<uint32_t> byAction;
-    inputConfigData() : file(getDataDir() / "inputConfig.wdb", false), byControl(getDataDir() / "inputConfigByControl.wdb", false, decltype(byControl)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefControl)), byAction(getDataDir() / "inputConfigByAction.wdb", false, decltype(byAction)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefAction)) {};
+    controllersFile_t controllers;//edited by controllerMenu
+    inputConfigData() : file(getDataDir() / "inputConfig.wdb", false),
+			byControl(getDataDir() / "inputConfigByControl.wdb", false, decltype(byControl)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefControl)),
+			byAction(getDataDir() / "inputConfigByAction.wdb", false, decltype(byAction)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefAction)),
+			controllers(getDataDir() / "controllers.wdb", false)
+    {};
     void derefControl(uint64_t eid, control& out) {
       out = file.deref_unsafe(eid).id;
     };
     void derefAction(uint64_t eid, uint32_t& out) {
       out = file.deref_unsafe(eid).action;
     };
+  };
+
+  std::string getSysName(const controllerId& c) {
+    using namespace std::string_literals;
+    std::string ret;
+    switch(c.type) {
+    case WITE::winput::type_e::key: ret = "keyboard"s; break;
+    case WITE::winput::type_e::mouse: ret = "mouse "s + std::to_string(c.id) + " axis"s; break;
+    case WITE::winput::type_e::mouseButton: ret = "mouse "s + std::to_string(c.id) + " button"s; break;
+    case WITE::winput::type_e::mouseWheel: ret = "mouse "s + std::to_string(c.id) + " wheel"s; break;
+    case WITE::winput::type_e::joyButton:
+      int joyCnt = SDL_NumJoysticks();
+      for(int i = 0;i < joyCnt;i++)
+	//TODO find joystick with same WITE::winput::joyId
+      ret = std::format("{:.24s} button", TODO);
+      break;
+    case WITE::winput::type_e::joyAxis:
+      ret = std::format("{:.24s} axis", TODO);
+      break;
+    }
+    return ret;
   };
 
   std::unique_ptr<inputConfigData> config;
@@ -70,6 +96,23 @@ namespace doh {
     }
     if(updated) [[unlikely]]
       config->byControl.rebalance();//likely framerate drop here, but only happens the first time a control is used since the game was installed (or the config was wiped).
+  };
+
+  controller& getController(const controllerId& c) {
+    controller* ret = NULL;
+    for(uint64_t eid : config->controllers) {//heap scan: how many controllers does anyone have? Also this is only used when displaying the name of the controller, during the tutorial or when editing in the settings menu
+      controller& r = config->controllers.deref_unsafe(eid);
+      if(c == r.id) [[unlikely]]
+	ret = &r;
+    }
+    if(ret == NULL) [[unlikely]] {
+      uint64_t eid = config->controllers.allocate_unsafe();
+      controller& r = config->controllers.deref_unsafe(eid);
+      r.id = c;
+      WITE::strcpy(r.label, getSysName(c).c_str());
+      ret = &r;
+    }
+    return *ret;
   };
 
   void deleteControl(const control& c) {
@@ -126,21 +169,26 @@ namespace doh {
   std::string to_string(const control& c) {
     using namespace std::string_literals;
     switch(c.type) {
-    case WITE::winput::type_e::mouse: return std::format("mouse {} {} axis", c.controllerId, static_cast<char>('X' + c.axisId));
+    case WITE::winput::type_e::mouse: return std::format("{} axis", static_cast<char>('X' + c.axisId));
     case WITE::winput::type_e::mouseButton:
       static constexpr std::string btnLut[4] = { "?", "left", "middle", "right" };
-      return std::format("mouse {} {} button", c.controllerId, btnLut[c.controlId]);
-    case WITE::winput::type_e::mouseWheel: return std::format("mouse {} wheel {} axis", c.controllerId, static_cast<char>('X' + c.axisId));
-    case WITE::winput::type_e::joyButton: return std::format("joy {} btn {}", c.controllerId, c.controlId);
+      return std::format("{} button", c.controlId <= 3 ? btnLut[c.controlId] : std::to_string(c.controlId));
+    case WITE::winput::type_e::mouseWheel: return std::format("wheel {} axis", c.controllerId, static_cast<char>('X' + c.axisId));
+    case WITE::winput::type_e::joyButton:
+      static constexpr const char *const hatDirs[] = { "up", "down", "left", "right" };
+      if(c.controlId >= 4096) [[unlikely]]
+	return std::format("hat {} dir {}", (c.controlId - 4096) / 4, hatDirs[(c.controlId - 4096) % 4]);
+      else
+	return std::format("btn {}", c.controlId);
     case WITE::winput::type_e::joyAxis:
-      return std::format("joy {} {} axis", c.controllerId, c.controlId < 3 ? std::to_string(static_cast<char>('X' + c.controlId)) : std::to_string(c.controlId));
+      return std::format("{} axis", c.controlId < 3 ? std::to_string(static_cast<char>('X' + c.controlId)) : std::to_string(c.controlId));
     case WITE::winput::type_e::key:
       std::string ret;
       if(c.controlId <= 'z' && c.controlId >= '!') [[likely]]
 	ret = std::string(1, static_cast<char>(c.controlId));
       else
 	switch(c.controlId) {
-	default: return "keycode "s + std::to_string(c.controlId);
+	default: return "keycode "s + std::format("{:X}", c.controlId);
 	case SDLK_RETURN: ret = "return"s; break;
 	case SDLK_ESCAPE: ret = "escape"s; break;
 	case SDLK_BACKSPACE: ret = "backspace"s; break;

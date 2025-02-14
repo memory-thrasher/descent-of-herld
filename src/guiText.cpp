@@ -23,7 +23,8 @@ namespace doh {
     int ret = std::vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
     for(out.size.x = 0;out.size.x < guiText_maxCharsPerString && buffer[out.size.x];++out.size.x) {
-      const auto& fce = font_character_extents[(unsigned)buffer[out.size.x]].data;//offset-length pair
+      unsigned ch = (unsigned)buffer[out.size.x];
+      const auto& fce = font_character_extents[ch <= 127 ? ch : 0].data;//offset-length pair
       out.drawCommands[out.size.x] = vk::DrawIndirectCommand { fce[1], 1, fce[0], out.size.x };
     }
     return ret;

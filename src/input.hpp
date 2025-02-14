@@ -19,6 +19,18 @@
 
 namespace doh {
 
+  struct controllerId {
+    WITE::winput::type_e type;
+    uint64_t id;
+    controllerId(const WITE::winput::inputIdentifier& i) : type(i.type), id(i.controllerId) {};
+    auto operator<=>(const controllerId& o) const = default;
+  };
+
+  struct controller {
+    controllerId id;
+    char label[33];
+  };
+
   struct controlAction {
     uint32_t id;
     const char*label;
@@ -42,7 +54,10 @@ namespace doh {
   };
 
   typedef WITE::dbFile<controlConfiguration, 4096> inputConfigFile_t;
+  typedef WITE::dbFile<controller, 4> controllersFile_t;
 
+  std::string getSysName(const controllerId&);
+  controller& getController(const controllerId&);
   controlConfiguration* getControl(const inputConfigFile_t::iterator_t&);
   controlConfiguration* getControl(const control&);
   controlConfiguration* getControl(uint32_t controlActionId);
