@@ -62,12 +62,12 @@ namespace doh {
     }
   };
 
-  uxPanel& uxTabbedView::emplaceTab(std::string btnLabel) {
+  uxTab& uxTabbedView::emplaceTab(std::string btnLabel) {
     uxTab& t = tabs.emplace_back(this, btnLabel);
     btnPanel.push(&t.btn);
     t.btn.setVisible(true);
     t.panel.setVisible(true);
-    return t.panel;
+    return t;
   };
 
   glm::vec4 uxTabbedView::getContentBounds() {

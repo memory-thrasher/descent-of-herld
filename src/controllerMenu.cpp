@@ -34,6 +34,8 @@ namespace doh {
 
   namespace controllerMenu_internals {
 
+    constexpr float deadzoneScale = 10;
+
     std::vector<control> pendingDelete;
 
     struct uxControl {
@@ -41,18 +43,21 @@ namespace doh {
       uxButtonVolatile deleteBtn;
       uxTextInput input;
       uxSlider deadzone;
-      float displayValue = NAN;
-      //TODO deadzone slider?
-      //TODO delete button
+      float displayValue = NAN, displayNormValue;
       uxControl() = delete;
       uxControl(const uxControl&) = delete;
       uxControl(controlConfiguration* ite) :
-	sysName(textOnlyNormal(), to_string(ite->id)),
+	sysName(textOnlyNormal(), getSysName(ite->id)),
 	value(textOnlyNormal(), "ND"s),
 	deleteBtn(btnNormal(), "Delete"s, [ite](uxButtonVolatile*) {
 	  pendingDelete.emplace_back(ite->id);
 	}),
-	input(textInputNormal(), ite->label) {};
+	input(textInputNormal(), ite->label)
+      {
+	float maxDead = WITE::max(abs(ite->min), abs(ite->max)) * deadzoneScale;
+	deadzone.setDomain({ maxDead, -1 });
+	deadzone.value.x = ite->deadzone * deadzoneScale;
+      };
     };
 
     struct uxController {
@@ -66,7 +71,7 @@ namespace doh {
       uxLabelVolatile sysName;
       uxTextInput input;
       controller& c;
-      uxController(controller& c) :
+      uxController(controller& c, uxTab& tab) :
 	sysNameHeader(textOnlyNormal(), "System Name"),
 	valueHeader(textOnlyNormal(), "raw / adj"),
 	inputHeader(textOnlyNormal(), "User-Defined Label (enter text, like 'trigger' or 'hat up')"),
@@ -74,10 +79,10 @@ namespace doh {
 	deadzoneHeader(textOnlyNormal(), "Deadzone"),
 	layout(btnNormal().height, {
 	  textOnlyNormal().text.widthToFitChars(16),
-	  textOnlyNormal().text.widthToFitChars(12),
+	  textOnlyNormal().text.widthToFitChars(16),
 	  btnNormal().textHov.widthToFitChars(6),
 	  textInputNormal().textFocused.widthToFitChars(63),
-	  0.17f
+	  0.25f
 	}),
 	//all controllers tab
 	sysName(textOnlyNormal(), getSysName(c.id)),
@@ -85,6 +90,10 @@ namespace doh {
 	c(c)
       {
 	input.maxLen = sizeof(controller::label);
+	btn = &tab.btn;
+	panel = &tab.panel;
+	panel->setLayout(&layout);
+	input.setVisible(true);
       };
 
       void redraw() {
@@ -110,7 +119,7 @@ namespace doh {
       void update() {
 	if(strcmp(input.content, c.label)) [[unlikely]] {
 	  WITE::strcpy(c.label, input.content);
-	  btn.labelStr = { c.label };
+	  btn->labelStr = c.label;
 	}
       };
 
@@ -123,7 +132,7 @@ namespace doh {
       uxTabbedView tabs;
       uxPanel* controllersPanel;
       uxGridLayout controllersLayout;
-      std::map<controller, uxController> controllers;
+      std::map<controllerId, uxController> controllers;
       bool deleteMe = false;
 
       transients_t(dbWrapper owner) :
@@ -146,45 +155,47 @@ namespace doh {
 	bool updated = !pendingDelete.empty();
 	for(const control& c : pendingDelete) {
 	  deleteControl(c);
-	  controllers[c].controls.erase(c);
+	  controllers.at(c).controls.erase(c);
 	}
 	pendingDelete.clear();
 	auto end = getControlEnd();
 	auto it = getControlBegin();
 	while(it != end) {
 	  controlConfiguration* ite = getControl(it);
-	  controller c = ite->id;
-	  auto& uxc = controllers[c];//possible implicit creation
-	  if(uxc.panel == NULL) [[unlikely]] {
+	  controllerId c = ite->id;
+	  if(!controllers.contains(c)) [[unlikely]] {
 	    if(!updated) [[unlikely]]
 	      tabs.updateVisible(false);
 	    updated = true;
-	    uxTab& tab = tabs.emplaceTab(getSysName(c.type, c.id));
-	    uxc.btn = tab.btn;
-	    uxc.panel = &tab.panel;
-	    uxc.panel->setLayout(&uxc.layout);
+	    controller& con = getController(c);
+	    controllers.emplace(std::piecewise_construct, std::tie(c), std::tie(con, tabs.emplaceTab(con.label)));
 	  }
+	  uxController& uxc = controllers.at(c);
 	  if(!uxc.controls.contains(ite->id)) [[unlikely]] {
 	    if(!updated) [[unlikely]]
 	      tabs.updateVisible(false);
 	    updated = true;
-	    // WARN(to_string(ite->id), " = axis: ", static_cast<uint32_t>(ite->id.axisId), ", controlId: ", ite->id.controlId, ", controllerId: ", ite->id.controllerId, ", type: ", static_cast<uint32_t>(ite->id.type));
+	    // WARN(getSysName(ite->id), " = axis: ", static_cast<uint32_t>(ite->id.axisId), ", controlId: ", ite->id.controlId, ", controllerId: ", ite->id.controllerId, ", type: ", static_cast<uint32_t>(ite->id.type));
 	    uxc.controls.emplace(std::piecewise_construct, std::make_tuple(ite->id), std::make_tuple(ite));
 	    //controls will be pushed into panel by uxController::redraw below
 	  }
-	  auto& row = uxc.controls.at(ite->id);
+	  auto& row = controllers.at(c).controls.at(ite->id);
 	  controlValue value;
 	  getControlValue(ite->id, value);
-	  if(row.value.isVisible() && row.displayValue != value.current) [[unlikely]] {
-	    row.value.setLabel(std::format("{:4.2f} / {:4.2f}", value.current, value.normalizedValue));
-	    row.displayValue = value.current;
+	  {//update config from control fields
 	    if(std::strcmp(ite->label, row.input.content)) [[unlikely]]
 	      WITE::strcpy(ite->label, row.input.content, sizeof(ite->label));
-	    float maxDead = WITE::max(abs(ite->min), abs(ite->max));
+	    float maxDead = WITE::max(abs(ite->min), abs(ite->max)) * deadzoneScale;
 	    if(row.deadzone.domain.x != maxDead) [[unlikely]]
 	      row.deadzone.setDomain({ maxDead, -1 });
 	    if(row.deadzone.value.x != ite->deadzone) [[unlikely]]
-	      ite->deadzone = row.deadzone.value.x;
+	      ite->deadzone = row.deadzone.value.x / deadzoneScale;
+	  }
+	  if(row.value.isVisible() && (row.displayValue != value.current ||
+				       row.displayNormValue != value.normalizedValue)) [[unlikely]] {
+	    row.value.setLabel(std::format("{:4.2f} / {:4.2f}", value.current, value.normalizedValue));
+	    row.displayValue = value.current;
+	    row.displayNormValue = value.normalizedValue;
 	  }
 	  ++it;
 	}

@@ -56,7 +56,9 @@ namespace doh {
   typedef WITE::dbFile<controlConfiguration, 4096> inputConfigFile_t;
   typedef WITE::dbFile<controller, 4> controllersFile_t;
 
+  int32_t getSdlJoyIdxFromControllerId(uint64_t);
   std::string getSysName(const controllerId&);
+  std::string getSysName(const control&);//does not include controller name
   controller& getController(const controllerId&);
   controlConfiguration* getControl(const inputConfigFile_t::iterator_t&);
   controlConfiguration* getControl(const control&);
@@ -65,7 +67,6 @@ namespace doh {
   void getControlValue(const control&, controlValue& out);
   inputConfigFile_t::iterator_t getControlBegin();
   inputConfigFile_t::iterator_t getControlEnd();
-  std::string to_string(const control&);
 
   //TODO list of actions
 

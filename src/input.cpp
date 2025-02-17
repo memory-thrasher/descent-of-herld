@@ -38,6 +38,15 @@ namespace doh {
     };
   };
 
+  int32_t getSdlJoyIdxFromControllerId(uint64_t id) {
+    int32_t joyCnt = SDL_NumJoysticks();
+    for(int32_t i = 0;i < joyCnt;i++)
+      if(WITE::winput::joyId(i) == id) [[unlikely]]
+	return i;
+    ASSERT_TRAP(false, "joy by id not found");
+    return -1;
+  };
+
   std::string getSysName(const controllerId& c) {
     using namespace std::string_literals;
     std::string ret;
@@ -47,13 +56,10 @@ namespace doh {
     case WITE::winput::type_e::mouseButton: ret = "mouse "s + std::to_string(c.id) + " button"s; break;
     case WITE::winput::type_e::mouseWheel: ret = "mouse "s + std::to_string(c.id) + " wheel"s; break;
     case WITE::winput::type_e::joyButton:
-      int joyCnt = SDL_NumJoysticks();
-      for(int i = 0;i < joyCnt;i++)
-	//TODO find joystick with same WITE::winput::joyId
-      ret = std::format("{:.24s} button", TODO);
+      ret = std::format("{:.24s} button", SDL_JoystickNameForIndex(getSdlJoyIdxFromControllerId(c.id)));
       break;
     case WITE::winput::type_e::joyAxis:
-      ret = std::format("{:.24s} axis", TODO);
+      ret = std::format("{:.24s} axis", SDL_JoystickNameForIndex(getSdlJoyIdxFromControllerId(c.id)));
       break;
     }
     return ret;
@@ -109,7 +115,10 @@ namespace doh {
       uint64_t eid = config->controllers.allocate_unsafe();
       controller& r = config->controllers.deref_unsafe(eid);
       r.id = c;
-      WITE::strcpy(r.label, getSysName(c).c_str());
+      std::string nom = getSysName(c);
+      if(nom.size() >= sizeof(controller::label)) [[unlikely]]
+	nom.resize(sizeof(controller::label) - 1);
+      WITE::strcpy(r.label, nom.c_str());
       ret = &r;
     }
     return *ret;
@@ -166,7 +175,7 @@ namespace doh {
     return config->file.end();
   };
 
-  std::string to_string(const control& c) {
+  std::string getSysName(const control& c) {
     using namespace std::string_literals;
     switch(c.type) {
     case WITE::winput::type_e::mouse: return std::format("{} axis", static_cast<char>('X' + c.axisId));
