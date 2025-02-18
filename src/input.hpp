@@ -31,12 +31,8 @@ namespace doh {
     char label[33];
   };
 
-  struct controlAction {
-    uint32_t id;
-    const char*label;
-  };
-
   struct control : public WITE::winput::inputIdentifier {
+    static constexpr uint8_t nullAxis = 255;
     uint8_t axisId;
     auto operator<=>(const control&) const = default;
   };
@@ -44,9 +40,14 @@ namespace doh {
   //this is stored in a dbFile, keep it PoD
   struct controlConfiguration {
     control id;
-    uint32_t action;//indexed
     float min, max, deadzone;
     char label[64];
+  };
+
+  //this is stored in a dbFile, keep it PoD
+  struct controlActionMapping {
+    control controlId;
+    uint32_t actionId;//indexed
   };
 
   struct controlValue : public WITE::winput::compositeInputData::axis {
@@ -54,7 +55,11 @@ namespace doh {
   };
 
   typedef WITE::dbFile<controlConfiguration, 4096> inputConfigFile_t;
-  typedef WITE::dbFile<controller, 4> controllersFile_t;
+
+  //category and action details are mostly for the control binding menu
+  enum class controlActionCategory : uint32_t {
+    menuNavigation, schematic, flightDefaults
+  };
 
   int32_t getSdlJoyIdxFromControllerId(uint64_t);
   std::string getSysName(const controllerId&);
@@ -62,13 +67,36 @@ namespace doh {
   controller& getController(const controllerId&);
   controlConfiguration* getControl(const inputConfigFile_t::iterator_t&);
   controlConfiguration* getControl(const control&);
-  controlConfiguration* getControl(uint32_t controlActionId);
+  controlConfiguration* getControl(uint32_t actionId);
   void deleteControl(const control& c);
   void getControlValue(const control&, controlValue& out);
   inputConfigFile_t::iterator_t getControlBegin();
   inputConfigFile_t::iterator_t getControlEnd();
+  controlActionMapping& getControlActionMapping(uint32_t actionId);
+  std::string actionCategoryToString(controlActionCategory);
 
-  //TODO list of actions
+  enum class globalAction : uint32_t {
+    //note: never change an id, only append
+    menuDown, menuUp, menuLeft, menuRight, menuSelect, menuBack, menuNext, menuLast
+  };
+
+  struct controlActionDetails {
+    globalAction actionId;
+    controlActionCategory categoryId;
+    const char*label;
+  };
+
+  //keep in same order as globalAction
+  constexpr controlActionDetails globalActionDetails[] {//more actions are stored within game files per-ship
+    { globalAction::menuDown, controlActionCategory::menuNavigation, "Menu Down" },
+    { globalAction::menuUp, controlActionCategory::menuNavigation, "Menu Up" },
+    { globalAction::menuLeft, controlActionCategory::menuNavigation, "Menu Left" },
+    { globalAction::menuRight, controlActionCategory::menuNavigation, "Menu Right" },
+    { globalAction::menuSelect, controlActionCategory::menuNavigation, "Menu Select" },
+    { globalAction::menuBack, controlActionCategory::menuNavigation, "Menu Back" },
+    { globalAction::menuNext, controlActionCategory::menuNavigation, "Menu Next" },
+    { globalAction::menuLast, controlActionCategory::menuNavigation, "Menu Last" },
+  };
 
 }
 

@@ -13,24 +13,34 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #pragma once
-//!!include me
 
-#include <WITE/WITE.hpp>
-
-#include "gpuShared.hpp"
+#include "uxBase.hpp"
+#include "uiStyle.hpp"
+#include "../generated/guiRectVolatile_stub.hpp"
+#include "../generated/guiTextVolatile_stub.hpp"
+#include "input.hpp"
 
 namespace doh {
 
-  struct controllerMenu : WITE::db_singleton {
-    static constexpr uint64_t typeId = 10001005;
-    static constexpr std::string dbFileId = "controllerMenu";
-    static void update(uint64_t oid, void* db);
-    // static void allocated(uint64_t oid, void* db);
-    // static void freed(uint64_t oid, void* db);
-    static void spunUp(uint64_t oid, void* db);
-    static void spunDown(uint64_t oid, void* db);
-    void* transients;
+  struct uxControlSelector : public uxBase {
+    guiRectVolatile rect;
+    guiRectInstance_t rectData;
+    guiTextVolatile label;
+    guiTextInstance_t labelData;
+    guiTextIndirectBuffer_t labelContent;
+    buttonStyle_t& style;
+    controlActionMapping& cam;
+    bool isPressed = false, awaitingInput = false;
+    uxControlSelector() = delete;
+    uxControlSelector(buttonStyle_t& style, controlActionMapping& cam);
+    virtual ~uxControlSelector();
+    void destroy();
+    void create();
+    void updateLabel();
+    virtual void update() override;
+    virtual const glm::vec4& getBounds() const override;
+    virtual void setBounds(const glm::vec4&) override;
+    virtual void updateVisible(bool parentVisible) override;
   };
-  //!!registerDbType controllerMenu
 
 }

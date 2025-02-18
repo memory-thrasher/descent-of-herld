@@ -21,9 +21,9 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  struct controllerMenu : WITE::db_singleton {
-    static constexpr uint64_t typeId = 10001005;
-    static constexpr std::string dbFileId = "controllerMenu";
+  struct controlBindingMenu : WITE::db_singleton {
+    static constexpr uint64_t typeId = 10001006;
+    static constexpr std::string dbFileId = "bindingMenu";
     static void update(uint64_t oid, void* db);
     // static void allocated(uint64_t oid, void* db);
     // static void freed(uint64_t oid, void* db);
@@ -31,6 +31,6 @@ namespace doh {
     static void spunDown(uint64_t oid, void* db);
     void* transients;
   };
-  //!!registerDbType controllerMenu
+  //!!registerDbType controlBindingMenu
 
 }

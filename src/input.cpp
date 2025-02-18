@@ -23,18 +23,20 @@ namespace doh {
     //only writable during inputUpdate, which is called by main when no other threads are doing anything, so no sync needed, hence "unsafe" functions are used
     inputConfigFile_t file;
     WITE::dbIndex<control> byControl;
-    WITE::dbIndex<uint32_t> byAction;
-    controllersFile_t controllers;//edited by controllerMenu
-    inputConfigData() : file(getDataDir() / "inputConfig.wdb", false),
-			byControl(getDataDir() / "inputConfigByControl.wdb", false, decltype(byControl)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefControl)),
-			byAction(getDataDir() / "inputConfigByAction.wdb", false, decltype(byAction)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefAction)),
-			controllers(getDataDir() / "controllers.wdb", false)
+    WITE::dbFile<controller, 4> controllers;//edited by controllerMenu
+    WITE::dbFile<controlActionMapping, 256> actions;
+    WITE::dbIndex<uint32_t> actionsByActionId;
+    inputConfigData() : file(getDataDir() / "controllerConfig.wdb", false),
+			byControl(getDataDir() / "controllerConfigByControl.wdb", false, decltype(byControl)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefControl)),
+			controllers(getDataDir() / "controllers.wdb", false),
+			actions(getDataDir() / "controlBindings.wdb", false),
+			actionsByActionId(getDataDir() / "controlBindingsByActionId.wdb", false, decltype(actionsByActionId)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefAction))
     {};
     void derefControl(uint64_t eid, control& out) {
       out = file.deref_unsafe(eid).id;
     };
     void derefAction(uint64_t eid, uint32_t& out) {
-      out = file.deref_unsafe(eid).action;
+      out = actions.deref_unsafe(eid).actionId;
     };
   };
 
@@ -88,7 +90,6 @@ namespace doh {
 	    eid = config->file.allocate_unsafe();
 	    controlConfiguration& cc = config->file.deref_unsafe(eid);
 	    cc.id = c;
-	    cc.action = 0;
 	    cc.min = axis.min;
 	    cc.max = axis.max;
 	    config->byControl.insert(eid, c);
@@ -128,7 +129,6 @@ namespace doh {
     uint64_t eid = config->byControl.findAny(c);
     if(eid != WITE::NONE) [[likely]] {
       config->byControl.remove(c);
-      config->byAction.remove(getControl(c)->action);
       config->file.free_unsafe(eid);
     }
   };
@@ -143,13 +143,16 @@ namespace doh {
     return eid == WITE::NONE ? NULL : &config->file.deref_unsafe(eid);
   };
 
-  controlConfiguration* getControl(uint32_t controlActionId) {
-    uint64_t eid = config->byAction.findAny(controlActionId);
-    return eid == WITE::NONE ? NULL : &config->file.deref_unsafe(eid);
+  controlConfiguration* getControl(uint32_t aid) {
+    return getControl(getControlActionMapping(aid).controlId);//might be NULL
   };
 
   void getControlValue(const control& c, controlValue& out) {
     controlConfiguration* cc = getControl(c);
+    if(c.axisId == control::nullAxis) [[unlikely]] {
+      out = {};
+      return;
+    }
     ASSERT_TRAP(cc != NULL, "Attempted to get value from control not found in db");
     WITE::winput::compositeInputData cid;
     WITE::winput::getInput(c, cid);
@@ -177,6 +180,8 @@ namespace doh {
 
   std::string getSysName(const control& c) {
     using namespace std::string_literals;
+    if(c.axisId == control::nullAxis) [[unlikely]]
+      return "unassigned";
     switch(c.type) {
     case WITE::winput::type_e::mouse: return std::format("{} axis", static_cast<char>('X' + c.axisId));
     case WITE::winput::type_e::mouseButton:
@@ -258,6 +263,30 @@ namespace doh {
 	}
       return ret + " key"s;
     };
+  };
+
+  controlActionMapping& getControlActionMapping(uint32_t actionId) {
+    uint64_t eid = config->actionsByActionId.findAny(actionId);
+    controlActionMapping*ret;
+    if(eid == WITE::NONE) [[unlikely]] {
+      eid = config->actions.allocate_unsafe();
+      config->actionsByActionId.insert(eid, actionId);
+      ret = &config->actions.deref_unsafe(eid);
+      ret->actionId = actionId;
+      ret->controlId.axisId = control::nullAxis;
+    } else {
+      ret = &config->actions.deref_unsafe(eid);
+    }
+    return *ret;
+  };
+
+  std::string actionCategoryToString(controlActionCategory actionCategory) {
+    using namespace std::string_literals;
+    switch(actionCategory) {
+    case controlActionCategory::menuNavigation: return "Menu Navigation"s;
+    case controlActionCategory::schematic: return "Schematic"s;
+    case controlActionCategory::flightDefaults: return "Flight Defaults"s;
+    }
   };
 
 }
