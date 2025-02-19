@@ -23,7 +23,7 @@ namespace doh {
 
   struct controlBindingMenu : WITE::db_singleton {
     static constexpr uint64_t typeId = 10001006;
-    static constexpr std::string dbFileId = "bindingMenu";
+    static constexpr char dbFileId[] = "controlBindingMenu";
     static void update(uint64_t oid, void* db);
     // static void allocated(uint64_t oid, void* db);
     // static void freed(uint64_t oid, void* db);

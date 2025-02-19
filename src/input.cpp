@@ -72,6 +72,22 @@ namespace doh {
   void inputInit() {//called by main only
     WITE::winput::initInput();
     config = std::make_unique<inputConfigData>();
+    //prepopulate common keyboard keys (avoid some symbols absent from many global layouts)
+    control c { { WITE::winput::type_e::key, 0 }, 0 };
+    for(uint32_t key = SDLK_0;key <= SDLK_z;key++) {
+      c.controlId = key;
+      uint64_t eid = config->byControl.findAny(c);
+      if(eid == WITE::NONE) [[unlikely]] {
+	eid = config->file.allocate_unsafe();
+	controlConfiguration& cc = config->file.deref_unsafe(eid);
+	cc.id = c;
+	cc.min = 0;
+	cc.max = 1;
+	config->byControl.insert(eid, c);
+      }
+      if(key == SDLK_9) [[unlikely]] key = SDLK_a - 1;
+    }
+    config->byControl.rebalance();
   };
 
   void inputUpdate() {//called by main only

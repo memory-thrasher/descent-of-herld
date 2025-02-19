@@ -38,7 +38,7 @@ namespace doh {
       controlConfiguration*cc = getControl(cam.controlId);
       ASSERT_TRAP(cc, "action contained control id but no matching configuration was found");
       controller& c = getController(cam.controlId);
-      guiTextFormat(labelContent, "%s, %s", c.label, cc->label);
+      guiTextFormat(labelContent, "%s, %s", c.label, cc->label[0] ? cc->label : getSysName(cam.controlId).c_str());
     } else {
       guiTextFormat(labelContent, "unassigned");
     }
@@ -50,16 +50,16 @@ namespace doh {
     if(awaitingInput) [[unlikely]] {
       WITE::winput::inputPair latest;
       WITE::winput::getLatest(latest);
-      if(latest.id != WITE::winput::key<SDLK_ESCAPE>::v &&
-	 latest.id != WITE::winput::lmb) [[likely]] {
-	uint8_t axis = 0;
-	for(uint8_t i = 1;i < 3;i++)
-	  if(abs(latest.data.axes[i].current) > abs(latest.data.axes[axis].current)) [[unlikely]]
-	    axis = i;
-	if(latest.data.axes[axis].current > 0.5f) [[unlikely]]
+      uint8_t axis = 0;
+      for(uint8_t i = 1;i < 3;i++)
+	if(abs(latest.data.axes[i].current) > abs(latest.data.axes[axis].current)) [[unlikely]]
+	  axis = i;
+      if(latest.data.axes[axis].justChanged() && latest.data.axes[axis].current > 0.5f) [[unlikely]] {
+	if(latest.id != WITE::winput::key<SDLK_ESCAPE>::v &&
+	   latest.id != WITE::winput::lmb) [[likely]]
 	  cam.controlId = { latest.id, axis };
+	awaitingInput = false;
       }
-      awaitingInput = false;
     } else {
       WITE::winput::compositeInputData lmbCid;
       WITE::winput::getInput(WITE::winput::lmb, lmbCid);
