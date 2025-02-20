@@ -80,6 +80,8 @@ namespace doh {
     menuDown, menuUp, menuLeft, menuRight, menuSelect, menuBack, menuNext, menuLast
   };
 
+  inline controlConfiguration* getControl(globalAction aid) { return getControl(static_cast<uint32_t>(aid)); };
+
   struct controlActionDetails {
     globalAction actionId;
     controlActionCategory categoryId;
