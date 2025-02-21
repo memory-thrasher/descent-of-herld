@@ -33,14 +33,14 @@ namespace doh {
   namespace controlBindingMenu_internals {
 
     struct uxAction {
-      uint32_t actionId;
+      globalAction actionId;
       uxLabelVolatile actionName, value;
       uxControlSelector selector;
       float displayNormValue = NAN;
       uxAction() = delete;
       uxAction(const uxAction&) = delete;
-      uxAction(uint32_t actionId) :
-	actionName(textOnlyNormal(), globalActionDetails[actionId].label),
+      uxAction(globalAction actionId) :
+	actionName(textOnlyNormal(), globalActionDetails[static_cast<uint32_t>(actionId)].label),
 	value(textOnlyNormal(), "ND"),
 	selector(btnNormal(), getControlActionMapping(actionId))
       {};
@@ -50,7 +50,7 @@ namespace doh {
       uxPanel* panel = NULL;
       uxButtonVolatile* btn;
       uxGridLayout layout;
-      std::map<uint32_t, uxAction> actions {};
+      std::map<globalAction, uxAction> actions {};
       uxActionCategory(uxTab& tab) :
 	layout(btnNormal().height, {
 	  textOnlyNormal().text.widthToFitChars(32),
@@ -89,7 +89,7 @@ namespace doh {
 			       std::tie(cad.categoryId),
 			       std::tie(tabs.emplaceTab(actionCategoryToString(cad.categoryId))));
 	  uxActionCategory& uac = categories.at(cad.categoryId);
-	  uint32_t aid = static_cast<uint32_t>(cad.actionId);
+	  globalAction aid = cad.actionId;
 	  uac.actions.emplace(std::piecewise_construct, std::make_tuple(aid), std::make_tuple(aid));
 	  uxAction& ua = uac.actions.at(aid);
 	  uac.panel->push(&ua.actionName);

@@ -14,14 +14,14 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-#include "uxBase.hpp"
+#include "uxInteractable.hpp"
 #include "uiStyle.hpp"
 #include "../generated/guiRect_stub.hpp"
 #include "../generated/guiText_stub.hpp"
 
 namespace doh {
 
-  struct uxButton : public uxBase {
+  struct uxButton : public uxInteractable {
     typedefCB(clickAction, void, uxButton*);
     guiRect rect;
     guiRectInstance_t rectData;
@@ -42,6 +42,7 @@ namespace doh {
     virtual const glm::vec4& getBounds() const override;
     virtual void setBounds(const glm::vec4&) override;
     virtual void updateVisible(bool parentVisible) override;
+    virtual void onActivate() override;
   };
 
 }

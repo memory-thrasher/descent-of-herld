@@ -37,8 +37,9 @@ namespace doh {
 
   void uxButton::update() {
     if(!isVisible()) [[unlikely]] return;
+    manageFocus();
     WITE::winput::compositeInputData lmbCid;
-    bool isHovered = this->isHovered(), isClicked = false;
+    bool isHovered = isFocused(), isClicked = false;
     WITE::winput::getInput(WITE::winput::lmb, lmbCid);
     auto& lmb = lmbCid.axes[0];
     if(!isHovered) [[likely]]
@@ -58,6 +59,10 @@ namespace doh {
     if(label) [[likely]]
       label.setStyle(isPressed ? style.textPressBuf : isHovered ? style.textHovBuf : style.textNormalBuf);
     if(isClicked) [[unlikely]] onClick(this);
+  };
+
+  void uxButton::onActivate() {
+    onClick(this);
   };
 
   void uxButton::destroy() {

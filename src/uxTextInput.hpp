@@ -14,7 +14,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-#include "uxBase.hpp"
+#include "uxInteractable.hpp"
 #include "../generated/guiRectVolatile_stub.hpp"
 #include "../generated/guiTextVolatile_stub.hpp"
 #include "../generated/guiInputCaret_stub.hpp"
@@ -22,7 +22,7 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 namespace doh {
 
-  struct uxTextInput : public uxBase {
+  struct uxTextInput : public uxInteractable {
     guiRectVolatile rect;
     guiRectInstance_t rectData;
     guiTextVolatile text;
@@ -34,7 +34,6 @@ namespace doh {
     char content[guiText_maxCharsPerString];
     size_t maxLen = guiText_maxCharsPerString - 1;
     uint32_t insertPnt = 0;
-    bool isFocused = false;
     uxTextInput() = delete;
     uxTextInput(const uxTextInput&) = delete;
     uxTextInput(textInputStyle_t& style, const char* initialContent);

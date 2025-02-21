@@ -41,27 +41,27 @@ namespace doh {
     bool updated = false, hover = isHovered(&mouseInSnorm);
     WITE::winput::getInput(WITE::winput::lmb, lmbCid);
     auto& lmb = lmbCid.axes[0];
+    bool isFocused = this->isFocused();
     if(lmb.isPressed()) [[unlikely]] {
       updated = true;
-      isFocused = hover;
-      if(hover) {
+      if(hover) [[unlikely]] {
 	insertPnt = WITE::min(static_cast<uint32_t>((mouseInSnorm.x - textData.bbox.x - style.textNormal.charMetric.z + style.textNormal.charMetric.x/2) / style.textNormal.charMetric.x), static_cast<uint32_t>(std::strlen(content)));
       }
     }
-    if(isFocused) {
+    if(isFocused) [[unlikely]] {
       bool shiftDown = WITE::winput::keyPressed<SDLK_LSHIFT>() || WITE::winput::keyPressed<SDLK_RSHIFT>();
       for(const uint32_t&key : WITE::winput::frameKeyboardBuffer) {
-	if(key == 0) break;
+	if(key == 0) [[unlikely]] break;
 	char insert = 0;
 	int insertPntDelta = 0;
 	switch(key) {
 	case SDLK_KP_ENTER:
 	case SDLK_RETURN:
 	case SDLK_ESCAPE:
-	case SDLK_TAB://TODO (shift) tab sends focus somewhere else
-	  //loose focus
-	  isFocused = false;
-	  updated = true;
+	  removeFocus();
+	  break;
+	case SDLK_TAB:
+	  shiftFocus(!shiftDown);
 	  break;
 	  //TODO non-qwerty layouts (mostly what symbols are shifted of what base keys)
 	case SDLK_UP:
@@ -85,12 +85,12 @@ namespace doh {
 	  updated = true;
 	  break;
 	case SDLK_BACKSPACE:
-	  if(insertPnt == 0) break;
+	  if(insertPnt == 0) [[unlikely]] break;
 	  insertPnt--;
 	case SDLK_DELETE:
 	  {
 	    size_t len = std::strlen(content);
-	    if(insertPnt >= len) break;
+	    if(insertPnt >= len) [[unlikely]] break;
 	    std::memmove(content + insertPnt, content + insertPnt + 1, len - insertPnt);//copies null term too
 	  }
 	  updated = true;
@@ -176,7 +176,7 @@ namespace doh {
 	case 'y': insert = shiftDown ? 'Y' : 'y'; break;
 	case 'z': insert = shiftDown ? 'Z' : 'z'; break;
 	}
-	if(insert) {
+	if(insert) [[likely]] {
 	  size_t newLen = WITE::min(std::strlen(content) + 1, sizeof(content) - 1, maxLen, (textData.bbox.z - textData.bbox.x - style.textNormal.charMetric.z) / style.textNormal.charMetric.x - 1);
 	  std::memmove(content + insertPnt + 1, content + insertPnt, newLen - insertPnt);
 	  ASSERT_TRAP(insertPnt < sizeof(content), "overflow");
@@ -186,7 +186,7 @@ namespace doh {
 	  content[newLen] = 0;
 	  updated = true;
 	}
-	if(insertPntDelta) {
+	if(insertPntDelta) [[likely]] {
 	  updated = true;
 	  if(-insertPntDelta >= static_cast<int>(insertPnt))
 	    insertPnt = 0;
@@ -195,16 +195,16 @@ namespace doh {
 	}
       }
     }
-    if(updated) {
+    if(updated) [[unlikely]] {
       guiTextFormat(textContent, "%s", content);
-      if(isFocused) {
+      if(isFocused) [[likely]]
 	updateCaretData();
-	if(!caret.onionObj) {
-	  caret = guiInputCaret::create();
-	}
-      } else if(caret.onionObj) {
-	caret.destroy();
-      }
+    }
+    if(isFocused) [[unlikely]] {
+      if(!caret.onionObj) [[unlikely]]
+	caret = guiInputCaret::create();
+    } else if(caret.onionObj) {
+      caret.destroy();
     }
     if(rect) [[likely]] {
       rect.writeInstanceData(rectData);
@@ -244,7 +244,7 @@ namespace doh {
       text.writeInstanceData(textData);
       text.setStyle(style.textNormalBuf);
     }
-    if(isFocused && !caret) [[likely]] {
+    if(isFocused() && !caret) [[likely]] {
       caret = guiInputCaret::create();
       updateCaretData();
       caret.writeInstanceData(caretData);

@@ -46,7 +46,8 @@ namespace doh {
 
   void uxControlSelector::update() {
     if(!isVisible()) [[unlikely]] return;
-    bool isHovered = this->isHovered();
+    manageFocus();
+    bool isHovered = this->isFocused();
     if(awaitingInput) [[unlikely]] {
       WITE::winput::inputPair latest;
       WITE::winput::getLatest(latest);
@@ -87,6 +88,10 @@ namespace doh {
       label.writeIndirectBuffer(labelContent);
       label.writeInstanceData(labelData);
     }
+  };
+
+  void uxControlSelector::onActivate() {
+    awaitingInput = true;
   };
 
   void uxControlSelector::destroy() {

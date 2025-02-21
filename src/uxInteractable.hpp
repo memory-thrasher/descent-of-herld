@@ -28,8 +28,11 @@ namespace doh {
   private:
     static std::list<uxInteractable*> allInteractables;
     static WITE::syncLock allInteractables_mutex;
-    static uxInteractable* focused = NULL;
+    static uxInteractable* focused;
     static WITE::syncLock focused_mutex;
+    static uint32_t focusedChangeTime;//using winput frame time, protected by focused_mutex
+    enum class focusMode_e { mouse, key };
+    static focusMode_e focusMode; //protected by focus_mutex
     bool onFocusChanged(bool acquiringFocus);//dispatches focus events
     std::list<focusEvent> focusListeners;
     WITE::syncLock focusListeners_mutex;
@@ -39,13 +42,15 @@ namespace doh {
     virtual ~uxInteractable();
     bool isFocused();
     void gainFocus();
-    bool manageFocus();//optionally called by child's update to test for menu input events, returns true if this object lost focus as a result of such an input event, false if not, including if this object was not focused in the first place
+    void manageFocus();//optionally called by child's update to test for hover and trigger focus
     void addFocusListener(focusEvent);
     void removeFocusListener(focusEvent);
     static void shiftFocus(glm::vec2 dir);//delta direction, need not be normalized. May be dead end.
     static void shiftFocus(bool next);//shift by order of creation (i.e. tab key)
     static void removeFocus();
     static bool anythingIsFocused();
+    static void globalUpdate();//only called by inputUpdate
+    virtual void onActivate();//default no-op
   };
 
 }

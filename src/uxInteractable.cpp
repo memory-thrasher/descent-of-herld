@@ -13,8 +13,16 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 */
 
 #include "uxInteractable.hpp"
+#include "input.hpp"
 
 namespace doh {
+
+  std::list<uxInteractable*> uxInteractable::allInteractables;
+  WITE::syncLock uxInteractable::allInteractables_mutex;
+  uxInteractable* uxInteractable::focused = NULL;
+  WITE::syncLock uxInteractable::focused_mutex;
+  uint32_t uxInteractable::focusedChangeTime;
+  uxInteractable::focusMode_e uxInteractable::focusMode;
 
   uxInteractable::uxInteractable() {
     WITE::scopeLock lock(&allInteractables_mutex);
@@ -23,6 +31,10 @@ namespace doh {
 
   uxInteractable::~uxInteractable() {
     WITE::scopeLock lock(&allInteractables_mutex);
+    if(focused == this) [[unlikely]] {
+      removeFocus();//fire listeners
+      focused = NULL;//but don't let them block it
+    }
     allInteractables.remove(this);
   };
 
@@ -37,6 +49,7 @@ namespace doh {
     if(focused) [[likely]]
       if(!focused->onFocusChanged(false)) [[unlikely]]
 	return;
+    focusedChangeTime = WITE::winput::getFrameStart();
     if(!onFocusChanged(true)) [[unlikely]] {
       focused = NULL;//we rejected focus, old holder was already notified of loss, so now nothing is focused
       return;
@@ -44,9 +57,64 @@ namespace doh {
     focused = this;
   };
 
-  bool uxInteractable::manageFocus() {
-    #error TODO
+  void uxInteractable::globalUpdate() {//static
+    WITE::winput::compositeInputData mouse;
+    WITE::winput::getInput(WITE::winput::mouse, mouse);
+    if(mouse.axes[0].justChanged() || mouse.axes[1].justChanged()) [[unlikely]]
+      focusMode = focusMode_e::mouse;
+    bool keyPressed = false;
+    controlValue cv;
+    getControlValue(globalAction::menuDown, cv);
+    if(cv.justPressed()) [[unlikely]] {
+      shiftFocus({0, 1});
+      keyPressed = true;
+    }
+    getControlValue(globalAction::menuRight, cv);
+    if(cv.justPressed()) [[unlikely]] {
+      shiftFocus({1, 0});
+      keyPressed = true;
+    }
+    getControlValue(globalAction::menuLeft, cv);
+    if(cv.justPressed()) [[unlikely]] {
+      shiftFocus({-1, 0});
+      keyPressed = true;
+    }
+    getControlValue(globalAction::menuUp, cv);
+    if(cv.justPressed()) [[unlikely]] {
+      shiftFocus({0, -1});
+      keyPressed = true;
+    }
+    getControlValue(globalAction::menuSelect, cv);
+    if(focused && cv.justReleased()) [[unlikely]]
+      focused->onActivate();
+    getControlValue(globalAction::menuNext, cv);
+    if(cv.justPressed()) [[unlikely]] {
+      shiftFocus(true);
+      keyPressed = true;
+    }
+    getControlValue(globalAction::menuLast, cv);
+    if(cv.justPressed()) [[unlikely]] {
+      shiftFocus(false);
+      keyPressed = true;
+    }
+    if(keyPressed) [[unlikely]]
+      focusMode = focusMode_e::key;
   };
+
+  void uxInteractable::manageFocus() {
+    if(focusedChangeTime == WITE::winput::getFrameStart()) [[likely]] return;
+    //focusedChangeTime: prevent cascade if the focus receiver gets updated later on the same frame
+    if(focusMode == focusMode_e::mouse) [[likely]] {
+      if(isHovered()) [[unlikely]]
+	gainFocus();
+      else if(isFocused()) [[unlikely]]
+	removeFocus();
+    }
+    if(isFocused() && !isVisible()) [[unlikely]]
+      removeFocus();
+  };
+
+  void uxInteractable::onActivate() {};//default no-op
 
   void uxInteractable::addFocusListener(focusEvent fe) {
     WITE::scopeLock lock(&focusListeners_mutex);
@@ -66,43 +134,53 @@ namespace doh {
     return ret;
   };
 
-  void uxInteractable::shiftFocus(glm::vec2 dir) {
+  void uxInteractable::shiftFocus(glm::vec2 dir) {//static
     WITE::scopeLock lockF(&focused_mutex);
     WITE::scopeLock lock(&allInteractables_mutex);
-    if(dir == glm::vec2{0, 0} || !focused) [[unlikely]] return;//no change requested
+    if(dir == glm::vec2{0, 0}) [[unlikely]] return;//no change requested
+    if(!focused) [[unlikely]] {
+      focused = allInteractables.front();
+      focusedChangeTime = WITE::winput::getFrameStart();
+      return;
+    }
     glm::vec2 src = focused->getBounds();
     uxInteractable* best = NULL;
-    float bestScore = 0;//std::numeric_limits<float>::infinity();
-    for(uxInteractable& ui : allInteractables) {
-      if(&ui == focused) [[unlikely]] continue;
-      glm::vec2 dst = ui.getBounds(),
+    float bestScore = std::numeric_limits<float>::infinity();
+    for(uxInteractable* ui : allInteractables) {
+      if(ui == focused || !ui->isVisible()) [[unlikely]] continue;
+      glm::vec2 dst = ui->getBounds(),
 	delta = dst - src,
 	proj = { delta.x * dir.x + delta.y * dir.y, delta.x * dir.y - delta.y * dir.x };
-      if(proj.x < 0) [[unlikely]] continue;
-      float score = 2*abs(proj.y) - proj.x;//lower = better
+      if(proj.x <= 0) [[unlikely]] continue;
+      float score = 2*abs(proj.y) + proj.x;//lower = better
       if(score < bestScore) [[unlikely]] {
 	bestScore = score;
-	best = &ui;
+	best = ui;
       }
     }
     if(best == NULL) [[unlikely]] return;
     if(!focused->onFocusChanged(false)) [[unlikely]] return;
+    focusedChangeTime = WITE::winput::getFrameStart();
     if(!best->onFocusChanged(true)) [[unlikely]] {
       focused = NULL;
       return;
     }
     focused = best;
-  };//static
+  };
 
-  void uxInteractable::shiftFocus(bool next) {
+  void uxInteractable::shiftFocus(bool next) {//static
     WITE::scopeLock lockF(&focused_mutex);
     WITE::scopeLock lock(&allInteractables_mutex);
-    if(dir == glm::vec2{0, 0} || !focused) [[unlikely]] return;//no change requested
+    if(!focused) [[unlikely]] {
+      focused = allInteractables.front();
+      focusedChangeTime = WITE::winput::getFrameStart();
+      return;
+    }
     auto end = allInteractables.end(),
       begin = allInteractables.begin(),
       i = begin;
     while(i != end && *i != focused) ++i;
-    ASSERT(i != end, "focused on something not found in list");
+    ASSERT_TRAP(i != end, "focused on something not found in list");
     if(next) {
       ++i;
       if(i == end) [[unlikely]] i = begin;
@@ -111,19 +189,21 @@ namespace doh {
 	i = end;
       --i;
     }
-    uxInteractable* next = *i;
+    uxInteractable* nextUx = *i;
     if(!focused->onFocusChanged(false)) [[unlikely]] return;
-    if(!next->onFocusChanged(true)) [[unlikely]] {
+    focusedChangeTime = WITE::winput::getFrameStart();
+    if(!nextUx->onFocusChanged(true)) [[unlikely]] {
       focused = NULL;
       return;
     }
-    focused = best;
-  };//static
+    focused = nextUx;
+  };
 
   void uxInteractable::removeFocus() {//static
     WITE::scopeLock lock(&focused_mutex);
     if(!focused) [[unlikely]] return;
-    if(!focused->onFocusChange(false)) [[unlikely]] return;
+    if(!focused->onFocusChanged(false)) [[unlikely]] return;
+    focusedChangeTime = WITE::winput::getFrameStart();
     focused = NULL;
   };
 

@@ -37,17 +37,18 @@ namespace doh {
 
   void uxButtonVolatile::update() {
     if(!isVisible()) [[unlikely]] return;
+    manageFocus();
     WITE::winput::compositeInputData lmbCid;
-    bool isHovered = this->isHovered(), isClicked = false;
+    bool isFocused = this->isFocused(), isClicked = false;
     WITE::winput::getInput(WITE::winput::lmb, lmbCid);
     auto& lmb = lmbCid.axes[0];
-    if(!isHovered) [[likely]]
+    if(!isFocused) [[likely]]
       isPressed = false; //dragging off a button = abort
     else if(lmb.justPressed()) [[unlikely]]
       isPressed = true;
     else if(!isPressed && lmb.isPressed()) [[unlikely]]
       //dragging on does not proc indication of press sensitivity
-      isHovered = false;
+      isFocused = false;
     else if(!lmb.isPressed()) {
       if(isPressed && lmb.justReleased()) [[unlikely]]
 	isClicked = true;
@@ -55,15 +56,19 @@ namespace doh {
     }
     guiTextFormat(labelContent, "%s", labelStr.c_str());
     if(rect) [[likely]] {
-      rect.setStyle(isPressed ? style.rectPressBuf : isHovered ? style.rectHovBuf : style.rectNormalBuf);
+      rect.setStyle(isPressed ? style.rectPressBuf : isFocused ? style.rectHovBuf : style.rectNormalBuf);
       rect.writeInstanceData(rectData);
     }
     if(label) [[likely]] {
-      label.setStyle(isPressed ? style.textPressBuf : isHovered ? style.textHovBuf : style.textNormalBuf);
+      label.setStyle(isPressed ? style.textPressBuf : isFocused ? style.textHovBuf : style.textNormalBuf);
       label.writeIndirectBuffer(labelContent);
       label.writeInstanceData(labelData);
     }
     if(isClicked) [[unlikely]] onClick(this);
+  };
+
+  void uxButtonVolatile::onActivate() {
+    onClick(this);
   };
 
   void uxButtonVolatile::destroy() {

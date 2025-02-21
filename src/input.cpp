@@ -16,6 +16,7 @@
 
 #include "input.hpp"
 #include "config.hpp"
+#include "uxInteractable.hpp"
 
 namespace doh {
 
@@ -25,7 +26,7 @@ namespace doh {
     WITE::dbIndex<control> byControl;
     WITE::dbFile<controller, 4> controllers;//edited by controllerMenu
     WITE::dbFile<controlActionMapping, 256> actions;
-    WITE::dbIndex<uint32_t> actionsByActionId;
+    WITE::dbIndex<globalAction> actionsByActionId;
     inputConfigData() : file(getDataDir() / "controllerConfig.wdb", false),
 			byControl(getDataDir() / "controllerConfigByControl.wdb", false, decltype(byControl)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefControl)),
 			controllers(getDataDir() / "controllers.wdb", false),
@@ -35,7 +36,7 @@ namespace doh {
     void derefControl(uint64_t eid, control& out) {
       out = file.deref_unsafe(eid).id;
     };
-    void derefAction(uint64_t eid, uint32_t& out) {
+    void derefAction(uint64_t eid, globalAction& out) {
       out = actions.deref_unsafe(eid).actionId;
     };
   };
@@ -119,6 +120,7 @@ namespace doh {
     }
     if(updated) [[unlikely]]
       config->byControl.rebalance();//likely framerate drop here, but only happens the first time a control is used since the game was installed (or the config was wiped).
+    uxInteractable::globalUpdate();
   };
 
   controller& getController(const controllerId& c) {
@@ -159,16 +161,20 @@ namespace doh {
     return eid == WITE::NONE ? NULL : &config->file.deref_unsafe(eid);
   };
 
-  controlConfiguration* getControl(uint32_t aid) {
+  controlConfiguration* getControl(globalAction aid) {
     return getControl(getControlActionMapping(aid).controlId);//might be NULL
   };
 
+  void getControlValue(globalAction aid, controlValue& out) {
+    getControlValue(getControlActionMapping(aid).controlId, out);
+  };
+
   void getControlValue(const control& c, controlValue& out) {
-    controlConfiguration* cc = getControl(c);
     if(c.axisId == control::nullAxis) [[unlikely]] {
       out = {};
       return;
     }
+    controlConfiguration* cc = getControl(c);
     ASSERT_TRAP(cc != NULL, "Attempted to get value from control not found in db");
     WITE::winput::compositeInputData cid;
     WITE::winput::getInput(c, cid);
@@ -180,10 +186,6 @@ namespace doh {
     float lowerBandUpperBound = WITE::min(-cc->deadzone, cc->max);
     out = { cid.axes[c.axisId], 0 };
     out.normalizedValue = std::abs(out.current) < cc->deadzone || cc->min == cc->max ? 0 : out.current >= 0 ? (out.current - upperBandLowerBound) / (cc->max - upperBandLowerBound) : (out.current - lowerBandUpperBound) / (lowerBandUpperBound - cc->min);
-    //temp debug
-    // static constexpr control lmb { WITE::winput::lmb, 0 };
-    // if(c == lmb) [[unlikely]]
-    //   WARN(
   };
 
   inputConfigFile_t::iterator_t getControlBegin() {
@@ -281,7 +283,7 @@ namespace doh {
     };
   };
 
-  controlActionMapping& getControlActionMapping(uint32_t actionId) {
+  controlActionMapping& getControlActionMapping(globalAction actionId) {
     uint64_t eid = config->actionsByActionId.findAny(actionId);
     controlActionMapping*ret;
     if(eid == WITE::NONE) [[unlikely]] {

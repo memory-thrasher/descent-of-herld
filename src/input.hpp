@@ -19,6 +19,16 @@
 
 namespace doh {
 
+  //category and action details are mostly for the control binding menu
+  enum class controlActionCategory : uint32_t {
+    menuNavigation, schematic, flightDefaults
+  };
+
+  enum class globalAction : uint32_t {
+    //note: never change an id, only append
+    menuDown, menuUp, menuLeft, menuRight, menuSelect, menuBack, menuNext, menuLast
+  };
+
   struct controllerId {
     WITE::winput::type_e type;
     uint64_t id;
@@ -47,7 +57,7 @@ namespace doh {
   //this is stored in a dbFile, keep it PoD
   struct controlActionMapping {
     control controlId;
-    uint32_t actionId;//indexed
+    globalAction actionId;//indexed
   };
 
   struct controlValue : public WITE::winput::compositeInputData::axis {
@@ -56,31 +66,20 @@ namespace doh {
 
   typedef WITE::dbFile<controlConfiguration, 4096> inputConfigFile_t;
 
-  //category and action details are mostly for the control binding menu
-  enum class controlActionCategory : uint32_t {
-    menuNavigation, schematic, flightDefaults
-  };
-
   int32_t getSdlJoyIdxFromControllerId(uint64_t);
   std::string getSysName(const controllerId&);
   std::string getSysName(const control&);//does not include controller name
   controller& getController(const controllerId&);
   controlConfiguration* getControl(const inputConfigFile_t::iterator_t&);
   controlConfiguration* getControl(const control&);
-  controlConfiguration* getControl(uint32_t actionId);
+  controlConfiguration* getControl(globalAction actionId);
   void deleteControl(const control& c);
   void getControlValue(const control&, controlValue& out);
+  void getControlValue(globalAction, controlValue& out);
   inputConfigFile_t::iterator_t getControlBegin();
   inputConfigFile_t::iterator_t getControlEnd();
-  controlActionMapping& getControlActionMapping(uint32_t actionId);
+  controlActionMapping& getControlActionMapping(globalAction actionId);
   std::string actionCategoryToString(controlActionCategory);
-
-  enum class globalAction : uint32_t {
-    //note: never change an id, only append
-    menuDown, menuUp, menuLeft, menuRight, menuSelect, menuBack, menuNext, menuLast
-  };
-
-  inline controlConfiguration* getControl(globalAction aid) { return getControl(static_cast<uint32_t>(aid)); };
 
   struct controlActionDetails {
     globalAction actionId;
