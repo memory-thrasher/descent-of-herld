@@ -12,10 +12,25 @@ You should have received a copy of the GNU General Public License along with The
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 */
 
+#pragma once
+
 namespace doh {
 
-  struct design {
-    //
+  /*
+    construct 1→n constructModule 1→n constructComponent
+      n:1 ↓ copy          n:1 ↓ copy              n:1 ↓ copy
+    constructDesign 1→n constructDesignModule 1→n constructDesignComponent
+    modules are of a configurable size bbox in whole meters, laid out in a grid
+    each module contains a specific number of component slots depending on size and type of module
+    component slots have component type restrictions
+   */
+
+  struct constructDesign {
+    static constexpr size_t labelMaxChars = 128;
+    char label[labelMaxChars + 1];//null term
+    uint16_t version;
+    uint8_t pad[4096-129-2];
   };
+  static_assert(sizeof(constructDesign) == 4096);
 
 }

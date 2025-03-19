@@ -14,12 +14,25 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-#include "../generated/allStubs.hpp"
-
 namespace doh {
 
-  void createOnionFull();
-  void render();
-  void onionDestroyAll();
+  enum class moduleShape_e : uint64_t {
+    cylinder,//for centrifuges and anything else with one large machine that handles cargo
+    boxArray,//for a large number of smaller machines
+    hexArray,//alt to boxGrid
+    flatArray,//for photovoltaic cells and other components that benefit from LoS exposure
+    //parabolicArray,//MAYBE, alt flatArray
+    sphere,//for reactions involving reflectivity, especially nuclear and laser, and maybe some late-game stuff
+  };
 
-};
+  struct constructDesignModule {
+    dbRef<constructDesign> construct;
+    moduleShape_e shape;
+    glm::mat4 transform;//object origin is object center, local to (concatenate to) construct's transform
+    glm::uvec3 size;//meters
+    glm::mat3 symbolTransform;
+    glm::uvec3 repetitions,//1D: cylinder (axial); 2D: flat; 3D: box, hex; unused: sphere
+      compsPerRep;//components per repetition, same dims as above, how many total components per unit
+  };
+
+}

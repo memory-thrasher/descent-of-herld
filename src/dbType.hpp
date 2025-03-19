@@ -66,9 +66,15 @@ namespace doh {
 
   template<class A> struct dbRef {
     uint64_t oid;
+    constexpr dbRef() : oid(NONE) {};
+    constexpr dbRef(uint64_t oid) : oid(oid) {};
+    dbRef(const dbRef& o) : oid(o.oid) {};
+    ~dbRef() = default;
     template<class... Args> dbType<A> spawn(dbWrapper db, Args... args) {
       return dbTypeFactory<A>(db).construct(std::forward<Args>()...);
     };
+    auto operator<=>(const dbRef&) = default;//so we can index a containing type on this without unwrapping
+    //TODO read?
   };
 
   template<class A> struct dbData : public A {

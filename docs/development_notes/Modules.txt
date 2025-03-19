@@ -10,6 +10,164 @@ You should have received a copy of the GNU General Public License along with The
 
 Stable and intermediate releases may be made continually. For this reason, a year range is used in the above copyrihgt declaration. I intend to keep the "working copy" publicly visible, even if it is not functional. I consider every push to this publicly visible repository as a release. Releases intended to be stable will be marked as such via git tag or similar feature.
 
+# list of components
+
+## process engineering
+
+### resource collection
+dust/rock scoop
+
+### crushers
+reciprocating hammer
+chain flail drum
+rotating shaft
+
+### pumps, vacuums, movers
+centrifuge / centripetal pump/blower/compressor (design: drum vs octopus, config: repeating vs continuous)
+gravity generator
+vane compressor/vacuum
+liquid ring compressor/vacuum
+piston/reciprocating compressor/pump/compactor
+screw compressor/mover (needs acceleration or fins or something)
+progressive cavity pump (better, but more maintenance)
+mixer / reaction chamber (agitated, multiple options)
+
+### shaping
+casting (probably specilization of centrifuge + heat)
+punch
+extruder (possibly heated to soften or melt, possibly cooled output (continuous rod/sheet))
+roller/bender (optional dye, width important (rod vs plate etc))
+hammer (optional dye)
+
+### electrolyser
+maybe should be a centrifuge add-on?
+
+### containerization
+spool un/winder
+barrel un/filler
+box/pallet un/boxer
+battery dis/charger
+
+### power
+photovoltaic cell
+dynamo
+charged particle capture
+electrolytic reactor (battery)
+
+### thermal
+resistive electric heater
+direct fired heater
+exhaust fan
+light/laser
+thermo-electrocoupler
+nuclear reactor (merge with above?)
+antimatter reactor
+total conversion reactor
+
+### kinetic drivers
+#### rotational
+electric motor (note: see feedback sensors, should either have brushes or brushless controller)
+combustion motor (diesel symbol)
+turbine driver
+vane turbine
+#### linear
+solenoid
+lead screw
+piston
+
+### passive components
+filter/sieve (zeolite to rock size sorters)
+logistical sorter
+clean-out
+heat exchanger (multiple topologies, flavor)
+storage area (how well sealed, variable volume: moving wall, flexible?)
+flow conditioner (improves flow meter accuracy, esp after elbow)
+in-line mixer (zigzag)
+quantum superposition storage (bag of holding)
+
+### assembly
+arm (optional attached tool changer)
+matter fabricator
+
+### tools (not modules)
+mold
+
+### connectors (structural/conductive)
+block
+pipe
+wire
+TODO more
+item monorail/tube
+wormhole generator
+
+### valves
+## TODO too many, pick subset
+pistol valve
+diaphragm valve
+ball valve
+ball check valve
+butterfly valve
+knife valve
+minimum pressure/flow valve
+solenoid valve driver
+screw valve driver
+turbine valve driver
+pressure regulator
+flow regulator
+excess flow relief valve
+excess pressure relief valve
+
+
+### translation/orientation/waste removal
+thrusters
+vent tube/stack
+gyroscope
+mass ejector
+
+## sensors
+### sample measurement
+optical
+resistive (potentiometer)
+capacitive
+### sampling
+directly mounted indicator (tachometer, potentiometer)
+flow lever
+pitot tube (optionally averaging)
+coriolis meter
+turbine flow meter
+sample boiling/suplemation (for spectroscopy)
+### atomic sample and measure
+thermister
+ultrasonic meter (size of particles?)
+
+## weapons
+harpoon
+
+
+
+### doomed
+casting module
+analyzer (generic symbol)
+flume
+orifice (symbol, use for docking connector?)
+vortex sensor
+weir meter (would need gravity, impractical in a centrifuge)
+conveyor
+damper
+e-cell
+dryer
+detonation arrestor (integrated in exhaust stack)
+monorail hoist
+scale
+
+
+
+
+pneumatic/hydraulic pump/turbine (gas vs liquid, essentially interchangable)
+pump + turbine = pneumatically driven pump
+
+
+
 # early game (factory simulator)
 
 ## energy collection

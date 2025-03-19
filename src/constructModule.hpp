@@ -14,12 +14,10 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-#include "../generated/allStubs.hpp"
-
 namespace doh {
 
-  void createOnionFull();
-  void render();
-  void onionDestroyAll();
+  struct constructModule {
+    dbRef<construct> construct;
+  };
 
-};
+}

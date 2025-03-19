@@ -14,12 +14,24 @@ Stable and intermediate releases may be made continually. For this reason, a yea
 
 #pragma once
 
-#include "../generated/allStubs.hpp"
-
 namespace doh {
 
-  void createOnionFull();
-  void render();
-  void onionDestroyAll();
+  //not sure if I want to keep this...
+  struct connectorSize_t {
+    int64_t exp;//diameter = 2^(exp) meters
+    constexpr connectorSize_t() : exp(0) {};
+    constexpr connectorSize_t(const connectorSize_t& o) = default;
+    constexpr connectorSize_t(int64_t e) : exp(e) {};
+    inline double meters() { return pow(2, exp); };
+  };
 
-};
+  constexpr connectorSize_t operator""_cs(int64_t v) { return {v}; };
+
+  struct connector {
+    connectorSize_t connectorSize;
+    uint64_t targetComponent;
+    uint64_t targetConnectorIdx;//mostly pad
+    //TODO
+  };
+
+}

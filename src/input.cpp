@@ -28,17 +28,11 @@ namespace doh {
     WITE::dbFile<controlActionMapping, 256> actions;
     WITE::dbIndex<globalAction> actionsByActionId;
     inputConfigData() : file(getDataDir() / "controllerConfig.wdb", false),
-			byControl(getDataDir() / "controllerConfigByControl.wdb", false, decltype(byControl)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefControl)),
+			byControl(getDataDir() / "controllerConfigByControl.wdb", false),
 			controllers(getDataDir() / "controllers.wdb", false),
 			actions(getDataDir() / "controlBindings.wdb", false),
-			actionsByActionId(getDataDir() / "controlBindingsByActionId.wdb", false, decltype(actionsByActionId)::read_cb_F::make<inputConfigData>(this, &inputConfigData::derefAction))
+			actionsByActionId(getDataDir() / "controlBindingsByActionId.wdb", false)
     {};
-    void derefControl(uint64_t eid, control& out) {
-      out = file.deref_unsafe(eid).id;
-    };
-    void derefAction(uint64_t eid, globalAction& out) {
-      out = actions.deref_unsafe(eid).actionId;
-    };
   };
 
   int32_t getSdlJoyIdxFromControllerId(uint64_t id) {
